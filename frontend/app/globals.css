@@ -1,26 +1,26 @@
+/* app/globals.css */
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  scroll-behavior: smooth; /* Modern smooth scrolling for anchored links */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* 1. REMOVE BROWSER SCROLLBARS GLOBALLY */
+/* For Webkit browsers (Chrome, Safari, Edge, Brave) */
+::-webkit-scrollbar {
+  display: none;
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* For Firefox */
+html {
+  scrollbar-width: none;
 }
-
+/* For IE/Edge (Legacy) */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  -ms-overflow-style: none;
+}
+
+/* 2. REMOVE HORIZONTAL SCROLLBAR ON CODE BLOCKS */
+pre code {
+  white-space: pre-wrap !important; /* Forces code wrapping so it doesn't overflow horizontally */
+  word-wrap: break-word !important;
 }
