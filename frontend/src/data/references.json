@@ -1,0 +1,37 @@
+{
+  "javascript": {
+    "title": "JavaScript",
+    "subtitle": "cheatsheet",
+    "description": "A comprehensive guide to modern JavaScript patterns and syntax.",
+    "sections": [
+      {
+        "group": "Getting Started",
+        "items": [
+          {
+            "label": "Introduction",
+            "content": "// JavaScript is a lightweight, interpreted language."
+          },
+          {
+            "label": "Console",
+            "content": "console.log('Hello World!');\nconsole.warn('Warning');"
+          }
+        ]
+      },
+      {
+        "group": "Variables",
+        "items": [
+          {
+            "label": "Declaration",
+            "content": "let x = 10;\nconst y = 'RefMe';"
+          }
+        ]
+      }
+    ]
+  },
+  "python": {
+    "title": "Python",
+    "subtitle": "reference",
+    "description": "Core syntax and data structures for Python 3.x.",
+    "sections": []
+  }
+}
