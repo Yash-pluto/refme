@@ -200,8 +200,13 @@ export default function RefMeHero() {
         <motion.div
           animate={{ opacity: [0.1, 0.2, 0.1], scale: [1, 1.1, 1] }}
           transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-          className={`absolute w-[50vw] h-[50vw] rounded-full blur-[120px] ${theme.overlay}`}
-          style={{ top: "-20%", left: "-10%" }}
+          className={`absolute rounded-full blur-[80px] sm:blur-[120px] ${theme.overlay}`}
+          style={{
+            top: "-20%",
+            left: "-10%",
+            width: "clamp(200px, 80vw, 50vw)",
+            height: "clamp(200px, 80vw, 50vw)",
+          }}
         />
         <motion.div
           animate={{ opacity: [0.1, 0.15, 0.1], scale: [1, 1.2, 1] }}
@@ -211,8 +216,13 @@ export default function RefMeHero() {
             ease: "easeInOut",
             delay: 2,
           }}
-          className={`absolute w-[40vw] h-[40vw] rounded-full blur-[120px] ${theme.overlay2}`}
-          style={{ top: "40%", right: "-10%" }}
+          className={`absolute rounded-full blur-[80px] sm:blur-[120px] ${theme.overlay2}`}
+          style={{
+            top: "40%",
+            right: "-10%",
+            width: "clamp(180px, 70vw, 40vw)",
+            height: "clamp(180px, 70vw, 40vw)",
+          }}
         />
       </div>
 

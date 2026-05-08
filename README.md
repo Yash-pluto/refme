@@ -1,4 +1,4 @@
-# RefMe_ — Technical Documentation Hub
+# RefMe\_ — Technical Documentation Hub
 
 A modern, responsive technical reference platform designed for developers and engineers to quickly access cheatsheets, code snippets, and documentation across multiple programming languages and frameworks.
 
@@ -69,23 +69,28 @@ refme/
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/yash-pluto/refme.git
    cd refme/frontend
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Run the development server**
+
    ```bash
    npm run dev
    ```
+
    The app will be available at `http://localhost:3000`
 
 4. **Build for production**
+
    ```bash
    npm run build
    npm start
@@ -106,16 +111,21 @@ refme/
 ## ✨ Key Components
 
 ### Theme System
+
 Global theme context (`ThemeContext.tsx`) manages dark/light mode state with localStorage persistence and system preference detection.
 
 ### Dynamic Routing
+
 Topic pages are dynamically generated from data using Next.js App Router, supporting routes like `/javascript`, `/python`, `/react`, etc.
 
 ### Responsive Layout
+
 Mobile-first design with Tailwind CSS breakpoints ensures excellent UX across all devices.
 
 ### Code Highlighting
+
 Syntax highlighting adapts to the selected theme:
+
 - **Dark Mode:** vscDarkPlus theme
 - **Light Mode:** oneLight theme
 
@@ -131,7 +141,8 @@ Syntax highlighting adapts to the selected theme:
 
 ## 🎨 Design Philosophy
 
-RefMe_ prioritizes:
+RefMe\_ prioritizes:
+
 - **Clarity:** Clean typography and spacing for easy reading
 - **Performance:** Optimized assets and efficient client-side rendering
 - **Accessibility:** Semantic HTML and keyboard navigation support
@@ -162,6 +173,7 @@ vercel deploy
 ## 🤝 Contributing
 
 Contributions are welcome! Feel free to:
+
 - Report bugs or issues
 - Suggest new features
 - Submit pull requests
@@ -180,13 +192,13 @@ This project is created by **Yash Vardhan** and is available under the MIT Licen
 **Yash Vardhan** — Known as **Yash Pluto**
 
 - GitHub: [@yash-pluto](https://github.com/yash-pluto)
-- Portfolio: [yashvardhan.dev](https://yashvardhan.dev)
+- Portfolio: [yashpluto.vercel.app](https://yashpluto.vercel.app)
 
 ---
 
 ## 🙏 Acknowledgments
 
-Built with modern web technologies and a passion for clean code and excellent developer experience. RefMe_ is designed to be your go-to technical reference platform.
+Built with modern web technologies and a passion for clean code and excellent developer experience. RefMe\_ is designed to be your go-to technical reference platform.
 
 ---
 
