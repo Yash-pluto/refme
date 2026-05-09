@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Search } from "lucide-react";
 import type { ReactNode } from "react";
 
-const MotionLink = motion(Link);
+const MotionLink = motion.create(Link);
 
 interface ReferenceItem {
   name: string;
@@ -25,31 +25,6 @@ interface BentoGridProps {
   filteredData: ReferenceSection[];
 }
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.1 },
-  },
-};
-
-const springTransition = {
-  type: "spring" as const,
-  stiffness: 300,
-  damping: 24,
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, scale: 0.95, y: 10 },
-  show: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    transition: springTransition,
-  },
-  exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2 } },
-};
-
 export default function BentoGrid({ darkMode, filteredData }: BentoGridProps) {
   const cardTheme = darkMode
     ? "bg-white/[0.02] border-white/5 hover:bg-white/[0.04]"
@@ -63,33 +38,27 @@ export default function BentoGrid({ darkMode, filteredData }: BentoGridProps) {
 
   if (filteredData.length === 0) {
     return (
-      <section className='relative z-10 max-w-7xl mx-auto px-6 pb-32 min-h-100'>
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className={`text-center py-20 ${mutedText}`}
-        >
-          <Search size={48} className='mx-auto mb-4 opacity-20' />
-          <p>No references found.</p>
-        </motion.div>
+      <section className='relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pb-16 sm:pb-32 min-h-100'>
+        <div className={`text-center py-12 sm:py-20 ${mutedText}`}>
+          <Search size={48} className='mx-auto mb-4 opacity-30' />
+          <p className='text-lg sm:text-xl'>No references found.</p>
+        </div>
       </section>
     );
   }
 
   return (
-    <section className='relative z-10 max-w-7xl mx-auto px-6 pb-32 min-h-100'>
-      <motion.div
-        variants={containerVariants}
-        initial='hidden'
-        animate='show'
-        className='space-y-16'
-      >
+    <section className='relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-32'>
+      <div className='space-y-20'>
         {filteredData.map((section) => (
           <div key={section.category} className='w-full'>
-            <div className='flex items-center gap-4 mb-8'>
-              <div className={`p-2 rounded-lg ${headerBg}`}>{section.icon}</div>
+            {/* Category Header - VERY VISIBLE */}
+            <div className='flex items-center gap-3 sm:gap-4 mb-8 sm:mb-12'>
+              <div className={`p-3 rounded-lg ${headerBg} flex-shrink-0`}>
+                {section.icon}
+              </div>
               <h2
-                className={`text-sm font-bold uppercase tracking-widest ${headerText}`}
+                className={`text-lg sm:text-2xl font-bold uppercase tracking-wider ${headerText}`}
               >
                 {section.category}
               </h2>
@@ -98,39 +67,44 @@ export default function BentoGrid({ darkMode, filteredData }: BentoGridProps) {
               />
             </div>
 
-            <motion.div
-              layout
-              className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4'
-            >
-              <AnimatePresence mode='popLayout'>
-                {section.items.map((item) => (
+            {/* Bento Grid - Professional Symmetrical Layout */}
+            <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-5'>
+              {section.items.map((item, index) => {
+                // Simple professional sizing: every 4th item is larger for visual interest
+                const isLarge = index % 4 === 0;
+                const colSpan = isLarge ? "sm:col-span-2" : "col-span-1";
+                const heightClass = isLarge
+                  ? "min-h-40 sm:min-h-48"
+                  : "min-h-24 sm:min-h-28";
+
+                return (
                   <MotionLink
                     key={item.name}
                     href={item.href}
-                    layout
-                    variants={itemVariants}
-                    initial='hidden'
-                    animate='show'
-                    exit='exit'
-                    whileHover={{ scale: 1.03, y: -4 }}
+                    whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className={`group relative overflow-hidden flex items-center gap-3 p-4 rounded-2xl border transition-all duration-300 ${cardTheme} ${item.border}`}
+                    className={`group relative overflow-hidden flex flex-col items-center justify-center gap-3 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border transition-all duration-300 ${colSpan} ${heightClass} ${cardTheme} ${item.border}`}
                     aria-label={`Navigate to ${item.name}`}
                   >
-                    <div className='absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300 bg-linear-to-r ${item.color}' />
+                    {/* Background overlay */}
+                    <div className='absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300 bg-gradient-to-r ${item.color}' />
+
+                    {/* Colored dot */}
                     <div
-                      className={`w-2 h-2 rounded-full bg-current ${item.color.split(" ").pop()}`}
+                      className={`w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 rounded-full bg-current flex-shrink-0 ${item.color.split(" ").pop()}`}
                     />
-                    <span className='font-semibold text-sm relative z-10 tracking-wide'>
+
+                    {/* Item name - LARGE AND BOLD */}
+                    <span className='font-bold text-base sm:text-lg md:text-xl lg:text-2xl relative z-10 tracking-wide text-center leading-snug text-current'>
                       {item.name}
                     </span>
                   </MotionLink>
-                ))}
-              </AnimatePresence>
-            </motion.div>
+                );
+              })}
+            </div>
           </div>
         ))}
-      </motion.div>
+      </div>
     </section>
   );
 }

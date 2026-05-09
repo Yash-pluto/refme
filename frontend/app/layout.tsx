@@ -28,6 +28,12 @@ export default function RootLayout({
       lang='en'
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <meta
+          name='viewport'
+          content='width=device-width, initial-scale=1, maximum-scale=5'
+        />
+      </head>
       <body className='min-h-full flex flex-col bg-zinc-50 text-zinc-950 dark:bg-[#050505] dark:text-zinc-100'>
         <ThemeProvider>{children}</ThemeProvider>
       </body>

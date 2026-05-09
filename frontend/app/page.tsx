@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { useTheme } from "../src/context/ThemeContext";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
@@ -153,7 +152,6 @@ export default function RefMeHero() {
   const theme = {
     page: darkMode ? "bg-[#050505] text-white" : "bg-zinc-50 text-black",
     overlay: darkMode ? "bg-indigo-500/10" : "bg-indigo-500/5",
-    overlay2: darkMode ? "bg-emerald-500/10" : "bg-emerald-500/5",
   };
 
   const handleShare = async () => {
@@ -188,31 +186,14 @@ export default function RefMeHero() {
     <div
       className={`${theme.page} min-h-screen transition-colors duration-500 relative overflow-hidden font-sans selection:bg-zinc-500/30`}
     >
-      {/* --- MODERN ENGINEERED BACKGROUND --- */}
+      {/* --- CLEAN DOTTED BACKGROUND --- */}
       <div className='absolute inset-0 z-0 overflow-hidden pointer-events-none'>
         <div
-          className='absolute inset-0 transition-opacity duration-500'
+          className='absolute inset-0'
           style={{
             backgroundImage: `radial-gradient(circle at 2px 2px, ${dotColor} 1px, transparent 0)`,
             backgroundSize: "32px 32px",
           }}
-        />
-        <motion.div
-          animate={{ opacity: [0.1, 0.2, 0.1], scale: [1, 1.1, 1] }}
-          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-          className={`absolute w-[50vw] h-[50vw] rounded-full blur-[120px] ${theme.overlay}`}
-          style={{ top: "-20%", left: "-10%" }}
-        />
-        <motion.div
-          animate={{ opacity: [0.1, 0.15, 0.1], scale: [1, 1.2, 1] }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 2,
-          }}
-          className={`absolute w-[40vw] h-[40vw] rounded-full blur-[120px] ${theme.overlay2}`}
-          style={{ top: "40%", right: "-10%" }}
         />
       </div>
 
