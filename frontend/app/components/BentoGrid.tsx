@@ -67,32 +67,15 @@ export default function BentoGrid({ darkMode, filteredData }: BentoGridProps) {
               />
             </div>
 
-            {/* Bento Grid - Masonry Layout with Dynamic Sizing */}
-            <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-5 auto-rows-max'>
+            {/* Bento Grid - Professional Symmetrical Layout */}
+            <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-5'>
               {section.items.map((item, index) => {
-                // Create masonry effect with random-looking but deterministic sizing
-                const sizePattern = index % 13;
-                let colSpan = "col-span-1";
-                let rowSpan = "row-span-1";
-
-                // Create varied sizes: some large, some medium, most small
-                if (sizePattern === 0 || sizePattern === 5) {
-                  colSpan = "sm:col-span-2 md:col-span-2";
-                  rowSpan = "sm:row-span-2 md:row-span-2";
-                } else if (sizePattern === 2 || sizePattern === 7) {
-                  colSpan = "sm:col-span-2";
-                  rowSpan = "sm:row-span-1";
-                } else if (sizePattern === 3 || sizePattern === 9) {
-                  rowSpan = "sm:row-span-2 md:row-span-2";
-                }
-
-                // Determine height based on size
-                let heightClass = "min-h-24 sm:min-h-28 md:min-h-32";
-                if (sizePattern === 0 || sizePattern === 5) {
-                  heightClass = "min-h-32 sm:min-h-48 md:min-h-56";
-                } else if (sizePattern === 3 || sizePattern === 9) {
-                  heightClass = "min-h-32 sm:min-h-48 md:min-h-56";
-                }
+                // Simple professional sizing: every 4th item is larger for visual interest
+                const isLarge = index % 4 === 0;
+                const colSpan = isLarge ? "sm:col-span-2" : "col-span-1";
+                const heightClass = isLarge
+                  ? "min-h-40 sm:min-h-48"
+                  : "min-h-24 sm:min-h-28";
 
                 return (
                   <MotionLink
@@ -100,7 +83,7 @@ export default function BentoGrid({ darkMode, filteredData }: BentoGridProps) {
                     href={item.href}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className={`group relative overflow-hidden flex flex-col items-center justify-center gap-3 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border transition-all duration-300 ${colSpan} ${rowSpan} ${heightClass} ${cardTheme} ${item.border}`}
+                    className={`group relative overflow-hidden flex flex-col items-center justify-center gap-3 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border transition-all duration-300 ${colSpan} ${heightClass} ${cardTheme} ${item.border}`}
                     aria-label={`Navigate to ${item.name}`}
                   >
                     {/* Background overlay */}

@@ -3,7 +3,6 @@ import { useTheme } from "../../src/context/ThemeContext";
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { motion, useScroll, useSpring } from "framer-motion";
 import {
   ChevronLeft,
   Copy,
@@ -78,10 +77,6 @@ export default function ReferenceDetail() {
       : "text-zinc-900 hover:text-indigo-600",
   };
 
-  // Progressive Scroll Bar
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
-
   // Handle intersection observer for active section highlighting
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -120,13 +115,7 @@ export default function ReferenceDetail() {
     <div
       className={`min-h-screen ${pageTheme.background} font-sans selection:bg-indigo-500/30`}
     >
-      {/* Top Progress Bar */}
-      <motion.div
-        className='fixed top-0 left-0 right-0 h-0.5 bg-indigo-500 z-100 origin-left'
-        style={{ scaleX }}
-      />
-
-      <div className='max-w-350 mx-auto flex flex-col xl:flex-row'>
+      <div className='max-w-[1400px] mx-auto flex flex-col xl:flex-row'>
         {/* LEFT SIDEBAR NAVIGATION */}
         <aside
           className={`hidden lg:block w-72 h-screen sticky top-0 p-8 pt-24 overflow-y-auto ${pageTheme.sidebar}`}
@@ -172,41 +161,34 @@ export default function ReferenceDetail() {
         <main className='grow px-6 md:px-16 lg:px-24 pt-24 pb-32'>
           {/* Header */}
           <header className='mb-20'>
-            <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className='flex items-center gap-3'
-              >
-                <span className='px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-wider'>
-                  {data.subtitle}
-                </span>
-              </motion.div>
-
+            <div className='flex items-center justify-between gap-3 mb-4'>
+              <span className='px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider'>
+                {data.subtitle}
+              </span>
               <button
                 onClick={toggleTheme}
-                className={`inline-flex items-center justify-center rounded-2xl p-2.5 border transition ${pageTheme.button}`}
+                className={`inline-flex items-center justify-center rounded-lg p-1.5 sm:p-2 border transition flex-shrink-0 ${pageTheme.button}`}
+                aria-label='Toggle theme'
+                type='button'
               >
-                {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+                {darkMode ? (
+                  <Sun size={16} className='sm:w-[18px] sm:h-[18px]' />
+                ) : (
+                  <Moon size={16} className='sm:w-[18px] sm:h-[18px]' />
+                )}
               </button>
             </div>
-            <motion.h1
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
+            <h1
               className={`text-5xl font-bold tracking-tight mb-6 ${pageTheme.heading}`}
             >
               {data.title}
               <span className='text-indigo-500'>.</span>
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+            </h1>
+            <p
               className={`text-lg ${pageTheme.muted} max-w-2xl leading-relaxed`}
             >
               {data.description}
-            </motion.p>
+            </p>
           </header>
 
           {/* Dynamic Sections */}
@@ -262,9 +244,8 @@ export default function ReferenceDetail() {
                     // Render Code Blocks
                     if (item.type === "code") {
                       return (
-                        <motion.div
+                        <div
                           key={itemId}
-                          whileHover={{ y: -2 }}
                           className={`relative group rounded-xl overflow-hidden ${pageTheme.codeCard}`}
                         >
                           <div
@@ -302,7 +283,7 @@ export default function ReferenceDetail() {
                               {item.content}
                             </SyntaxHighlighter>
                           </div>
-                        </motion.div>
+                        </div>
                       );
                     }
                     return null;

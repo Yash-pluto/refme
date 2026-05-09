@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Search, Moon, Sun, Share2 } from "lucide-react";
 
 interface NavbarProps {
@@ -27,19 +26,16 @@ export default function Navbar({
     : "border-black/10 hover:bg-black/5";
 
   return (
-    <nav className='flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8 relative z-20 max-w-7xl mx-auto w-full'>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4 }}
-        className='text-xl sm:text-2xl font-black tracking-tighter'
-      >
+    <nav className='flex items-center justify-between gap-3 px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8 relative z-20 max-w-7xl mx-auto w-full'>
+      {/* Logo */}
+      <div className='text-xl sm:text-2xl font-black tracking-tighter flex-shrink-0'>
         RefMe<span className='text-zinc-500'>_</span>
-      </motion.div>
+      </div>
 
-      <div className='flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between sm:justify-end flex-wrap'>
+      {/* Search Bar - Hidden on mobile, visible on sm+ */}
+      <div className='hidden sm:flex items-center gap-2 flex-1 max-w-xs'>
         <div
-          className={`flex items-center gap-2 sm:gap-3 ${panelClass} px-3 py-2 rounded-lg border backdrop-blur-md transition-colors flex-1 sm:flex-initial min-w-0 max-w-sm`}
+          className={`flex items-center gap-2 ${panelClass} px-3 py-2 rounded-lg border backdrop-blur-md transition-colors w-full`}
         >
           <Search size={16} className='opacity-40 flex-shrink-0' />
           <input
@@ -51,24 +47,29 @@ export default function Navbar({
             aria-label='Search references'
           />
           <kbd
-            className={`text-[8px] sm:text-[10px] opacity-30 border px-1.5 py-0.5 rounded-md font-mono hidden sm:inline-block ${darkMode ? "border-white" : "border-black"}`}
+            className={`text-[8px] opacity-30 border px-1.5 py-0.5 rounded-md font-mono hidden sm:inline-block ${darkMode ? "border-white" : "border-black"}`}
           >
             /
           </kbd>
         </div>
+      </div>
 
+      {/* Action Buttons */}
+      <div className='flex items-center gap-2'>
         <button
           onClick={toggleTheme}
-          className={`p-2 sm:p-2.5 rounded-xl border transition-all flex-shrink-0 ${buttonBorder}`}
+          className={`p-2 rounded-xl border transition-all ${buttonBorder}`}
           aria-label='Toggle dark mode'
+          type='button'
         >
           {darkMode ? <Sun size={18} /> : <Moon size={18} />}
         </button>
 
         <button
           onClick={onShare}
-          className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl border transition-all font-medium text-xs sm:text-sm flex-shrink-0 ${buttonBorder}`}
+          className={`flex items-center gap-1 px-3 py-2 rounded-xl border transition-all font-medium text-xs ${buttonBorder}`}
           aria-label='Share this page'
+          type='button'
         >
           <Share2 size={16} />
           <span className='hidden sm:inline'>Share</span>
