@@ -2,7 +2,6 @@
 import DirectoryList from "./components/DirectoryList";
 import { useTheme } from "../src/context/ThemeContext";
 import { useState } from "react";
-import { ArrowDownRight } from "lucide-react";
 import {
   Layout,
   Code2,
@@ -16,6 +15,9 @@ import {
   FileCode2,
   Blocks,
   Globe,
+  ArrowDownRight,
+  Code,
+  Link,
 } from "lucide-react";
 
 // --- REUSABLE DATA STRUCTURE ---
@@ -266,11 +268,32 @@ export default function RefMeHero() {
             <ArrowDownRight className='opacity-30 group-focus-within:opacity-100 group-focus-within:text-cyan-500 transition-all' />
           </div>
         </div>
-
         {/* Footer Meta */}
-        <div className='hidden md:flex justify-between font-mono text-[10px] opacity-50 uppercase mt-12 tracking-widest'>
-          <span>Built by Yash Vardhan.</span>
-          <span>
+        <div className='flex flex-wrap items-end justify-between gap-y-6 gap-x-4 font-mono text-[10px] uppercase mt-12 tracking-widest'>
+          <div className='flex flex-col gap-2.5 opacity-60'>
+            <span>Built by Yash Vardhan.</span>
+            <div className='flex items-center gap-4'>
+              <a
+                href='https://github.com/Yash-pluto'
+                target='_blank'
+                rel='noopener noreferrer'
+                className='flex items-center gap-1.5 hover:text-cyan-500 transition-colors'
+              >
+                <Code size={12} />
+                GitHub
+              </a>
+              <a
+                href='https://www.linkedin.com/in/vardhan-yash3105/'
+                target='_blank'
+                rel='noopener noreferrer'
+                className='flex items-center gap-1.5 hover:text-cyan-500 transition-colors'
+              >
+                <Link size={12} />
+                LinkedIn
+              </a>
+            </div>
+          </div>
+          <span className='opacity-50'>
             Status: <span className='text-emerald-500'>Online</span>
           </span>
         </div>
