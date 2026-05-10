@@ -1,11 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { Search } from "lucide-react";
 import type { ReactNode } from "react";
-
-const MotionLink = motion.create(Link);
 
 interface ReferenceItem {
   name: string;
@@ -38,10 +35,10 @@ export default function BentoGrid({ darkMode, filteredData }: BentoGridProps) {
 
   if (filteredData.length === 0) {
     return (
-      <section className='relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pb-16 sm:pb-32 min-h-100'>
+      <section className='relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pb-16 sm:pb-32'>
         <div className={`text-center py-12 sm:py-20 ${mutedText}`}>
           <Search size={48} className='mx-auto mb-4 opacity-30' />
-          <p className='text-lg sm:text-xl'>No references found.</p>
+          <p className='text-lg'>No references found.</p>
         </div>
       </section>
     );
@@ -49,16 +46,18 @@ export default function BentoGrid({ darkMode, filteredData }: BentoGridProps) {
 
   return (
     <section className='relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-32'>
-      <div className='space-y-20'>
+      <div className='space-y-16'>
         {filteredData.map((section) => (
           <div key={section.category} className='w-full'>
-            {/* Category Header - VERY VISIBLE */}
-            <div className='flex items-center gap-3 sm:gap-4 mb-8 sm:mb-12'>
-              <div className={`p-3 rounded-lg ${headerBg} flex-shrink-0`}>
+            {/* Category Header */}
+            <div className='flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8'>
+              <div
+                className={`p-2.5 sm:p-3 rounded-lg ${headerBg} flex-shrink-0`}
+              >
                 {section.icon}
               </div>
               <h2
-                className={`text-lg sm:text-2xl font-bold uppercase tracking-wider ${headerText}`}
+                className={`text-base sm:text-xl font-bold uppercase tracking-wider ${headerText}`}
               >
                 {section.category}
               </h2>
@@ -67,40 +66,25 @@ export default function BentoGrid({ darkMode, filteredData }: BentoGridProps) {
               />
             </div>
 
-            {/* Bento Grid - Professional Symmetrical Layout */}
-            <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-5'>
-              {section.items.map((item, index) => {
-                // Simple professional sizing: every 4th item is larger for visual interest
-                const isLarge = index % 4 === 0;
-                const colSpan = isLarge ? "sm:col-span-2" : "col-span-1";
-                const heightClass = isLarge
-                  ? "min-h-40 sm:min-h-48"
-                  : "min-h-24 sm:min-h-28";
+            {/* Perfect Symmetrical Grid */}
+            <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4'>
+              {section.items.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`group relative overflow-hidden flex flex-col items-center justify-center gap-3 p-5 sm:p-6 rounded-xl border transition-transform duration-200 hover:-translate-y-1 h-28 sm:h-32 ${cardTheme} ${item.border}`}
+                >
+                  <div className='absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300 bg-gradient-to-r ${item.color}' />
 
-                return (
-                  <MotionLink
-                    key={item.name}
-                    href={item.href}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className={`group relative overflow-hidden flex flex-col items-center justify-center gap-3 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border transition-all duration-300 ${colSpan} ${heightClass} ${cardTheme} ${item.border}`}
-                    aria-label={`Navigate to ${item.name}`}
-                  >
-                    {/* Background overlay */}
-                    <div className='absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300 bg-gradient-to-r ${item.color}' />
+                  <div
+                    className={`w-3 h-3 rounded-full bg-current flex-shrink-0 ${item.color.split(" ").pop()}`}
+                  />
 
-                    {/* Colored dot */}
-                    <div
-                      className={`w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 rounded-full bg-current flex-shrink-0 ${item.color.split(" ").pop()}`}
-                    />
-
-                    {/* Item name - LARGE AND BOLD */}
-                    <span className='font-bold text-base sm:text-lg md:text-xl lg:text-2xl relative z-10 tracking-wide text-center leading-snug text-current'>
-                      {item.name}
-                    </span>
-                  </MotionLink>
-                );
-              })}
+                  <span className='font-bold text-sm sm:text-lg relative z-10 tracking-wide text-center text-current'>
+                    {item.name}
+                  </span>
+                </Link>
+              ))}
             </div>
           </div>
         ))}
