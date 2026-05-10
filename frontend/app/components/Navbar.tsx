@@ -28,7 +28,7 @@ export default function Navbar({
   return (
     <nav className='flex items-center justify-between gap-3 px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8 relative z-20 max-w-7xl mx-auto w-full'>
       {/* Logo */}
-      <div className='text-xl sm:text-2xl font-black tracking-tighter flex-shrink-0'>
+      <div className='text-xl sm:text-2xl font-black tracking-tighter shrink-0'>
         RefMe<span className='text-zinc-500'>_</span>
       </div>
 
@@ -37,7 +37,7 @@ export default function Navbar({
         <div
           className={`flex items-center gap-2 ${panelClass} px-3 py-2 rounded-lg border backdrop-blur-md transition-colors w-full`}
         >
-          <Search size={16} className='opacity-40 flex-shrink-0' />
+          <Search size={16} className='opacity-40 shrink-0' />
           <input
             type='text'
             value={searchQuery}

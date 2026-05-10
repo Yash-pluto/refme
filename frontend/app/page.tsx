@@ -17,6 +17,7 @@ import {
   Blocks,
   Globe,
 } from "lucide-react";
+
 // --- REUSABLE DATA STRUCTURE ---
 export const REFERENCE_DATA = [
   {
@@ -189,50 +190,21 @@ export const REFERENCE_DATA = [
   },
 ];
 
-// --- ANIMATION VARIANTS ---
-
 export default function RefMeHero() {
   const { darkMode, toggleTheme } = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Stark, flat colors. No gradients, no soft grays.
   const theme = {
     page: darkMode
       ? "bg-[#0A0A0A] text-[#E5E5E5]"
       : "bg-[#F4F4F0] text-[#111111]",
-    border: darkMode ? "border-[#333333]" : "border-[#111111]",
+    border: darkMode ? "border-[#222222]" : "border-[#D1D1D1]",
+    accent: darkMode ? "text-cyan-400" : "text-indigo-600",
   };
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "RefMe_",
-          text: "Technical documentation and patterns for modern engineers.",
-          url: window.location.href,
-        });
-      } catch (err) {
-        console.error("Share failed:", err);
-      }
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert("Link copied to clipboard!");
-    }
-  };
-
-  // --- SEARCH FILTER LOGIC ---
-  // This filters the categories and items based on the user's input
-  const filteredData = REFERENCE_DATA.map((section) => ({
-    ...section,
-    items: section.items.filter((item) =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()),
-    ),
-  })).filter((section) => section.items.length > 0);
-
-  const dotColor = darkMode ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)";
   return (
     <div
-      className={`${theme.page} min-h-screen font-sans selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black flex flex-col md:flex-row`}
+      className={`${theme.page} min-h-screen font-sans selection:bg-cyan-500/30 flex flex-col md:flex-row`}
     >
       {/* LEFT PANE: Sticky Hero & Search */}
       <div
@@ -240,47 +212,67 @@ export default function RefMeHero() {
       >
         <div>
           {/* Header */}
-          <div className='flex justify-between items-start mb-20'>
-            <h1 className='text-4xl md:text-6xl font-black tracking-tighter uppercase leading-none'>
-              REF
-              <br />
-              ME<span className='text-orange-500'>_</span>
+          <div className='flex justify-between items-start mb-16'>
+            <h1 className='text-5xl md:text-7xl font-black tracking-tighter uppercase leading-none flex flex-col'>
+              <span>REF</span>
+              <div className='flex items-center'>
+                <span
+                  className={darkMode ? "text-[#333333]" : "text-[#CCCCCC]"}
+                >
+                  //
+                </span>
+                <span>ME</span>
+                <span className={`${theme.accent} animate-pulse ml-1`}>_</span>
+              </div>
             </h1>
             <button
               onClick={toggleTheme}
-              className='text-sm font-mono uppercase hover:underline underline-offset-4'
+              className='text-xs font-mono font-bold uppercase tracking-widest hover:text-cyan-500 transition-colors'
             >
-              {darkMode ? "[ LIGHT ]" : "[ DARK ]"}
+              [ {darkMode ? "LIGHT" : "DARK"} ]
             </button>
           </div>
 
-          {/* Description */}
-          <p className='font-mono text-sm uppercase tracking-widest opacity-60 mb-6'>
-            // Technical Archive
+          {/* Description (Syntax Highlighted Text) */}
+          <p className='font-mono text-xs uppercase tracking-widest opacity-50 mb-6'>
+            &gt; SYSTEM.INIT()
           </p>
-          <p className='text-xl md:text-2xl font-medium leading-tight mb-12'>
-            High-fidelity documentation and architectural patterns for modern
-            engineering.
+          <p className='text-xl md:text-2xl font-medium leading-relaxed mb-12'>
+            A curated collection of{" "}
+            <span className='text-emerald-500 font-bold'>cheat sheets</span>,{" "}
+            <span className='text-indigo-500 font-bold'>workflows</span>, and{" "}
+            <span className='text-rose-500 font-bold'>
+              architectural patterns
+            </span>
+            . No fluff, no endless scrolling—just the{" "}
+            <span className='text-amber-500 font-bold'>raw syntax</span> you
+            need to build.
           </p>
 
-          {/* Raw Search Input */}
+          {/* Terminal Search Input */}
           <div
-            className={`relative flex items-center border-b-2 ${theme.border} pb-2`}
+            className={`relative flex items-center border-b-2 ${theme.border} pb-2 group focus-within:border-cyan-500 transition-colors`}
           >
+            <span className={`font-mono font-bold mr-3 ${theme.accent}`}>
+              $&gt;
+            </span>
             <input
               type='text'
-              placeholder='Query archive...'
+              placeholder='Query directory...'
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className='w-full bg-transparent outline-none font-mono text-lg placeholder-opacity-30 placeholder-current'
             />
-            <ArrowDownRight className='opacity-50' />
+            <ArrowDownRight className='opacity-30 group-focus-within:opacity-100 group-focus-within:text-cyan-500 transition-all' />
           </div>
         </div>
 
         {/* Footer Meta */}
-        <div className='hidden md:block font-mono text-xs opacity-50 uppercase mt-12'>
-          Index: 04.2026 / Status: Active / Mode: Strict
+        <div className='hidden md:flex justify-between font-mono text-[10px] opacity-50 uppercase mt-12 tracking-widest'>
+          <span>Built by Yash Vardhan.</span>
+          <span>
+            Status: <span className='text-emerald-500'>Online</span>
+          </span>
         </div>
       </div>
 

@@ -1,0 +1,358 @@
+---
+title: "JavaScript"
+description: "The universal language of the web. Core syntax, ES6+ features, and modern asynchronous patterns."
+category: "Core Programming"
+---
+
+## Getting Started
+
+JavaScript is a lightweight, interpreted, just-in-time compiled programming language with first-class functions. While primarily known as the scripting language for Web pages, it is heavily used in non-browser environments like Node.js.
+
+### Variables & Declarations
+
+Modern JavaScript relies strictly on block-scoped declarations to prevent memory leaks and unintended global mutations.
+
+```javascript
+// 'const' prevents reassignment. Use this by default.
+// Note: It does not make objects or arrays deeply immutable.
+const isFound = false;
+
+// 'let' is block-scoped and allows reassignment.
+let retryCount = 0;
+retryCount += 1;
+
+// 'var' is function-scoped (legacy). Avoid using this in modern code.
+var legacyVariable = undefined;
+```
+
+### Strings & Interpolation
+
+Template literals (backticks) provide a clean syntax for multi-line strings and dynamic expression interpolation, replacing legacy string concatenation.
+
+```javascript
+const user = "Tommy";
+const age = 7;
+
+// Legacy concatenation
+const legacyStr = "Tommy is " + age + " years old.";
+
+// Modern Interpolation (ES6+)
+const modernStr = `${user} is ${age} years old.`;
+
+// Multi-line strings
+const sqlQuery = `
+  SELECT * FROM users
+  WHERE active = true
+`;
+```
+
+### The Console
+
+The global `console` object provides access to the browser's debugging console.
+
+```javascript
+console.log("Standard output message");
+console.warn("Warning: Deprecated API usage");
+console.error(new Error("Fatal exception occurred"));
+```
+
+---
+
+## Conditionals & Logic
+
+### Strict Equality
+
+Always use strict equality (`===`) to prevent JavaScript's engine from performing implicit type coercion, which can lead to unpredictable bugs.
+
+```javascript
+0 == false; // true (Type coercion applied)
+0 === false; // false (Strict type and value check)
+1 == "1"; // true
+1 === "1"; // false
+```
+
+### Modern Logical Operators
+
+JavaScript provides elegant operators for handling fallback values and deeply nested object properties without throwing undefined errors.
+
+```javascript
+// Nullish Coalescing (??): Returns RHS only if LHS is null or undefined.
+// Safer than || which triggers on ANY falsy value (like 0 or '').
+const timeout = 0 ?? 3000; // Result: 0
+const name = null ?? "Guest"; // Result: 'Guest'
+
+// Optional Chaining (?.): Safely access nested properties.
+const response = { data: { user: { id: 123 } } };
+const userId = response?.data?.user?.id; // 123
+const profileId = response?.data?.profile?.id; // undefined (No crash)
+```
+
+### Ternary Operator
+
+The ternary operator is a concise, inline alternative to `if-else` blocks, highly useful in variable assignments and React JSX.
+
+```javascript
+const statusCode = 200;
+const isSuccess = statusCode === 200 ? true : false;
+```
+
+---
+
+## Functions
+
+### Function Declarations vs. Arrow Functions
+
+Arrow functions (`=>`) provide a concise syntax and, crucially, do not bind their own `this` context. They inherit `this` from the enclosing lexical scope.
+
+```javascript
+// Standard Function Declaration (Hoisted)
+function calculateTotal(price, tax) {
+  return price + price * tax;
+}
+
+// Arrow Function Expression (ES6)
+const calculateTotal = (price, tax) => {
+  return price + price * tax;
+};
+
+// Implicit Return (Single line, concise body)
+const multiply = (a, b) => a * b;
+
+// Single Parameter (Parentheses optional)
+const logMessage = (msg) => console.log(msg);
+```
+
+---
+
+## Scope & Closures
+
+Scope dictates the visibility of variables. `var` is scoped to the nearest function block, whereas `let` and `const` are scoped to the nearest enclosing block (`{}`).
+
+```javascript
+// Closure/Scope Issue with var
+for (var i = 0; i < 3; i++) {
+  setTimeout(() => console.log(i), 10);
+}
+// Prints: 3, 3, 3 (Shared reference)
+
+// Solved with block-scoped let
+for (let j = 0; j < 3; j++) {
+  setTimeout(() => console.log(j), 10);
+}
+// Prints: 0, 1, 2 (Unique binding per iteration)
+```
+
+---
+
+## Arrays & Sets
+
+### Array Mutation
+
+Arrays in JavaScript are dynamic. Be mindful of which methods mutate the original array versus those that return a new array.
+
+```javascript
+const pipeline = ["build", "test"];
+
+// Mutating methods
+pipeline.push("deploy"); // Adds to end: ['build', 'test', 'deploy']
+pipeline.unshift("lint"); // Adds to start: ['lint', 'build', 'test', 'deploy']
+const lastTask = pipeline.pop(); // Removes from end: 'deploy'
+const firstTask = pipeline.shift(); // Removes from start: 'lint'
+```
+
+### Sets
+
+Sets are collections of uniquely structured values. They are highly optimized for checking value existence (`has`).
+
+```javascript
+// Creates a unique list, instantly stripping duplicates
+const uniqueIds = new Set([1, 2, 2, 3]);
+
+uniqueIds.add(4);
+uniqueIds.has(2); // true
+uniqueIds.delete(3);
+console.log(uniqueIds.size); // 3
+```
+
+---
+
+## Loops & Iterators
+
+### Declarative Iteration (Array Methods)
+
+Prefer array iterator methods (`map`, `filter`, `reduce`) over standard `for` loops for functional, non-mutating data transformations.
+
+```javascript
+const numbers = [1, 2, 3, 4, 5];
+
+// Map: Transforms every item into a new array
+const doubled = numbers.map((n) => n * 2); // [2, 4, 6, 8, 10]
+
+// Filter: Returns items that pass a condition
+const evens = numbers.filter((n) => n % 2 === 0); // [2, 4]
+
+// Reduce: Accumulates array into a single value
+const sum = numbers.reduce((acc, curr) => acc + curr, 0); // 15
+```
+
+### Iterating Objects and Iterables
+
+```javascript
+const fruits = ["apple", "orange", "banana"];
+
+// for...of (Iterates over values of iterable objects)
+for (let fruit of fruits) {
+  console.log(fruit);
+}
+
+// for...in (Iterates over enumerable property keys of an object)
+const user = { name: "John", age: 30 };
+for (let key in user) {
+  console.log(`${key}: ${user[key]}`);
+}
+```
+
+---
+
+## Objects & Classes
+
+### Object Composition & Destructuring
+
+Objects are key-value dictionaries. Destructuring allows you to cleanly extract properties into standalone variables.
+
+```javascript
+const serverConfig = {
+  host: "localhost",
+  port: 8080,
+  start() {
+    console.log(`Starting on ${this.port}`);
+  },
+};
+
+// Destructuring extraction
+const { host, port } = serverConfig;
+
+// Shorthand property creation
+const environment = "dev";
+const appState = { environment, status: "live" };
+// Equivalent to { environment: 'dev', status: 'live' }
+```
+
+### ES6 Classes
+
+Classes are syntactic sugar over JavaScript's prototype-based inheritance, providing a cleaner, object-oriented pattern.
+
+```javascript
+class Service {
+  constructor(endpoint) {
+    this.endpoint = endpoint;
+  }
+
+  // Instance method
+  fetchData() {
+    console.log(`Fetching from ${this.endpoint}`);
+  }
+
+  // Static method (Called on the class itself, not instances)
+  static validateUrl(url) {
+    return url.startsWith("http");
+  }
+}
+
+class ApiService extends Service {
+  constructor(endpoint, apiKey) {
+    super(endpoint); // Calls parent constructor
+    this.apiKey = apiKey;
+  }
+}
+```
+
+---
+
+## Modules
+
+JavaScript relies on the ES Module (ESM) system to split code into reusable files.
+
+```javascript
+// mathUtility.js
+export const add = (a, b) => a + b; // Named export
+export default function multiply(a, b) {
+  // Default export
+  return a * b;
+}
+
+// main.js
+import multiply, { add } from "./mathUtility.js";
+```
+
+---
+
+## Asynchronous JavaScript
+
+### Promises
+
+Promises represent the eventual completion (or failure) of an asynchronous operation, preventing the "callback hell" of older nested architectures.
+
+```javascript
+const fetchUser = new Promise((resolve, reject) => {
+  // Simulate network request
+  setTimeout(() => {
+    const success = true;
+    if (success) resolve({ id: 1, name: "Alice" });
+    else reject(new Error("Network failure"));
+  }, 1000);
+});
+
+// Handling via chaining
+fetchUser
+  .then((user) => console.log(user.name))
+  .catch((error) => console.error(error.message));
+```
+
+### Async / Await
+
+Introduced in ES2017, `async/await` is syntactic sugar over Promises, allowing asynchronous code to be written and read like synchronous, top-down code.
+
+```javascript
+const initializeApp = async () => {
+  try {
+    // Execution pauses here until the Promise resolves
+    const user = await fetchUser();
+    console.log(`Welcome, ${user.name}`);
+  } catch (error) {
+    // Automatically catches promise rejections
+    console.error("Initialization failed:", error);
+  }
+};
+```
+
+---
+
+## Network Requests
+
+### The Fetch API
+
+The modern standard for making HTTP requests natively in the browser, replacing the legacy `XMLHttpRequest` API.
+
+```javascript
+const postData = async (url = "", data = {}) => {
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    // Parse the JSON response
+    return await response.json();
+  } catch (error) {
+    console.error("Fetch operation failed:", error.message);
+  }
+};
+```

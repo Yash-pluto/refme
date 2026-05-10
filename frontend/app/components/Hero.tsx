@@ -22,7 +22,7 @@ export default function Hero({ darkMode }: HeroProps) {
         className={`text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight mb-6 ${darkMode ? "text-white" : "text-zinc-900"}`}
       >
         Engineered{" "}
-        <span className='text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-cyan-500'>
+        <span className='text-transparent bg-clip-text bg-linear-to-r from-indigo-500 to-cyan-500'>
           References.
         </span>
       </h1>
