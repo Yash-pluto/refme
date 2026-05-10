@@ -4,6 +4,7 @@ import { useTheme } from "../src/context/ThemeContext";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import BentoGrid from "./components/BentoGrid";
+import { ReferenceSection } from "./components/BentoGrid";
 import Footer from "./components/Footer";
 import {
   Layout,
@@ -20,7 +21,7 @@ import {
   Globe,
 } from "lucide-react";
 // --- REUSABLE DATA STRUCTURE ---
-const REFERENCE_DATA = [
+const REFERENCE_DATA: ReferenceSection[] = [
   {
     category: "AI & Models",
     icon: <Bot size={20} />,

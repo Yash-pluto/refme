@@ -8,13 +8,21 @@ import type { ReactNode } from "react";
 
 const MotionLink = motion.create(Link);
 
-interface ReferenceItem {
+// app/components/BentoGrid.tsx
+
+export interface ReferenceItem {
   name: string;
   href: string;
   theme: string;
   icon: ReactNode;
   desc: string;
   size: "normal" | "large";
+}
+
+export interface ReferenceSection {
+  category: string;
+  icon: ReactNode;
+  items: ReferenceItem[];
 }
 
 // Animation variants for staggered rendering
@@ -34,12 +42,6 @@ const itemVariants: Variants = {
     transition: { type: "spring", stiffness: 300, damping: 24 },
   },
 };
-
-interface ReferenceSection {
-  category: string;
-  icon: ReactNode;
-  items: ReferenceItem[];
-}
 
 interface BentoGridProps {
   darkMode: boolean;
