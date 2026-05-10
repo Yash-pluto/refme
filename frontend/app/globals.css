@@ -14,10 +14,6 @@
 html {
   scrollbar-width: none;
 }
-/* For IE/Edge (Legacy) */
-body {
-  -ms-overflow-style: none;
-}
 
 /* 2. REMOVE HORIZONTAL SCROLLBAR ON CODE BLOCKS */
 pre code {
