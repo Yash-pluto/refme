@@ -1,8 +1,9 @@
+// app/components/BentoGrid.tsx
 "use client";
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Search } from "lucide-react";
+import { Search, ArrowUpRight } from "lucide-react";
 import type { ReactNode } from "react";
 
 const MotionLink = motion.create(Link);
@@ -10,8 +11,10 @@ const MotionLink = motion.create(Link);
 interface ReferenceItem {
   name: string;
   href: string;
-  color: string;
-  border: string;
+  theme: string;
+  icon: ReactNode;
+  desc: string;
+  size: "normal" | "large";
 }
 
 interface ReferenceSection {
@@ -26,83 +29,148 @@ interface BentoGridProps {
 }
 
 export default function BentoGrid({ darkMode, filteredData }: BentoGridProps) {
-  const cardTheme = darkMode
-    ? "bg-white/[0.02] border-white/5 hover:bg-white/[0.04]"
-    : "bg-black/[0.02] border-black/5 hover:bg-black/[0.04]";
-
+  // Theme variants for deep, premium aesthetics
+  const sectionBg = darkMode ? "bg-[#0a0a0a]" : "bg-white";
   const mutedText = darkMode ? "text-zinc-500" : "text-zinc-400";
-  const headerText = darkMode ? "text-zinc-300" : "text-zinc-700";
-  const headerBg = darkMode
-    ? "bg-white/5 text-zinc-400"
-    : "bg-black/5 text-zinc-600";
+  const headerText = darkMode ? "text-zinc-100" : "text-zinc-900";
+
+  // Advanced Glassmorphism & Hover states for the cards
+  const cardBase = darkMode
+    ? "bg-white/[0.02] border-white/5 backdrop-blur-md"
+    : "bg-black/[0.02] border-black/5 backdrop-blur-md";
+
+  const cardHover = darkMode
+    ? "hover:bg-white/[0.04] hover:border-white/10 hover:shadow-[0_0_30px_-5px_rgba(255,255,255,0.05)]"
+    : "hover:bg-black/[0.04] hover:border-black/10 hover:shadow-[0_0_30px_-5px_rgba(0,0,0,0.05)]";
 
   if (filteredData.length === 0) {
     return (
       <section className='relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pb-16 sm:pb-32 min-h-100'>
-        <div className={`text-center py-12 sm:py-20 ${mutedText}`}>
-          <Search size={48} className='mx-auto mb-4 opacity-30' />
-          <p className='text-lg sm:text-xl'>No references found.</p>
+        <div className={`text-center py-20 ${mutedText}`}>
+          <Search size={48} className='mx-auto mb-6 opacity-20' />
+          <p className='text-xl tracking-tight'>No modules located.</p>
         </div>
       </section>
     );
   }
 
+  // Animation variants for staggered rendering
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.05 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 300, damping: 24 },
+    },
+  };
+
   return (
-    <section className='relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-32'>
-      <div className='space-y-20'>
+    <section className='relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 sm:pb-32'>
+      <div className='space-y-24'>
         {filteredData.map((section) => (
-          <div key={section.category} className='w-full'>
-            {/* Category Header - VERY VISIBLE */}
-            <div className='flex items-center gap-3 sm:gap-4 mb-8 sm:mb-12'>
-              <div className={`p-3 rounded-lg ${headerBg} flex-shrink-0`}>
+          <motion.div
+            key={section.category}
+            className='w-full'
+            variants={containerVariants}
+            initial='hidden'
+            whileInView='show'
+            viewport={{ once: true, margin: "-100px" }}
+          >
+            {/* Ultra-Clean Section Header */}
+            <div className='flex items-center gap-4 mb-10'>
+              <div
+                className={`flex items-center justify-center w-10 h-10 rounded-xl ${darkMode ? "bg-white/5 text-zinc-300" : "bg-black/5 text-zinc-700"}`}
+              >
                 {section.icon}
               </div>
               <h2
-                className={`text-lg sm:text-2xl font-bold uppercase tracking-wider ${headerText}`}
+                className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${headerText}`}
               >
                 {section.category}
               </h2>
               <div
-                className={`grow h-px ${darkMode ? "bg-white/10" : "bg-black/10"}`}
+                className={`grow h-px ml-4 ${darkMode ? "bg-gradient-to-r from-white/10 to-transparent" : "bg-gradient-to-r from-black/10 to-transparent"}`}
               />
             </div>
 
-            {/* Bento Grid - Professional Symmetrical Layout */}
-            <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-5'>
-              {section.items.map((item, index) => {
-                // Simple professional sizing: every 4th item is larger for visual interest
-                const isLarge = index % 4 === 0;
-                const colSpan = isLarge ? "sm:col-span-2" : "col-span-1";
-                const heightClass = isLarge
-                  ? "min-h-40 sm:min-h-48"
-                  : "min-h-24 sm:min-h-28";
+            {/* Asymmetrical Bento Grid */}
+            <div className='grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6'>
+              {section.items.map((item) => {
+                // Large items span 2 columns on desktop
+                const colSpan =
+                  item.size === "large"
+                    ? "md:col-span-2 lg:col-span-2"
+                    : "col-span-1";
+
+                // Color mapping for dynamic hover glows
+                const themeGlows: Record<string, string> = {
+                  emerald: "group-hover:shadow-emerald-500/10",
+                  blue: "group-hover:shadow-blue-500/10",
+                  sky: "group-hover:shadow-sky-500/10",
+                  yellow: "group-hover:shadow-yellow-500/10",
+                  orange: "group-hover:shadow-orange-500/10",
+                  cyan: "group-hover:shadow-cyan-500/10",
+                  indigo: "group-hover:shadow-indigo-500/10",
+                  zinc: "group-hover:shadow-zinc-500/10",
+                };
 
                 return (
-                  <MotionLink
+                  <motion.div
                     key={item.name}
-                    href={item.href}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className={`group relative overflow-hidden flex flex-col items-center justify-center gap-3 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border transition-all duration-300 ${colSpan} ${heightClass} ${cardTheme} ${item.border}`}
-                    aria-label={`Navigate to ${item.name}`}
+                    variants={itemVariants}
+                    className={colSpan}
                   >
-                    {/* Background overlay */}
-                    <div className='absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300 bg-gradient-to-r ${item.color}' />
+                    <MotionLink
+                      href={item.href}
+                      whileHover={{ y: -4 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`group relative flex flex-col h-full min-h-[180px] p-6 sm:p-8 rounded-2xl sm:rounded-3xl border transition-all duration-500 overflow-hidden ${cardBase} ${cardHover} ${themeGlows[item.theme]}`}
+                    >
+                      {/* Subtle Background Radial Gradient on Hover */}
+                      <div
+                        className={`absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500 bg-gradient-to-br from-${item.theme}-500/40 via-transparent to-transparent`}
+                      />
 
-                    {/* Colored dot */}
-                    <div
-                      className={`w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 rounded-full bg-current flex-shrink-0 ${item.color.split(" ").pop()}`}
-                    />
+                      {/* Header row: Icon & Action Arrow */}
+                      <div className='flex justify-between items-start mb-auto relative z-10'>
+                        <div
+                          className={`p-3 rounded-xl border ${darkMode ? "bg-black/50 border-white/10" : "bg-white border-black/10 shadow-sm"}`}
+                        >
+                          {item.icon}
+                        </div>
+                        <ArrowUpRight
+                          size={20}
+                          className={`opacity-0 -translate-x-2 translate-y-2 group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0 transition-all duration-300 ${darkMode ? "text-zinc-400" : "text-zinc-500"}`}
+                        />
+                      </div>
 
-                    {/* Item name - LARGE AND BOLD */}
-                    <span className='font-bold text-base sm:text-lg md:text-xl lg:text-2xl relative z-10 tracking-wide text-center leading-snug text-current'>
-                      {item.name}
-                    </span>
-                  </MotionLink>
+                      {/* Footer row: Title & Description */}
+                      <div className='relative z-10 mt-6'>
+                        <h3
+                          className={`text-xl font-bold tracking-tight mb-2 ${darkMode ? "text-zinc-100" : "text-zinc-900"}`}
+                        >
+                          {item.name}
+                        </h3>
+                        <p
+                          className={`text-sm leading-relaxed ${darkMode ? "text-zinc-500" : "text-zinc-500"}`}
+                        >
+                          {item.desc}
+                        </p>
+                      </div>
+                    </MotionLink>
+                  </motion.div>
                 );
               })}
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </section>

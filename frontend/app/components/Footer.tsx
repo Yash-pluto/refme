@@ -1,4 +1,7 @@
+// app/components/Footer.tsx
 "use client";
+
+import Link from "next/link";
 
 interface FooterProps {
   darkMode: boolean;
@@ -35,19 +38,12 @@ export default function Footer({ darkMode }: FooterProps) {
             </h4>
             <ul className='space-y-2 sm:space-y-4 text-xs sm:text-sm font-medium text-zinc-500'>
               <li>
-                <a href='#' className='hover:text-zinc-400 transition-colors'>
+                <Link
+                  href='/docs'
+                  className='hover:text-zinc-400 transition-colors'
+                >
                   Documentation
-                </a>
-              </li>
-              <li>
-                <a href='#' className='hover:text-zinc-400 transition-colors'>
-                  API Reference
-                </a>
-              </li>
-              <li>
-                <a href='#' className='hover:text-zinc-400 transition-colors'>
-                  Changelog
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -70,13 +66,13 @@ export default function Footer({ darkMode }: FooterProps) {
                 </a>
               </li>
               <li>
-                <a href='#' className='hover:text-zinc-400 transition-colors'>
-                  Discord
-                </a>
-              </li>
-              <li>
-                <a href='#' className='hover:text-zinc-400 transition-colors'>
-                  Twitter / X
+                <a
+                  href='https://www.linkedin.com/in/vardhan-yash3105/'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='hover:text-zinc-400 transition-colors'
+                >
+                  LinkedIn
                 </a>
               </li>
             </ul>
@@ -84,20 +80,12 @@ export default function Footer({ darkMode }: FooterProps) {
         </div>
 
         <div
-          className={`pt-6 sm:pt-8 border-t flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 text-xs font-medium ${darkMode ? "border-white/10 text-zinc-600" : "border-black/10 text-zinc-400"}`}
+          className={`pt-6 sm:pt-8 border-t flex flex-col justify-center items-center text-xs font-medium ${darkMode ? "border-white/10 text-zinc-600" : "border-black/10 text-zinc-400"}`}
         >
-          <p className='text-center sm:text-left'>
-            © {new Date().getFullYear()} REFME INFRASTRUCTURE. All rights
-            reserved.
+          <p className='text-center'>
+            Built with 🖤 as a side project by Yash Vardhan. On a journey to
+            master full-stack development.
           </p>
-          <div className='flex items-center gap-4 sm:gap-6'>
-            <a href='#' className='hover:text-zinc-400 transition-colors'>
-              Privacy
-            </a>
-            <a href='#' className='hover:text-zinc-400 transition-colors'>
-              Terms
-            </a>
-          </div>
         </div>
       </div>
     </footer>
