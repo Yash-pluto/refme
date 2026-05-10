@@ -31,19 +31,14 @@ export default function ReferenceDetail() {
 
   const topicKey = params.topic as string;
   const data = cheatsheetLibrary[topicKey];
+
   const pageTheme = {
     background: darkMode
       ? "bg-[#050505] text-zinc-100"
       : "bg-zinc-50 text-zinc-950",
-    container: darkMode
-      ? "bg-slate-950/95 border border-white/10 shadow-[0_40px_120px_-30px_rgba(0,0,0,0.65)]"
-      : "bg-white/95 border border-zinc-200 shadow-[0_40px_120px_-30px_rgba(15,23,42,0.08)]",
     sidebar: darkMode
-      ? "bg-[#050505] border border-white/10 text-zinc-300"
-      : "bg-white border border-zinc-200 text-zinc-950",
-    panel: darkMode
-      ? "bg-slate-950/90 border border-white/10"
-      : "bg-zinc-100 border border-zinc-200",
+      ? "bg-[#050505] border-white/10 text-zinc-300"
+      : "bg-white border-zinc-200 text-zinc-950",
     button: darkMode
       ? "border-white/10 bg-white/5 hover:bg-white/10 text-white"
       : "border-black/10 bg-black/5 hover:bg-black/10 text-black",
@@ -52,8 +47,8 @@ export default function ReferenceDetail() {
     sectionTitle: darkMode ? "text-white" : "text-zinc-950",
     sectionLabel: darkMode ? "text-zinc-600" : "text-zinc-900",
     codeCard: darkMode
-      ? "bg-[#111827] border border-white/10"
-      : "bg-zinc-100 border border-zinc-200",
+      ? "bg-[#111827] border-white/10"
+      : "bg-zinc-100 border-zinc-200",
     codeHeader: darkMode
       ? "border-white/10 bg-white/[0.03]"
       : "border-zinc-200 bg-white",
@@ -68,16 +63,12 @@ export default function ReferenceDetail() {
     navButton: darkMode
       ? "text-zinc-400 hover:text-white"
       : "text-zinc-700 hover:text-zinc-950",
-    badge: darkMode
-      ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-300"
-      : "bg-indigo-500/10 border-indigo-500/20 text-indigo-600",
     externalDocsText: darkMode ? "text-indigo-300" : "text-indigo-700",
     externalDocsButton: darkMode
       ? "text-white hover:text-indigo-400"
       : "text-zinc-900 hover:text-indigo-600",
   };
 
-  // Handle intersection observer for active section highlighting
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -105,24 +96,49 @@ export default function ReferenceDetail() {
     );
   }
 
-  const copyToClipboard = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
+  // CRITICAL FIX: Bulletproof Copy Function for Mobile HTTP testing
+  const copyToClipboard = async (text: string, id: string) => {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        // Works on localhost and production HTTPS
+        await navigator.clipboard.writeText(text);
+      } else {
+        // Fallback for testing on Mobile over local IP (HTTP)
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand("copy");
+        } catch (err) {
+          console.error("Fallback copy failed", err);
+        }
+        document.body.removeChild(textArea);
+      }
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (err) {
+      console.error("Copy failed", err);
+    }
   };
 
   return (
     <div
-      className={`min-h-screen ${pageTheme.background} font-sans selection:bg-indigo-500/30`}
+      className={`min-h-screen flex flex-col ${pageTheme.background} font-sans selection:bg-indigo-500/30`}
     >
-      <div className='max-w-[1400px] mx-auto flex flex-col xl:flex-row'>
+      <div className='max-w-[1400px] w-full mx-auto flex flex-col xl:flex-row flex-1'>
         {/* LEFT SIDEBAR NAVIGATION */}
         <aside
-          className={`hidden lg:block w-72 h-screen sticky top-0 p-8 pt-24 overflow-y-auto ${pageTheme.sidebar}`}
+          className={`hidden lg:block w-72 h-screen sticky top-0 p-8 pt-24 overflow-y-auto border-r ${pageTheme.sidebar}`}
         >
           <button
             onClick={() => router.push("/")}
             className={`flex items-center gap-2 transition-all mb-12 text-[10px] font-bold uppercase tracking-widest group ${pageTheme.navButton}`}
+            type='button'
           >
             <ChevronLeft
               size={14}
@@ -143,11 +159,7 @@ export default function ReferenceDetail() {
                   <a
                     key={section.id}
                     href={`#${section.id}`}
-                    className={`text-sm transition-colors ${
-                      activeSection === section.id
-                        ? pageTheme.navActive
-                        : pageTheme.navInactive
-                    }`}
+                    className={`text-sm transition-colors ${activeSection === section.id ? pageTheme.navActive : pageTheme.navInactive}`}
                   >
                     {section.title}
                   </a>
@@ -158,64 +170,59 @@ export default function ReferenceDetail() {
         </aside>
 
         {/* MAIN CONTENT AREA */}
-        <main className='grow px-6 md:px-16 lg:px-24 pt-24 pb-32'>
+        <main className='flex-1 px-6 md:px-16 lg:px-24 pt-16 md:pt-24 pb-32 max-w-full overflow-hidden'>
           {/* Header */}
-          <header className='mb-20'>
+          <header className='mb-16 md:mb-20'>
             <div className='flex items-center justify-between gap-3 mb-4'>
               <span className='px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider'>
                 {data.subtitle}
               </span>
               <button
                 onClick={toggleTheme}
-                className={`inline-flex items-center justify-center rounded-lg p-1.5 sm:p-2 border transition flex-shrink-0 ${pageTheme.button}`}
+                className={`flex items-center justify-center rounded-xl p-2.5 border transition-all flex-shrink-0 cursor-pointer ${pageTheme.button}`}
                 aria-label='Toggle theme'
                 type='button'
               >
-                {darkMode ? (
-                  <Sun size={16} className='sm:w-[18px] sm:h-[18px]' />
-                ) : (
-                  <Moon size={16} className='sm:w-[18px] sm:h-[18px]' />
-                )}
+                {darkMode ? <Sun size={18} /> : <Moon size={18} />}
               </button>
             </div>
             <h1
-              className={`text-5xl font-bold tracking-tight mb-6 ${pageTheme.heading}`}
+              className={`text-4xl md:text-5xl font-bold tracking-tight mb-6 ${pageTheme.heading} break-words`}
             >
               {data.title}
               <span className='text-indigo-500'>.</span>
             </h1>
             <p
-              className={`text-lg ${pageTheme.muted} max-w-2xl leading-relaxed`}
+              className={`text-base md:text-lg ${pageTheme.muted} max-w-2xl leading-relaxed`}
             >
               {data.description}
             </p>
           </header>
 
           {/* Dynamic Sections */}
-          <div className='space-y-24'>
+          <div className='space-y-16 md:space-y-24'>
             {data.sections.map((section, sIdx) => (
               <section
                 key={section.id}
                 id={section.id}
                 className='scroll-mt-24'
               >
-                <div className='flex items-center gap-4 mb-10 group'>
+                <div className='flex items-center gap-3 md:gap-4 mb-8 md:mb-10 group'>
                   <Hash
                     size={18}
-                    className='text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity'
+                    className='text-indigo-500 md:opacity-0 md:group-hover:opacity-100 transition-opacity'
                   />
                   <h2
-                    className={`text-xl font-bold tracking-tight ${pageTheme.sectionTitle}`}
+                    className={`text-lg md:text-xl font-bold tracking-tight ${pageTheme.sectionTitle}`}
                   >
                     {section.title}
                   </h2>
                 </div>
 
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8'>
                   {section.items.map((item, iIdx) => {
                     const itemId = `${sIdx}-${iIdx}`;
 
-                    // Render Subsection Titles
                     if (item.type === "subsectionTitle") {
                       return (
                         <div key={itemId} className='col-span-full mt-4'>
@@ -228,12 +235,11 @@ export default function ReferenceDetail() {
                       );
                     }
 
-                    // Render Paragraphs
                     if (item.type === "paragraph") {
                       return (
                         <div key={itemId} className='col-span-full max-w-3xl'>
                           <p
-                            className={`${pageTheme.muted} leading-relaxed text-base`}
+                            className={`${pageTheme.muted} leading-relaxed text-sm md:text-base`}
                           >
                             {item.content}
                           </p>
@@ -241,12 +247,11 @@ export default function ReferenceDetail() {
                       );
                     }
 
-                    // Render Code Blocks
                     if (item.type === "code") {
                       return (
                         <div
                           key={itemId}
-                          className={`relative group rounded-xl overflow-hidden ${pageTheme.codeCard}`}
+                          className={`relative group rounded-xl overflow-hidden border w-full max-w-full ${pageTheme.codeCard}`}
                         >
                           <div
                             className={`flex items-center justify-between px-4 py-2 border-b ${pageTheme.codeHeader}`}
@@ -258,16 +263,18 @@ export default function ReferenceDetail() {
                               onClick={() =>
                                 copyToClipboard(item.content, itemId)
                               }
-                              className='text-zinc-500 hover:text-white transition-colors'
+                              className='text-zinc-500 hover:text-white transition-colors p-2 -mr-2 rounded-lg cursor-pointer'
+                              type='button'
+                              aria-label='Copy code snippet'
                             >
                               {copiedId === itemId ? (
-                                <Check size={14} className='text-emerald-500' />
+                                <Check size={16} className='text-emerald-500' />
                               ) : (
-                                <Copy size={14} />
+                                <Copy size={16} />
                               )}
                             </button>
                           </div>
-                          <div className='p-1'>
+                          <div className='p-1 overflow-x-auto w-full'>
                             <SyntaxHighlighter
                               language={item.language || topicKey}
                               style={pageTheme.syntaxStyle}
@@ -294,7 +301,7 @@ export default function ReferenceDetail() {
           </div>
         </main>
 
-        {/* RIGHT DECORATIVE COLUMN (Optional) */}
+        {/* RIGHT DECORATIVE COLUMN */}
         <aside className='hidden xl:block w-64 h-screen sticky top-0 p-8 pt-24'>
           <div className='p-6 rounded-2xl bg-indigo-500/5 border border-indigo-500/10'>
             <p
@@ -303,6 +310,7 @@ export default function ReferenceDetail() {
               Need more help? Check the official documentation for {data.title}.
             </p>
             <button
+              type='button'
               className={`flex items-center gap-2 text-[10px] font-bold uppercase transition-colors ${pageTheme.externalDocsButton}`}
             >
               External Docs <ExternalLink size={12} />
