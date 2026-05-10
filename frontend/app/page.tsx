@@ -1,11 +1,8 @@
 "use client";
-import { useState } from "react";
+import DirectoryList from "./components/DirectoryList";
 import { useTheme } from "../src/context/ThemeContext";
-import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
-import BentoGrid from "./components/BentoGrid";
-import { ReferenceSection } from "./components/BentoGrid";
-import Footer from "./components/Footer";
+import { useState } from "react";
+import { ArrowDownRight } from "lucide-react";
 import {
   Layout,
   Code2,
@@ -21,7 +18,7 @@ import {
   Globe,
 } from "lucide-react";
 // --- REUSABLE DATA STRUCTURE ---
-const REFERENCE_DATA: ReferenceSection[] = [
+export const REFERENCE_DATA = [
   {
     category: "AI & Models",
     icon: <Bot size={20} />,
@@ -198,9 +195,12 @@ export default function RefMeHero() {
   const { darkMode, toggleTheme } = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Stark, flat colors. No gradients, no soft grays.
   const theme = {
-    page: darkMode ? "bg-[#050505] text-white" : "bg-zinc-50 text-black",
-    overlay: darkMode ? "bg-indigo-500/10" : "bg-indigo-500/5",
+    page: darkMode
+      ? "bg-[#0A0A0A] text-[#E5E5E5]"
+      : "bg-[#F4F4F0] text-[#111111]",
+    border: darkMode ? "border-[#333333]" : "border-[#111111]",
   };
 
   const handleShare = async () => {
@@ -230,51 +230,64 @@ export default function RefMeHero() {
   })).filter((section) => section.items.length > 0);
 
   const dotColor = darkMode ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)";
-
   return (
     <div
-      className={`${theme.page} min-h-screen transition-colors duration-500 relative overflow-hidden font-sans selection:bg-zinc-500/30`}
+      className={`${theme.page} min-h-screen font-sans selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black flex flex-col md:flex-row`}
     >
-      <div className='absolute inset-0 z-0 overflow-hidden pointer-events-none bg-inherit'>
-        {/* Deep Glowing Orbs for Ambient Light */}
-        <div
-          className={`absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full blur-[150px] opacity-30 transition-colors duration-1000 ${darkMode ? "bg-indigo-900/40" : "bg-indigo-200/50"}`}
-        />
-        <div
-          className={`absolute bottom-[-10%] right-[-5%] w-[50%] h-[50%] rounded-full blur-[120px] opacity-20 transition-colors duration-1000 ${darkMode ? "bg-blue-900/40" : "bg-blue-200/50"}`}
-        />
+      {/* LEFT PANE: Sticky Hero & Search */}
+      <div
+        className={`w-full md:w-[35vw] md:h-screen md:sticky top-0 flex flex-col justify-between border-b md:border-b-0 md:border-r ${theme.border} p-6 md:p-10`}
+      >
+        <div>
+          {/* Header */}
+          <div className='flex justify-between items-start mb-20'>
+            <h1 className='text-4xl md:text-6xl font-black tracking-tighter uppercase leading-none'>
+              REF
+              <br />
+              ME<span className='text-orange-500'>_</span>
+            </h1>
+            <button
+              onClick={toggleTheme}
+              className='text-sm font-mono uppercase hover:underline underline-offset-4'
+            >
+              {darkMode ? "[ LIGHT ]" : "[ DARK ]"}
+            </button>
+          </div>
 
-        {/* Architectural Grid Pattern */}
-        <div
-          className='absolute inset-0'
-          style={{
-            backgroundImage: `
-              linear-gradient(to right, ${darkMode ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)"} 1px, transparent 1px),
-              linear-gradient(to bottom, ${darkMode ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)"} 1px, transparent 1px)
-            `,
-            backgroundSize: "40px 40px",
-            maskImage:
-              "radial-gradient(ellipse 80% 80% at 50% 20%, black 20%, transparent 100%)",
-            WebkitMaskImage:
-              "radial-gradient(ellipse 80% 80% at 50% 20%, black 20%, transparent 100%)",
-          }}
-        />
+          {/* Description */}
+          <p className='font-mono text-sm uppercase tracking-widest opacity-60 mb-6'>
+            // Technical Archive
+          </p>
+          <p className='text-xl md:text-2xl font-medium leading-tight mb-12'>
+            High-fidelity documentation and architectural patterns for modern
+            engineering.
+          </p>
+
+          {/* Raw Search Input */}
+          <div
+            className={`relative flex items-center border-b-2 ${theme.border} pb-2`}
+          >
+            <input
+              type='text'
+              placeholder='Query archive...'
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className='w-full bg-transparent outline-none font-mono text-lg placeholder-opacity-30 placeholder-current'
+            />
+            <ArrowDownRight className='opacity-50' />
+          </div>
+        </div>
+
+        {/* Footer Meta */}
+        <div className='hidden md:block font-mono text-xs opacity-50 uppercase mt-12'>
+          Index: 04.2026 / Status: Active / Mode: Strict
+        </div>
       </div>
 
-      {/* --- NAVIGATION --- */}
-      <Navbar
-        searchQuery={searchQuery}
-        onSearch={setSearchQuery}
-        darkMode={darkMode}
-        toggleTheme={toggleTheme}
-        onShare={handleShare}
-      />
-
-      <Hero darkMode={darkMode} />
-
-      <BentoGrid darkMode={darkMode} filteredData={filteredData} />
-
-      <Footer darkMode={darkMode} />
+      {/* RIGHT PANE: Scrolling Directory */}
+      <div className='w-full md:w-[65vw] min-h-screen'>
+        <DirectoryList darkMode={darkMode} searchQuery={searchQuery} />
+      </div>
     </div>
   );
 }
