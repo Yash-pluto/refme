@@ -130,6 +130,31 @@ export default function ReferenceDetail() {
     <div
       className={`min-h-screen flex flex-col ${pageTheme.background} font-sans selection:bg-indigo-500/30`}
     >
+      {/* --- PREMIUM TOPIC BACKGROUND --- */}
+      <div className='fixed inset-0 z-0 overflow-hidden pointer-events-none'>
+        {/* Subtle top glow highlighting the topic title */}
+        <div
+          className={`absolute top-[-20%] left-[20%] w-[60%] h-[50%] rounded-full blur-[140px] opacity-40 transition-colors duration-1000 ${darkMode ? "bg-zinc-800/50" : "bg-zinc-200/70"}`}
+        />
+
+        {/* Fade-out Grid */}
+        <div
+          className='absolute inset-0'
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, ${darkMode ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)"} 1px, transparent 1px),
+              linear-gradient(to bottom, ${darkMode ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)"} 1px, transparent 1px)
+            `,
+            backgroundSize: "32px 32px",
+            maskImage:
+              "linear-gradient(to bottom, black 0%, rgba(0,0,0,0.5) 40%, transparent 100%)",
+            WebkitMaskImage:
+              "linear-gradient(to bottom, black 0%, rgba(0,0,0,0.5) 40%, transparent 100%)",
+          }}
+        />
+      </div>
+
+      {/* Ensure your main content wrapper below this has `relative z-10` so it sits above the background! */}
       <div className='max-w-[1400px] w-full mx-auto flex flex-col xl:flex-row flex-1'>
         {/* LEFT SIDEBAR NAVIGATION */}
         <aside

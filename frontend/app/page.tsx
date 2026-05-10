@@ -5,139 +5,187 @@ import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import BentoGrid from "./components/BentoGrid";
 import Footer from "./components/Footer";
-import { Layout, Code2, Terminal, Bot } from "lucide-react";
-
+import {
+  Layout,
+  Code2,
+  Terminal,
+  Bot,
+  Cpu,
+  Braces,
+  Binary,
+  FileJson,
+  Sparkles,
+  FileCode2,
+  Blocks,
+  Globe,
+} from "lucide-react";
 // --- REUSABLE DATA STRUCTURE ---
 const REFERENCE_DATA = [
   {
     category: "AI & Models",
-    icon: <Bot size={18} />,
+    icon: <Bot size={20} />,
     items: [
       {
         name: "ChatGPT",
         href: "/chatgpt",
-        color: "from-emerald-500/20 to-emerald-500/0 text-emerald-500",
-        border: "group-hover:border-emerald-500/50",
+        theme: "emerald",
+        icon: <Cpu size={24} className='text-emerald-500' />,
+        desc: "Prompt engineering & API reference.",
+        size: "large",
       },
       {
         name: "Claude Code",
         href: "/claude",
-        color: "from-orange-500/20 to-orange-500/0 text-orange-500",
-        border: "group-hover:border-orange-500/50",
+        theme: "orange",
+        icon: <Bot size={24} className='text-orange-500' />,
+        desc: "Anthropic's CLI and SDK patterns.",
+        size: "normal",
       },
       {
-        name: "Cursor CLI",
+        name: "Cursor",
         href: "/cursor",
-        color: "from-blue-500/20 to-blue-500/0 text-blue-500",
-        border: "group-hover:border-blue-500/50",
+        theme: "blue",
+        icon: <Terminal size={24} className='text-blue-500' />,
+        desc: "AI-first IDE workflows.",
+        size: "normal",
       },
       {
-        name: "Gemini CLI",
+        name: "Gemini",
         href: "/gemini",
-        color: "from-sky-500/20 to-sky-500/0 text-sky-500",
-        border: "group-hover:border-sky-500/50",
+        theme: "sky",
+        icon: <Sparkles size={24} className='text-sky-500' />,
+        desc: "Google's multi-modal intelligence.",
+        size: "normal",
       },
     ],
   },
   {
     category: "Core Programming",
-    icon: <Code2 size={18} />,
+    icon: <Code2 size={20} />,
     items: [
       {
         name: "Python",
         href: "/python",
-        color: "from-yellow-500/20 to-yellow-500/0 text-yellow-500",
-        border: "group-hover:border-yellow-500/50",
+        theme: "yellow",
+        icon: <FileCode2 size={24} className='text-yellow-500' />,
+        desc: "Data science, ML, and backend scripting.",
+        size: "large",
       },
       {
         name: "JavaScript",
         href: "/javascript",
-        color: "from-yellow-400/20 to-yellow-400/0 text-yellow-400",
-        border: "group-hover:border-yellow-400/50",
+        theme: "yellow",
+        icon: <Braces size={24} className='text-yellow-400' />,
+        desc: "The universal language of the web.",
+        size: "normal",
       },
       {
         name: "TypeScript",
         href: "/typescript",
-        color: "from-blue-600/20 to-blue-600/0 text-blue-600",
-        border: "group-hover:border-blue-600/50",
+        theme: "blue",
+        icon: <FileCode2 size={24} className='text-blue-500' />,
+        desc: "Type-safe JavaScript for scale.",
+        size: "normal",
       },
       {
         name: "Go",
         href: "/go",
-        color: "from-cyan-500/20 to-cyan-500/0 text-cyan-500",
-        border: "group-hover:border-cyan-500/50",
+        theme: "cyan",
+        icon: <Binary size={24} className='text-cyan-500' />,
+        desc: "High-performance concurrency.",
+        size: "normal",
       },
       {
         name: "Rust",
         href: "/rust",
-        color: "from-orange-600/20 to-orange-600/0 text-orange-600",
-        border: "group-hover:border-orange-600/50",
+        theme: "orange",
+        icon: <Blocks size={24} className='text-orange-600' />,
+        desc: "Memory safety without garbage collection.",
+        size: "normal",
       },
       {
         name: "C++",
         href: "/cpp",
-        color: "from-indigo-500/20 to-indigo-500/0 text-indigo-500",
-        border: "group-hover:border-indigo-500/50",
+        theme: "indigo",
+        icon: <Cpu size={24} className='text-indigo-500' />,
+        desc: "System-level performance and control.",
+        size: "normal",
       },
     ],
   },
   {
     category: "Infrastructure & CLI",
-    icon: <Terminal size={18} />,
+    icon: <Terminal size={20} />,
     items: [
-      {
-        name: "Bash",
-        href: "/bash",
-        color: "from-zinc-500/20 to-zinc-500/0 text-zinc-400",
-        border: "group-hover:border-zinc-500/50",
-      },
       {
         name: "Docker",
         href: "/docker",
-        color: "from-blue-400/20 to-blue-400/0 text-blue-400",
-        border: "group-hover:border-blue-400/50",
+        theme: "sky",
+        icon: <FileJson size={24} className='text-sky-500' />,
+        desc: "Containerization and compose structures.",
+        size: "large",
+      },
+      {
+        name: "Bash",
+        href: "/bash",
+        theme: "zinc",
+        icon: <Terminal size={24} className='text-zinc-500' />,
+        desc: "Unix shell scripting essentials.",
+        size: "normal",
       },
       {
         name: "Kubernetes",
         href: "/kubernetes",
-        color: "from-indigo-600/20 to-indigo-600/0 text-indigo-500",
-        border: "group-hover:border-indigo-600/50",
+        theme: "indigo",
+        icon: <Layout size={24} className='text-indigo-500' />,
+        desc: "Orchestration & Helm charts.",
+        size: "normal",
       },
       {
         name: "PowerShell",
         href: "/powershell",
-        color: "from-blue-700/20 to-blue-700/0 text-blue-500",
-        border: "group-hover:border-blue-700/50",
+        theme: "blue",
+        icon: <Terminal size={24} className='text-blue-600' />,
+        desc: "Windows automation and configuration.",
+        size: "normal",
       },
     ],
   },
   {
     category: "Web & Styling",
-    icon: <Layout size={18} />,
+    icon: <Layout size={20} />,
     items: [
       {
         name: "React",
         href: "/react",
-        color: "from-sky-400/20 to-sky-400/0 text-sky-400",
-        border: "group-hover:border-sky-400/50",
+        theme: "sky",
+        icon: <Globe size={24} className='text-sky-400' />,
+        desc: "Hooks, patterns, and state management.",
+        size: "large",
       },
       {
         name: "Tailwind CSS",
         href: "/tailwind",
-        color: "from-cyan-400/20 to-cyan-400/0 text-cyan-400",
-        border: "group-hover:border-cyan-400/50",
+        theme: "cyan",
+        icon: <Layout size={24} className='text-cyan-400' />,
+        desc: "Utility classes and configuration.",
+        size: "normal",
       },
       {
         name: "CSS 3",
         href: "/css3",
-        color: "from-blue-500/20 to-blue-500/0 text-blue-500",
-        border: "group-hover:border-blue-500/50",
+        theme: "blue",
+        icon: <Blocks size={24} className='text-blue-500' />,
+        desc: "Modern semantic web layouts.",
+        size: "normal",
       },
       {
         name: "HTML 5",
         href: "/html5",
-        color: "from-orange-500/20 to-orange-500/0 text-orange-500",
-        border: "group-hover:border-orange-500/50",
+        theme: "orange",
+        icon: <FileCode2 size={24} className='text-orange-500' />,
+        desc: "Document structure and accessibility.",
+        size: "normal",
       },
     ],
   },
@@ -186,13 +234,28 @@ export default function RefMeHero() {
     <div
       className={`${theme.page} min-h-screen transition-colors duration-500 relative overflow-hidden font-sans selection:bg-zinc-500/30`}
     >
-      {/* --- CLEAN DOTTED BACKGROUND --- */}
-      <div className='absolute inset-0 z-0 overflow-hidden pointer-events-none'>
+      <div className='absolute inset-0 z-0 overflow-hidden pointer-events-none bg-inherit'>
+        {/* Deep Glowing Orbs for Ambient Light */}
+        <div
+          className={`absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full blur-[150px] opacity-30 transition-colors duration-1000 ${darkMode ? "bg-indigo-900/40" : "bg-indigo-200/50"}`}
+        />
+        <div
+          className={`absolute bottom-[-10%] right-[-5%] w-[50%] h-[50%] rounded-full blur-[120px] opacity-20 transition-colors duration-1000 ${darkMode ? "bg-blue-900/40" : "bg-blue-200/50"}`}
+        />
+
+        {/* Architectural Grid Pattern */}
         <div
           className='absolute inset-0'
           style={{
-            backgroundImage: `radial-gradient(circle at 2px 2px, ${dotColor} 1px, transparent 0)`,
-            backgroundSize: "32px 32px",
+            backgroundImage: `
+              linear-gradient(to right, ${darkMode ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)"} 1px, transparent 1px),
+              linear-gradient(to bottom, ${darkMode ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)"} 1px, transparent 1px)
+            `,
+            backgroundSize: "40px 40px",
+            maskImage:
+              "radial-gradient(ellipse 80% 80% at 50% 20%, black 20%, transparent 100%)",
+            WebkitMaskImage:
+              "radial-gradient(ellipse 80% 80% at 50% 20%, black 20%, transparent 100%)",
           }}
         />
       </div>
