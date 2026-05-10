@@ -2,13 +2,15 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { Search, ArrowUpRight } from "lucide-react";
 import type { ReactNode } from "react";
 
 const MotionLink = motion.create(Link);
 
-interface ReferenceItem {
+// app/components/BentoGrid.tsx
+
+export interface ReferenceItem {
   name: string;
   href: string;
   theme: string;
@@ -17,11 +19,29 @@ interface ReferenceItem {
   size: "normal" | "large";
 }
 
-interface ReferenceSection {
+export interface ReferenceSection {
   category: string;
   icon: ReactNode;
   items: ReferenceItem[];
 }
+
+// Animation variants for staggered rendering
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05 },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 300, damping: 24 },
+  },
+};
 
 interface BentoGridProps {
   darkMode: boolean;
@@ -68,7 +88,7 @@ export default function BentoGrid({ darkMode, filteredData }: BentoGridProps) {
     show: {
       opacity: 1,
       y: 0,
-      transition: { type: "spring", stiffness: 300, damping: 24 },
+      transition: { type: "spring" as const, stiffness: 300, damping: 24 },
     },
   };
 
