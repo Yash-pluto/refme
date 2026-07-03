@@ -192,7 +192,7 @@ This project is created by **Yash Vardhan** and is available under the MIT Licen
 **Yash Vardhan** — Known as **Yash Pluto**
 
 - GitHub: [@yash-pluto](https://github.com/yash-pluto)
-- Portfolio: [yashpluto.vercel.app](https://yashpluto.vercel.app)
+- Portfolio: [yash-pluto.vercel.app](https://yash-pluto.vercel.app)
 
 ---
 
