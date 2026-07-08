@@ -1,7 +1,7 @@
 // app/[topic]/page.tsx
 import { getTopicBySlug } from "../../src/lib/mdx";
 import { MDXRemote } from "next-mdx-remote/rsc";
-import { notFound } from "next/navigation";
+import SkeletonTopic from "../components/SkeletonTopic";
 import TopicLayout from "./TopicLayout";
 import ClientCodeBlock from "../components/ClientCodeBlock";
 import { MdxH2, MdxH3, MdxP, MdxUl } from "../components/MdxTypography";
@@ -31,7 +31,11 @@ export default async function TopicPage({
   const topicData = getTopicBySlug(resolvedParams.topic);
 
   if (!topicData) {
-    return notFound();
+    return (
+      <TopicLayout frontmatter={undefined} topicKey={resolvedParams.topic}>
+        <SkeletonTopic topicKey={resolvedParams.topic} />
+      </TopicLayout>
+    );
   }
 
   return (
