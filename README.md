@@ -60,7 +60,114 @@ refme/
    ```
    The app will be running at `http://localhost:3000`.
 
-## Adding New Content
+   The app will be available at `http://localhost:3000`
+
+4. **Build for production**
+
+   ```bash
+   npm run build
+   npm start
+   ```
+
+---
+
+## 📖 Usage
+
+- **Browse Topics:** Navigate through the grid on the homepage to explore different programming languages and frameworks
+- **Search References:** Use the search bar to filter topics by name
+- **Toggle Theme:** Click the moon/sun icon to switch between dark and light modes
+- **View Details:** Click on any reference card to access detailed cheatsheets and code snippets
+- **Copy Code:** Hover over code blocks and use the copy button to add snippets to your clipboard
+
+---
+
+## ✨ Key Components
+
+### Theme System
+
+Global theme context (`ThemeContext.tsx`) manages dark/light mode state with localStorage persistence and system preference detection.
+
+### Dynamic Routing
+
+Topic pages are dynamically generated from data using Next.js App Router, supporting routes like `/javascript`, `/python`, `/react`, etc.
+
+### Responsive Layout
+
+Mobile-first design with Tailwind CSS breakpoints ensures excellent UX across all devices.
+
+### Code Highlighting
+
+Syntax highlighting adapts to the selected theme:
+
+- **Dark Mode:** vscDarkPlus theme
+- **Light Mode:** oneLight theme
+
+---
+
+## 📱 Responsive Breakpoints
+
+- **Mobile:** < 768px — Full-width layout with collapsible sidebar
+- **Tablet:** 768px - 1024px — Optimized spacing and grid adjustments
+- **Desktop:** 1024px+ — Full three-column layout with sidebars
+
+---
+
+## 🎨 Design Philosophy
+
+RefMe\_ prioritizes:
+
+- **Clarity:** Clean typography and spacing for easy reading
+- **Performance:** Optimized assets and efficient client-side rendering
+- **Accessibility:** Semantic HTML and keyboard navigation support
+- **Consistency:** Unified color scheme and component design
+
+---
+
+## 🔒 Security Considerations
+
+- All content is static or user-generated through the UI
+- No backend database credentials exposed
+- Environment variables properly managed
+- Dependencies regularly updated
+
+---
+
+## 🚢 Deployment
+
+Optimized for deployment on **Vercel**:
+
+```bash
+npm run build
+vercel deploy
+```
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to:
+
+- Report bugs or issues
+- Suggest new features
+- Submit pull requests
+- Improve documentation
+
+---
+
+## 📄 License
+
+This project is created by **Yash Vardhan** and is available under the MIT License.
+
+---
+
+## 👤 Author
+
+**Yash Vardhan** — Known as **Yash Pluto**
+
+- GitHub: [@yash-pluto](https://github.com/yash-pluto)
+- Portfolio: [yash-pluto.vercel.app](https://yash-pluto.vercel.app)
+
+---
 
 Because the site runs on MDX, adding a new topic is incredibly simple:
 
