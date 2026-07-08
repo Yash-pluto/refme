@@ -1,77 +1,50 @@
-# RefMe\_ — Technical Documentation Hub
+# RefMe\_
 
-A modern, responsive technical reference platform designed for developers and engineers to quickly access cheatsheets, code snippets, and documentation across multiple programming languages and frameworks.
+A curated, zero-latency reference hub for modern full-stack workflows. No fluff, no endless scrolling—just the raw syntax you need to build.
 
-Built with ❤️ by **Yash Vardhan** ([Yash Pluto](https://github.com/yash-pluto))
+Built as a side project by [Yash Vardhan](https://www.linkedin.com/in/vardhan-yash3105/) ([@Yash-pluto](https://github.com/Yash-pluto)).
 
----
+## The "Why"
 
-## 🌟 Features
+As developers, we constantly switch contexts between writing code, running CLI commands, managing infrastructure, and configuring tools. I got tired of opening dozens of browser tabs or repeatedly prompting AI for the same boilerplate snippets.
 
-- **Dark & Light Theme Toggle** — Seamless theme switching with persistent storage
-- **Multi-Language Support** — Comprehensive references for Python, JavaScript, TypeScript, Go, Rust, C++, React, Tailwind CSS, Docker, Kubernetes, Bash, and more
-- **Responsive Design** — Optimized for desktop, tablet, and mobile devices
-- **Fast Navigation** — Client-side routing with smooth page transitions
-- **Code Syntax Highlighting** — Beautiful syntax-highlighted code blocks with copy-to-clipboard functionality
-- **Search & Filter** — Quick access to specific references and topics
-- **Professional UI** — Polished, sleek interface built with modern design principles
+I built RefMe to act as a secondary brain—a highly opinionated, lightning-fast, and distraction-free environment curated specifically for quick lookups.
 
----
+## Under the Hood
 
-## 🛠️ Tech Stack
+This isn't a standard template. It's custom-built for speed and clarity:
 
-- **Frontend Framework:** Next.js 16.2.4 with App Router
-- **UI Library:** React 19.2.4
-- **Styling:** Tailwind CSS v4
-- **Animations:** Framer Motion
-- **Code Highlighting:** react-syntax-highlighter with Prism.js
-- **Icons:** lucide-react
-- **Language:** TypeScript
+- **Framework:** Next.js 15 (App Router)
+- **Styling:** Tailwind CSS v4 with a strict monochrome/zinc palette.
+- **Content:** MDX (`next-mdx-remote`) allows writing standard markdown cheatsheets while injecting custom interactive React components (like the copy-paste code blocks).
+- **Layout:** Custom split-pane design with a fixed left-hand command center and a scrolling right-hand content area.
+- **Icons & Typography:** Lucide React, paired with JetBrains Mono and Outfit.
 
----
+## Project Structure
 
-## 📁 Project Structure
-
-```
+```text
 refme/
-├── frontend/                          # Next.js application
+├── frontend/
 │   ├── app/
-│   │   ├── layout.tsx                 # Root layout with theme provider
-│   │   ├── page.tsx                   # Homepage with hero and grid
-│   │   ├── [topic]/
-│   │   │   └── page.tsx               # Dynamic topic detail pages
-│   │   ├── components/
-│   │   │   ├── Navbar.tsx             # Navigation bar
-│   │   │   ├── Hero.tsx               # Hero section
-│   │   │   ├── BentoGrid.tsx          # Reference grid display
-│   │   │   └── Footer.tsx             # Footer component
-│   │   └── globals.css                # Global styles
+│   │   ├── layout.tsx         # Global layout & font configuration
+│   │   ├── page.tsx           # Split-pane homepage & directory search
+│   │   ├── docs/              # Architecture & vision page
+│   │   ├── [topic]/           # Dynamic MDX renderer for each cheatsheet
+│   │   └── components/        # Interactive bits (ClientCodeBlock, DirectoryList)
+│   ├── content/               # Where the actual .mdx cheatsheets live
 │   ├── src/
-│   │   ├── context/
-│   │   │   └── ThemeContext.tsx       # Global theme management
-│   │   └── data/
-│   │       ├── cheatsheets.ts         # Reference content data
-│   │       └── references.json        # Reference metadata
-│   ├── public/                         # Static assets
-│   └── package.json                   # Dependencies
-└── README.md                           # This file
+│   │   ├── context/           # Custom ThemeContext (Dark/Light mode)
+│   │   ├── data/              # Directory structure definitions
+│   │   └── lib/               # MDX parsing logic
+│   └── tailwind.config.ts
 ```
 
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 18.0 or higher
-- npm or yarn package manager
-
-### Installation
+## Running Locally
 
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/yash-pluto/refme.git
+   git clone [https://github.com/yash-pluto/refme.git](https://github.com/yash-pluto/refme.git)
    cd refme/frontend
    ```
 
@@ -81,11 +54,11 @@ refme/
    npm install
    ```
 
-3. **Run the development server**
-
+3. **Boot it up**
    ```bash
    npm run dev
    ```
+   The app will be running at `http://localhost:3000`.
 
    The app will be available at `http://localhost:3000`
 
@@ -196,10 +169,12 @@ This project is created by **Yash Vardhan** and is available under the MIT Licen
 
 ---
 
-## 🙏 Acknowledgments
+Because the site runs on MDX, adding a new topic is incredibly simple:
 
-Built with modern web technologies and a passion for clean code and excellent developer experience. RefMe\_ is designed to be your go-to technical reference platform.
+1. Add a new `.mdx` file in the `frontend/content/` directory.
+2. Ensure it has standard frontmatter (`title`, `description`).
+3. Add the route to your `REFERENCE_DATA` structure in `app/page.tsx` so it shows up in the directory.
 
----
+## License
 
-**Last Updated:** May 2026 | **Version:** 1.0.0 | **Maintained by:** Yash Vardhan (Yash Pluto)
+MIT License - Do whatever you want with it. If you use the layout or code, a shoutout is appreciated!
