@@ -1,0 +1,667 @@
+---
+title: "React"
+description: "A beginner-friendly React guide covering JSX, components, hooks, architecture, rendering, and lifecycle."
+category: "Frameworks"
+---
+
+## Getting Started
+
+React is a JavaScript library for building user interfaces out of composable, reusable components. It uses a declarative model: you describe what the UI should look like for a given state, and React figures out how to update the DOM to match. You never manually write `document.createElement` or `.appendChild` — you describe the end result, and React handles the DOM manipulation for you.
+
+### Installation
+
+```bash
+npm create vite@latest my-app -- --template react
+cd my-app
+npm install
+npm run dev
+```
+
+### Project Structure
+
+```bash
+my-app/
+├── src/
+│   ├── components/
+│   ├── App.jsx
+│   └── main.jsx
+├── index.html
+├── package.json
+└── vite.config.js
+```
+
+### A Minimal Component
+
+```jsx
+// main.jsx
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App.jsx";
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
+// App.jsx
+export default function App() {
+  return <h1>Hello, React</h1>;
+}
+```
+
+---
+
+## Architecture & Rendering
+
+Before diving into syntax, it's worth understanding what React is actually doing behind the scenes. This section explains the mental model that everything else in this guide builds on.
+
+### JSX Compiles to Function Calls
+
+JSX isn't HTML — it's syntax sugar. Every JSX element compiles down to a `React.createElement()` call, which returns a plain JavaScript object describing what you want rendered. React never touches the real DOM at this step; it's just building a description of it.
+
+```jsx
+// What you write:
+const element = <h1 className="title">Hello</h1>;
+
+// What it compiles to:
+const element = React.createElement("h1", { className: "title" }, "Hello");
+
+// What that actually returns (simplified):
+// {
+//   type: "h1",
+//   props: { className: "title", children: "Hello" }
+// }
+```
+
+That plain object tree is called the **Virtual DOM**: a lightweight, in-memory representation of what the UI should look like. It's just JavaScript objects — cheap to create and compare, unlike real DOM nodes, which are expensive to create and mutate.
+
+### Reconciliation: How React Decides What to Update
+
+Every time a component's state or props change, React doesn't throw away the real DOM and rebuild it from scratch. Instead it re-runs the component function to get a **new** Virtual DOM tree, then compares it against the **previous** Virtual DOM tree. This comparison process is called **reconciliation**.
+
+React walks both trees and only applies the minimal set of real DOM changes needed to make the browser match the new tree — this final step is called the **commit phase**. If only a button's text changed, React updates that one text node, not the entire page.
+
+```jsx
+// Before state update: <button>Count: 0</button>
+// After setCount(1):    <button>Count: 1</button>
+
+// React does NOT recreate the <button> element in the real DOM.
+// Reconciliation detects only the text content changed,
+// so it patches just that one text node.
+```
+
+This is why `key` matters so much when rendering lists (covered later): keys are how React matches up old and new tree nodes during reconciliation. Without a stable key, React can't reliably tell "this is the same item, just moved" from "this is a brand new item," which leads to bugs like input fields losing their value when a list reorders.
+
+### What Actually Triggers a Re-render
+
+A component re-renders when its state changes (via a setter like `setCount`), when its props change, or when its parent re-renders. "Re-render" means React calls the function component again, top to bottom — the *entire* function body re-executes, not just the part that changed.
+
+```jsx
+function Greeting({ name }) {
+  console.log("Rendering Greeting"); // This logs on EVERY render
+  const upperName = name.toUpperCase(); // This re-runs every time too
+
+  return <h1>Hello, {upperName}</h1>;
+}
+```
+
+This is a common surprise for beginners: nothing in a function component "runs once and stays." Every render re-executes every line, which is why expensive calculations sometimes need `useMemo` (covered in the hooks section) to avoid redoing work unnecessarily.
+
+### Unidirectional Data Flow
+
+React data flows in one direction: **props flow down, events flow up.** A parent passes data to a child via props; the child never directly modifies its parent's data. If a child needs to change something in the parent, the parent passes down a *function* as a prop, and the child calls that function — it hands the event back up rather than reaching up to mutate state directly.
+
+```jsx
+function Parent() {
+  const [count, setCount] = useState(0);
+
+  // Data flows DOWN: count and the increment function are passed as props
+  return <Child count={count} onIncrement={() => setCount(count + 1)} />;
+}
+
+function Child({ count, onIncrement }) {
+  // Events flow UP: Child calls the function Parent gave it,
+  // rather than modifying count itself
+  return <button onClick={onIncrement}>Count is {count}</button>;
+}
+```
+
+This one-way flow makes apps easier to debug: if a value is wrong, you only need to trace it in one direction (up through the props it was passed) instead of hunting through code that could have mutated it from anywhere.
+
+---
+
+## JSX Basics
+
+JSX is a syntax extension that lets you write HTML-like markup inside JavaScript, using the rules explained above — it compiles to `React.createElement` calls that build a Virtual DOM tree.
+
+### Expressions & Attributes
+
+Any valid JavaScript expression goes inside curly braces. Attributes use camelCase instead of lowercase HTML.
+
+```jsx
+const user = "Tommy";
+const element = <p>Hello, {user}!</p>;
+
+const link = <a href="https://react.dev" target="_blank">Docs</a>;
+const input = <input type="text" maxLength={10} disabled={false} />;
+```
+
+### className & Fragments
+
+`class` is reserved in JavaScript, so JSX uses `className`. Fragments group elements without adding an extra DOM node — useful because a component can only return a single root element.
+
+```jsx
+const box = <div className="card highlighted">Content</div>;
+
+function List() {
+  return (
+    <>
+      <li>Item one</li>
+      <li>Item two</li>
+    </>
+  );
+}
+```
+
+### Conditional Rendering with Ternaries
+
+JSX has no `if` statements inside markup, so conditionals rely on expressions. The ternary operator is the most common pattern for choosing between two outputs inline.
+
+```jsx
+function StatusBadge({ isOnline }) {
+  return <span>{isOnline ? "🟢 Online" : "⚪ Offline"}</span>;
+}
+```
+
+More conditional rendering patterns (the `&&` operator and early returns) are covered in their own section further down, once components and state have been introduced.
+
+---
+
+## Components
+
+Components are reusable, self-contained pieces of UI — JavaScript functions that return JSX. Modern React almost exclusively uses functional components (as opposed to older class-based components).
+
+### Functional Components & Props
+
+Props pass data from a parent component down to a child, following the unidirectional data flow described above.
+
+```jsx
+function UserCard({ name, role }) {
+  return (
+    <div>
+      <h3>{name}</h3>
+      <p>{role}</p>
+    </div>
+  );
+}
+
+<UserCard name="Alice" role="Admin" />;
+```
+
+### Default Props
+
+Destructured parameters can define fallback values directly, used whenever a prop isn't passed in.
+
+```jsx
+function Button({ label = "Click me", variant = "primary" }) {
+  return <button className={variant}>{label}</button>;
+}
+
+<Button />; // Renders "Click me" with the "primary" variant
+```
+
+### Children
+
+The special `children` prop holds whatever is nested between a component's tags. This enables the composition pattern (wrapping components around content) mentioned in the Tips section.
+
+```jsx
+function Card({ children }) {
+  return <div className="card">{children}</div>;
+}
+
+<Card>
+  <p>Rendered inside the card.</p>
+</Card>;
+```
+
+---
+
+## State
+
+State lets a component remember and update data between renders. Without state, a component would forget everything and reset to its initial values on every re-render.
+
+### useState & Updating State
+
+`useState` returns the current value and a setter function. Calling the setter schedules a re-render — it does not mutate the original variable, and it doesn't update the value immediately in the same line of code.
+
+```jsx
+import { useState } from "react";
+
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  return <button onClick={() => setCount(count + 1)}>Count: {count}</button>;
+}
+```
+
+### State Updates Are Asynchronous and Batched
+
+This trips up almost every beginner at some point: calling `setCount` does not update `count` right away. React schedules the update and re-renders the component later, batching multiple state updates together into a single re-render for performance.
+
+```jsx
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  const handleClick = () => {
+    setCount(count + 1);
+    console.log(count); // Still logs the OLD value — the update hasn't applied yet
+
+    // Calling it multiple times in a row does NOT add up the way you'd expect:
+    setCount(count + 1);
+    setCount(count + 1);
+    setCount(count + 1);
+    // Result: count only increases by 1, not 3!
+    // Each call uses the same "count" value from this render,
+    // and React batches them into one update.
+  };
+
+  return <button onClick={handleClick}>Count: {count}</button>;
+}
+```
+
+The fix is the functional update form, covered next — it's the same category of problem javascript.mdx's `let`-in-a-loop example demonstrates: using a stale value captured at the wrong time.
+
+### Functional Updates
+
+When new state depends on the previous value, pass a function to the setter instead of a plain value. React guarantees this function receives the most up-to-date state, even across multiple queued calls.
+
+```jsx
+const [count, setCount] = useState(0);
+
+const increment = () => setCount((prev) => prev + 1);
+
+increment();
+increment();
+increment();
+// count is guaranteed to increase by 3, because each updater function
+// receives the result of the previous one — no stale values.
+```
+
+---
+
+## Effects & the Component Lifecycle
+
+Older React (class components) had explicit lifecycle methods: `componentDidMount`, `componentDidUpdate`, and `componentWillUnmount`. Function components don't have these methods — instead, `useEffect` covers all three phases, controlled by its dependency array. If you've seen lifecycle methods in a tutorial before, this table is the mental bridge:
+
+| Lifecycle phase | Class component method | Hook equivalent |
+|---|---|---|
+| Mount (first render) | `componentDidMount` | `useEffect(fn, [])` |
+| Update (on specific changes) | `componentDidUpdate` | `useEffect(fn, [dep1, dep2])` |
+| Unmount (removed from screen) | `componentWillUnmount` | cleanup function returned from `useEffect` |
+
+Effects let components synchronize with external systems — APIs, subscriptions, timers, or the DOM — after the render has already happened and the DOM has been updated.
+
+### useEffect & Dependency Array
+
+The dependency array controls when the effect re-runs. An empty array means "mount only" — it runs once, after the very first render, and never again.
+
+```jsx
+import { useEffect } from "react";
+
+function DocumentTitle({ title }) {
+  useEffect(() => {
+    document.title = title;
+  }, [title]); // Re-runs only when `title` changes — this is the "update" phase
+
+  return <p>Check the browser tab title</p>;
+}
+```
+
+Leaving the array off entirely makes the effect run after *every* render (rarely what you want); an empty array `[]` makes it run only once, on mount.
+
+### Cleanup Functions (the Unmount Phase)
+
+Returning a function from an effect cleans up subscriptions or timers. React calls this cleanup function right before the component is removed from the screen (unmount), and also right before the effect re-runs due to a dependency change — preventing duplicate timers or leaked subscriptions.
+
+```jsx
+useEffect(() => {
+  const timerId = setInterval(() => console.log("tick"), 1000);
+
+  return () => clearInterval(timerId); // Runs on unmount — the cleanup phase
+}, []);
+```
+
+---
+
+## Event Handling
+
+React wraps native DOM events in a consistent, cross-browser system called SyntheticEvent.
+
+### onClick & onChange
+
+```jsx
+function NameForm() {
+  const [value, setValue] = useState("");
+
+  return (
+    <div>
+      <input value={value} onChange={(e) => setValue(e.target.value)} />
+      <button onClick={() => alert(`Hello, ${value}`)}>Greet</button>
+    </div>
+  );
+}
+```
+
+### Form Submission
+
+Call `preventDefault()` to stop the browser's default full-page reload.
+
+```jsx
+function LoginForm() {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Form submitted");
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <button type="submit">Log In</button>
+    </form>
+  );
+}
+```
+
+---
+
+## More Conditional Rendering Patterns
+
+Now that components and state are covered, here are the other two conditional rendering patterns you'll use constantly, beyond the ternary shown earlier.
+
+### && Operator
+
+Renders something, or nothing at all — useful when there's no "else" case.
+
+```jsx
+function Notifications({ count }) {
+  return <div>{count > 0 && <span>{count} new messages</span>}</div>;
+}
+```
+
+### Early Return
+
+Guards an entire component against an invalid or loading state, returning different JSX before the "main" render logic runs.
+
+```jsx
+function Profile({ user }) {
+  if (!user) return <p>Loading profile...</p>;
+  return <h2>{user.name}</h2>;
+}
+```
+
+---
+
+## Lists & Keys
+
+### map() & Keys
+
+Use `Array.prototype.map` to turn an array of data into an array of elements. Keys help React's reconciliation process (explained in Architecture & Rendering) identify which items changed, were added, or were removed — and must be unique among siblings.
+
+```jsx
+const users = [
+  { id: 1, name: "Alice" },
+  { id: 2, name: "Bob" },
+];
+
+function UserList() {
+  return (
+    <ul>
+      {users.map((user) => (
+        <li key={user.id}>{user.name}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+### Best Practices
+
+- Use a stable unique identifier (like a database id) as the key, not the array index — array indices shift when items are added/removed, confusing reconciliation.
+- Never omit keys when rendering lists — reconciliation becomes unreliable without them, and React will warn you in the console.
+- Keep keys unique only among siblings, not globally across the app.
+
+---
+
+## Forms
+
+### Controlled Components
+
+A controlled component keeps its value in React state, making state the single source of truth instead of the DOM. This fits the unidirectional data flow model: the input's displayed value always comes from state (down), and every keystroke updates that state (up) via `onChange`.
+
+```jsx
+function ContactForm() {
+  const [email, setEmail] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Submitting:", email);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <button type="submit">Subscribe</button>
+    </form>
+  );
+}
+```
+
+---
+
+## Common Hooks
+
+A closer look at the hooks you'll reach for most often beyond `useState` and `useEffect`, each with a complete, runnable example.
+
+### useMemo — Memoizing an Expensive Value
+
+`useMemo` re-runs a calculation only when its dependencies change, instead of on every render. Reach for it when a computation is genuinely expensive (sorting or filtering a large array, heavy math) — for cheap operations, it adds overhead without meaningful benefit.
+
+```jsx
+import { useMemo, useState } from "react";
+
+function ProductList() {
+  const [items] = useState([
+    { id: 1, name: "Banana", price: 3 },
+    { id: 2, name: "Apple", price: 1 },
+    { id: 3, name: "Cherry", price: 5 },
+  ]);
+  const [filterText, setFilterText] = useState("");
+
+  // Without useMemo, sorting would re-run on EVERY render,
+  // including renders caused by unrelated state changes like filterText typing.
+  const sortedItems = useMemo(() => {
+    console.log("Sorting..."); // Only logs when `items` actually changes
+    return [...items].sort((a, b) => a.price - b.price);
+  }, [items]);
+
+  return (
+    <div>
+      <input
+        value={filterText}
+        onChange={(e) => setFilterText(e.target.value)}
+        placeholder="Typing here won't re-sort the list"
+      />
+      <ul>
+        {sortedItems.map((item) => (
+          <li key={item.id}>{item.name}: ${item.price}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+### useCallback — Memoizing a Function Reference
+
+Every render creates brand-new function instances by default. `useCallback` keeps the same function reference across renders unless its dependencies change — important when passing callbacks to memoized child components, since a new function reference would defeat that memoization.
+
+```jsx
+import { useCallback, useState } from "react";
+
+function TodoApp() {
+  const [count, setCount] = useState(0);
+
+  // Without useCallback, handleSelect would be a NEW function on every render,
+  // even though its behavior never actually changes.
+  const handleSelect = useCallback((id) => {
+    console.log("Selected item:", id);
+  }, []); // No dependencies — this function never needs to change
+
+  return (
+    <div>
+      <p>Unrelated counter: {count}</p>
+      <button onClick={() => setCount(count + 1)}>Re-render parent</button>
+      <button onClick={() => handleSelect(42)}>Select item 42</button>
+    </div>
+  );
+}
+```
+
+### useRef — Persisting a Value Without Re-rendering
+
+`useRef` holds a mutable value that survives across renders, but changing it does NOT trigger a re-render (unlike `useState`). It's most commonly used to directly access a DOM element.
+
+```jsx
+import { useRef } from "react";
+
+function SearchBox() {
+  const inputRef = useRef(null);
+
+  const focusInput = () => {
+    inputRef.current.focus(); // Directly calls the DOM node's focus() method
+  };
+
+  return (
+    <div>
+      <input ref={inputRef} type="text" placeholder="Search..." />
+      <button onClick={focusInput}>Focus the input</button>
+    </div>
+  );
+}
+```
+
+### useContext — Reading Shared Data Without Prop Drilling
+
+Passing props down through five layers of components just so the bottom one can read a value is called "prop drilling." `useContext` lets any descendant read a value directly, as long as it's wrapped in that context's Provider — no need to pass it through every layer in between.
+
+```jsx
+import { createContext, useContext } from "react";
+
+// 1. Create the context
+const ThemeContext = createContext("light");
+
+// 2. Provide a value somewhere up the tree
+function App() {
+  return (
+    <ThemeContext.Provider value="dark">
+      <Toolbar />
+    </ThemeContext.Provider>
+  );
+}
+
+// 3. Any descendant can read it directly — no props passed through Toolbar
+function Toolbar() {
+  return <ThemedButton />;
+}
+
+function ThemedButton() {
+  const theme = useContext(ThemeContext); // "dark"
+  return <button className={theme}>Click me</button>;
+}
+```
+
+---
+
+## Tips & Best Practices
+
+- Prefer functional components with hooks over class components.
+- Keep components small and focused on a single responsibility.
+- Always use stable, unique keys when rendering lists.
+- Lift state up to the nearest common ancestor when multiple components need to share it — this follows the same unidirectional data flow principle covered earlier.
+- Avoid unnecessary re-renders by memoizing expensive values (`useMemo`) and callbacks (`useCallback`) where it actually matters — not by default on every value.
+- Prefer composition (passing components as `children` or props) over inheritance.
+- Keep side effects inside `useEffect`, not directly in the render body — remember, the entire function body re-runs on every render.
+
+---
+
+## Common Mistakes
+
+### Missing Keys
+
+```jsx
+// ❌ React can't track list items efficiently without a key
+{items.map((item) => <li>{item.name}</li>)}
+
+// ✅ Unique key provided
+{items.map((item) => <li key={item.id}>{item.name}</li>)}
+```
+
+### Mutating State
+
+```jsx
+// ❌ Mutates the array directly — React won't detect the change,
+// because the array reference stays the same
+todos.push(newTodo);
+setTodos(todos);
+
+// ✅ Creates a new array reference, so React knows something changed
+setTodos([...todos, newTodo]);
+```
+
+### Infinite useEffect Loops
+
+```jsx
+// ❌ No dependency array — setCount triggers a re-render every time,
+// which re-runs the effect (since it has no array to limit it), causing an infinite loop
+useEffect(() => {
+  setCount(count + 1);
+});
+
+// ✅ Dependency array controls when the effect actually re-runs
+useEffect(() => {
+  setCount((prev) => prev + 1);
+}, []);
+```
+
+### Calling Hooks Conditionally
+
+```jsx
+// ❌ Hooks must not be called inside conditions, loops, or nested functions —
+// React relies on hooks being called in the exact same order every render
+if (isLoggedIn) {
+  const [user, setUser] = useState(null);
+}
+
+// ✅ Call the hook unconditionally, then branch on the value
+const [user, setUser] = useState(null);
+if (isLoggedIn) {
+  // use `user` here
+}
+```
+
+### Forgetting Cleanup
+
+```jsx
+// ❌ Timer keeps running even after the component unmounts — a memory leak
+useEffect(() => {
+  setInterval(() => console.log("tick"), 1000);
+}, []);
+
+// ✅ Cleanup function stops the timer on unmount
+useEffect(() => {
+  const timerId = setInterval(() => console.log("tick"), 1000);
+  return () => clearInterval(timerId);
+}, []);
+```
+
+---
