@@ -10,17 +10,17 @@ I got tired of opening a dozen browser tabs or re-prompting AI for the same boil
 
 - **Framework:** Next.js 15 (App Router)
 - **Styling:** Tailwind CSS v4, monochrome/zinc palette
-- **Content:** MDX via `next-mdx-remote` — markdown cheatsheets with embedded interactive React components (e.g. copy-paste code blocks)
-- **Layout:** Split-pane — fixed sidebar, scrolling content area
+- **Content:** MDX via `next-mdx-remote` - markdown cheatsheets with embedded interactive React components (e.g. copy-paste code blocks)
+- **Layout:** Split-pane - fixed sidebar, scrolling content area
 - **Icons & Typography:** Lucide React, paired with JetBrains Mono and Outfit
 - **Deployment:** Vercel
 
 ## Features
 
-- **Theme system** — dark/light mode with localStorage persistence and system preference detection.
-- **Dynamic routing** — topic pages generated via Next.js App Router (`/javascript`, `/python`, `/react`, etc.).
-- **Code highlighting** — adapts to theme: `vscDarkPlus` in dark mode, `oneLight` in light mode.
-- **Responsive** — mobile (`<768px`) single-column, tablet (`768–1024px`) adjusted grid, desktop (`1024px+`) full three-column layout.
+- **Theme system** - dark/light mode with localStorage persistence and system preference detection.
+- **Dynamic routing** - topic pages generated via Next.js App Router (`/javascript`, `/python`, `/react`, etc.).
+- **Code highlighting** - adapts to theme: `vscDarkPlus` in dark mode, `oneLight` in light mode.
+- **Responsive** - mobile (`<768px`) single-column, tablet (`768–1024px`) adjusted grid, desktop (`1024px+`) full three-column layout.
 
 ## Project structure
 
@@ -82,7 +82,7 @@ vercel deploy
 
 ## License
 
-MIT — do whatever you want with it. A shoutout is appreciated if you use the layout or code.
+MIT - do whatever you want with it. A shoutout is appreciated if you use the layout or code.
 
 
 <div align="center">
