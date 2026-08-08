@@ -1,22 +1,7 @@
 // app/layout.tsx
 import type { Metadata } from "next";
-import { Outfit, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "../src/context/ThemeContext";
-
-// The premium geometric sans-serif font
-const outfit = Outfit({
-  variable: "--font-outfit",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-// The gold-standard developer monospace font
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
-  subsets: ["latin"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "RefMe_ | Technical Reference for Modern Developers",
@@ -59,10 +44,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang='en'
-      className={`${outfit.variable} ${jetbrainsMono.variable} h-full antialiased`}
-    >
+    <html lang='en' className='h-full antialiased'>
       <head>
         <meta
           name='viewport'

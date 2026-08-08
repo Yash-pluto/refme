@@ -1,5 +1,5 @@
 // app/[topic]/page.tsx
-import { getTopicBySlug } from "../../src/lib/mdx";
+import { getAllTopics, getTopicBySlug } from "../../src/lib/mdx";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import SkeletonTopic from "../components/SkeletonTopic";
 import TopicLayout from "./TopicLayout";
@@ -29,10 +29,24 @@ export default async function TopicPage({
 }) {
   const resolvedParams = await params;
   const topicData = getTopicBySlug(resolvedParams.topic);
+  const allTopics = getAllTopics();
+  const currentIndex = allTopics.findIndex((topic) => topic.id === resolvedParams.topic);
+  const prevTopic = currentIndex > 0 ? allTopics[currentIndex - 1] : null;
+  const nextTopic =
+    currentIndex >= 0 && currentIndex < allTopics.length - 1
+      ? allTopics[currentIndex + 1]
+      : null;
 
   if (!topicData) {
     return (
-      <TopicLayout frontmatter={undefined} topicKey={resolvedParams.topic}>
+      <TopicLayout
+        frontmatter={undefined}
+        topicKey={resolvedParams.topic}
+        topics={allTopics}
+        headings={[]}
+        prevTopic={prevTopic}
+        nextTopic={nextTopic}
+      >
         <SkeletonTopic topicKey={resolvedParams.topic} />
       </TopicLayout>
     );
@@ -42,6 +56,10 @@ export default async function TopicPage({
     <TopicLayout
       frontmatter={topicData.frontmatter}
       topicKey={resolvedParams.topic}
+      topics={allTopics}
+      headings={topicData.headings}
+      prevTopic={prevTopic}
+      nextTopic={nextTopic}
     >
       <MDXRemote source={topicData.content} components={mdxComponents} />
     </TopicLayout>

@@ -3,8 +3,40 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 
+export type DocHeading = {
+  id: string;
+  title: string;
+  depth: number;
+};
+
 // This safely resolves the 'content' directory at the root of your Next.js app
 const contentDir = path.join(process.cwd(), "content");
+
+export function extractHeadings(content: string): DocHeading[] {
+  return content
+    .split("\n")
+    .reduce<DocHeading[]>((acc, line) => {
+      const match = line.match(/^(##|###)\s+(.+)$/);
+
+      if (!match) return acc;
+
+      const depth = match[1].length === 2 ? 2 : 3;
+      const title = match[2]
+        .trim()
+        .replace(/[*_`>#]/g, "")
+        .replace(/\s+/g, " ");
+      const id = title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .trim()
+        .replace(/\s+/g, "-");
+
+      if (!id) return acc;
+
+      acc.push({ id, title, depth });
+      return acc;
+    }, []);
+}
 
 export function getTopicBySlug(slug: string) {
   const fullPath = path.join(contentDir, `${slug}.mdx`);
@@ -15,7 +47,7 @@ export function getTopicBySlug(slug: string) {
   const fileContents = fs.readFileSync(fullPath, "utf8");
   const { data, content } = matter(fileContents);
 
-  return { frontmatter: data, content };
+  return { frontmatter: data, content, headings: extractHeadings(content) };
 }
 
 export function getAllTopics() {
