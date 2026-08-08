@@ -1,0 +1,355 @@
+---
+title: "C++"
+description: "A high-performance, systems-level language for applications, game engines, embedded systems, and performance-critical software."
+category: "Core Programming"
+---
+
+## Getting Started
+
+C++ is a compiled, high-performance programming language that builds on C while adding object-oriented, generic, and modern programming features. It is widely used in operating systems, game engines, desktop applications, embedded systems, and high-throughput infrastructure.
+
+### Installation
+
+You can install a C++ toolchain using Visual Studio Build Tools on Windows, GCC or Clang on Linux, and Xcode Command Line Tools on macOS.
+
+```bash
+# Check that your compiler is installed
+g++ --version
+
+# Compile and run a program
+g++ hello.cpp -o hello
+./hello
+```
+
+### Hello World
+
+```cpp
+#include <iostream>
+
+int main() {
+    std::cout << "Hello, C++!" << std::endl;
+    return 0;
+}
+```
+
+---
+
+## Variables & Data Types
+
+C++ is a statically typed language, which means the type of each variable is checked at compile time.
+
+### Fundamental Types
+
+```cpp
+int age = 25;
+double price = 19.99;
+char grade = 'A';
+bool isReady = true;
+std::string name = "Alice";
+```
+
+### Type Modifiers
+
+```cpp
+short smallValue = 10;
+long long bigNumber = 1234567890123LL;
+unsigned int positiveOnly = 42;
+```
+
+### Auto Keyword
+
+```cpp
+auto count = 10;         // int
+auto pi = 3.14159;       // double
+auto message = std::string("Hello");
+```
+
+---
+
+## Input, Output & Strings
+
+### Standard Output
+
+```cpp
+#include <iostream>
+#include <string>
+
+int main() {
+    std::string name = "Ada";
+    std::cout << "Hello, " << name << "!" << std::endl;
+    return 0;
+}
+```
+
+### String Operations
+
+```cpp
+#include <string>
+#include <iostream>
+
+int main() {
+    std::string greeting = "Hello";
+    greeting += " world";
+
+    std::cout << greeting << std::endl;   // Hello world
+    std::cout << greeting.size() << std::endl;
+    return 0;
+}
+```
+
+---
+
+## Control Flow
+
+### If / Else
+
+```cpp
+int score = 85;
+
+if (score >= 90) {
+    std::cout << "Excellent";
+} else if (score >= 70) {
+    std::cout << "Good";
+} else {
+    std::cout << "Try again";
+}
+```
+
+### Loops
+
+```cpp
+for (int i = 0; i < 5; ++i) {
+    std::cout << i << " ";
+}
+
+int count = 0;
+while (count < 3) {
+    std::cout << count << " ";
+    ++count;
+}
+```
+
+### Switch
+
+```cpp
+int day = 2;
+
+switch (day) {
+    case 1:
+        std::cout << "Monday";
+        break;
+    case 2:
+        std::cout << "Tuesday";
+        break;
+    default:
+        std::cout << "Other day";
+        break;
+}
+```
+
+---
+
+## Functions
+
+Functions help organize logic into reusable blocks of code.
+
+```cpp
+int add(int a, int b) {
+    return a + b;
+}
+
+int main() {
+    std::cout << add(3, 4) << std::endl; // 7
+    return 0;
+}
+```
+
+### Default Arguments
+
+```cpp
+void greet(const std::string& name, const std::string& prefix = "Hello") {
+    std::cout << prefix << ", " << name << "!" << std::endl;
+}
+```
+
+### Pass by Reference
+
+```cpp
+void increment(int& value) {
+    ++value;
+}
+
+int main() {
+    int x = 5;
+    increment(x);
+    std::cout << x << std::endl; // 6
+    return 0;
+}
+```
+
+---
+
+## Classes & Object-Oriented Programming
+
+C++ supports classes, constructors, encapsulation, and inheritance.
+
+```cpp
+#include <iostream>
+#include <string>
+
+class Person {
+public:
+    Person(std::string name) : name(name) {}
+
+    void introduce() const {
+        std::cout << "Hi, I am " << name << std::endl;
+    }
+
+private:
+    std::string name;
+};
+
+int main() {
+    Person p("Alice");
+    p.introduce();
+    return 0;
+}
+```
+
+### Inheritance
+
+```cpp
+class Animal {
+public:
+    virtual void speak() const {
+        std::cout << "Animal sound" << std::endl;
+    }
+};
+
+class Dog : public Animal {
+public:
+    void speak() const override {
+        std::cout << "Woof" << std::endl;
+    }
+};
+```
+
+---
+
+## Standard Template Library (STL)
+
+The STL provides containers and algorithms that make common tasks easier and safer.
+
+### Vectors
+
+```cpp
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> numbers = {1, 2, 3, 4};
+    numbers.push_back(5);
+
+    for (int n : numbers) {
+        std::cout << n << " ";
+    }
+
+    return 0;
+}
+```
+
+### Maps
+
+```cpp
+#include <map>
+#include <string>
+#include <iostream>
+
+int main() {
+    std::map<std::string, int> ages;
+    ages["Alice"] = 30;
+    ages["Bob"] = 25;
+
+    std::cout << ages["Alice"] << std::endl;
+    return 0;
+}
+```
+
+### Algorithms
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> values = {4, 1, 3, 2};
+    std::sort(values.begin(), values.end());
+
+    for (int v : values) {
+        std::cout << v << " ";
+    }
+
+    return 0;
+}
+```
+
+---
+
+## Memory & Pointers
+
+Pointers allow direct access to memory. Use them carefully, especially in performance-sensitive code.
+
+```cpp
+int value = 42;
+int* ptr = &value;
+
+std::cout << *ptr << std::endl; // 42
+```
+
+### Smart Pointers
+
+```cpp
+#include <memory>
+#include <iostream>
+
+int main() {
+    std::unique_ptr<int> ptr = std::make_unique<int>(10);
+    std::cout << *ptr << std::endl;
+    return 0;
+}
+```
+
+---
+
+## Modern C++ Best Practices
+
+- Prefer `std::string` over C-style strings.
+- Use `auto` when the type is obvious and improves readability.
+- Prefer `const` and references for safer function interfaces.
+- Use `std::vector` instead of raw arrays when possible.
+- Favor smart pointers over raw pointers for ownership.
+- Write small, focused functions and keep code readable.
+
+### Example
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+
+int main() {
+    std::vector<std::string> names = {"Ada", "Grace", "Linus"};
+    for (const auto& name : names) {
+        std::cout << name << std::endl;
+    }
+
+    return 0;
+}
+```
+
+---
+
+## Summary
+
+C++ is an excellent choice when you need control, performance, and scalability. Mastering its foundations — types, control flow, functions, classes, and the STL — will prepare you for systems programming, game development, and high-performance applications.
