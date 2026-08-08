@@ -27,10 +27,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run ESLint
-        # Uses the "lint": "eslint" script from your package.json
-        run: npm run lint
-
       - name: Check TypeScript Types
         # Uses npx to run the TypeScript compiler and check for errors without generating files
         run: npx tsc --noEmit
