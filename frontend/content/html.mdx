@@ -1,0 +1,268 @@
+---
+title: "HTML"
+description: "The standard markup language for building web pages. Learn semantics, structure, forms, media, and modern best practices."
+category: "Core Programming"
+---
+
+## Getting Started
+
+HTML (HyperText Markup Language) is the foundation of every web page. It provides the structure and meaning of content, while CSS handles presentation and JavaScript adds interactivity. A good HTML document is semantic, accessible, and easy to maintain.
+
+### Basic Document Structure
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Page</title>
+  </head>
+  <body>
+    <h1>Hello, World!</h1>
+    <p>This is a simple HTML document.</p>
+  </body>
+</html>
+```
+
+### Common HTML Elements
+
+```html
+<h1>Heading 1</h1>
+<h2>Heading 2</h2>
+<p>This is a paragraph.</p>
+<a href="https://example.com">Visit Example</a>
+<img src="image.jpg" alt="A sample image" />
+<button>Click Me</button>
+```
+
+---
+
+## Semantic Structure
+
+Semantic HTML improves readability for humans and machines. It helps search engines, assistive technologies, and developers understand the purpose of each section.
+
+```html
+<article>
+  <header>
+    <h2>Article Title</h2>
+    <p>Published on April 8, 2026</p>
+  </header>
+
+  <section>
+    <h3>Overview</h3>
+    <p>This content belongs to a specific article.</p>
+  </section>
+
+  <footer>
+    <p>Written by a contributor</p>
+  </footer>
+</article>
+```
+
+### Common Semantic Tags
+
+```html
+<header>Site header</header>
+<nav>Navigation links</nav>
+<main>Main content</main>
+<section>Grouped content</section>
+<article>Independent content block</article>
+<aside>Related or supplementary content</aside>
+<footer>Footer information</footer>
+```
+
+---
+
+## Text Content & Formatting
+
+HTML provides tags for formatting text, though visual styling is usually handled by CSS.
+
+```html
+<p>This is <strong>important</strong> text.</p>
+<p>This is <em>emphasized</em> text.</p>
+<p>Use <mark>highlighted</mark> text for emphasis.</p>
+<p>Here is <code>inline code</code>.</p>
+<p>Line break:<br />This continues on the next line.</p>
+```
+
+### Lists
+
+```html
+<ul>
+  <li>Unordered list item</li>
+  <li>Another item</li>
+</ul>
+
+<ol>
+  <li>First item</li>
+  <li>Second item</li>
+</ol>
+```
+
+---
+
+## Links, Images & Media
+
+### Anchor Links
+
+```html
+<a href="#section">Jump to a section</a>
+<a href="about.html">Go to About Page</a>
+<a href="mailto:hello@example.com">Email us</a>
+<a href="tel:+1234567890">Call us</a>
+```
+
+### Images
+
+```html
+<img src="images/photo.jpg" alt="A smiling developer" />
+
+<!-- Responsive image with width and height -->
+<img
+  src="images/photo.jpg"
+  alt="A smiling developer"
+  width="600"
+  height="400"
+/>
+```
+
+### Audio and Video
+
+```html
+<audio controls>
+  <source src="song.mp3" type="audio/mpeg" />
+  Your browser does not support audio playback.
+</audio>
+
+<video controls width="640" height="360">
+  <source src="movie.mp4" type="video/mp4" />
+  Your browser does not support video playback.
+</video>
+```
+
+---
+
+## Forms
+
+Forms are essential for collecting user input. They should use appropriate labels and accessible attributes.
+
+```html
+<form action="/submit" method="post">
+  <label for="name">Name</label>
+  <input id="name" name="name" type="text" required />
+
+  <label for="email">Email</label>
+  <input id="email" name="email" type="email" required />
+
+  <label for="message">Message</label>
+  <textarea id="message" name="message" rows="4"></textarea>
+
+  <button type="submit">Send</button>
+</form>
+```
+
+### Common Input Types
+
+```html
+<input type="text" placeholder="Enter text" />
+<input type="email" />
+<input type="password" />
+<input type="number" />
+<input type="date" />
+<input type="checkbox" />
+<input type="radio" />
+<input type="file" />
+```
+
+### Select and Option
+
+```html
+<label for="country">Choose a country</label>
+<select id="country" name="country">
+  <option value="us">United States</option>
+  <option value="ca">Canada</option>
+  <option value="uk">United Kingdom</option>
+</select>
+```
+
+---
+
+## Tables
+
+Tables are used for displaying tabular data, not for visual layout.
+
+```html
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Alice</td>
+      <td>Developer</td>
+    </tr>
+    <tr>
+      <td>Bob</td>
+      <td>Designer</td>
+    </tr>
+  </tbody>
+</table>
+```
+
+---
+
+## Accessibility Basics
+
+Accessible HTML ensures your content is usable by everyone, including people using assistive technologies.
+
+```html
+<img src="profile.jpg" alt="Profile photo of Jane Doe" />
+
+<button aria-label="Close dialog">×</button>
+
+<label for="search">Search</label>
+<input id="search" type="search" name="search" />
+```
+
+### Accessibility Tips
+
+- Use meaningful `alt` text for images.
+- Always associate labels with form controls.
+- Use semantic elements like `header`, `main`, and `footer`.
+- Ensure buttons and links have clear purpose.
+- Avoid relying on color alone for meaning.
+
+---
+
+## Best Practices
+
+```html
+<!-- Good: semantic, descriptive, and accessible -->
+<main>
+  <section>
+    <h2>Products</h2>
+    <p>Browse our latest offerings.</p>
+  </section>
+</main>
+
+<!-- Avoid: using divs for everything and missing structure -->
+<div>
+  <div>
+    <div>Products</div>
+    <div>Browse our latest offerings.</div>
+  </div>
+</div>
+```
+
+### Recommended Practices
+
+- Use semantic tags whenever possible.
+- Keep markup clean and well-indented.
+- Use lowercase tag names and attribute names.
+- Add `alt` text to images.
+- Prefer native form controls over custom ones when possible.
+- Validate your HTML to catch structural issues early.
