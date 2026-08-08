@@ -1,0 +1,36 @@
+/* app/globals.css */
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Segoe UI", Inter, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "SFMono-Regular", "Consolas", "Liberation Mono", monospace;
+}
+
+:root {
+  scroll-behavior: smooth;
+}
+
+/* 1. REMOVE BROWSER SCROLLBARS GLOBALLY */
+::-webkit-scrollbar {
+  display: none;
+}
+
+html {
+  scrollbar-width: none;
+}
+
+/* 2. OPTIMIZE CODE BLOCKS */
+pre code {
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  font-family: var(--font-jetbrains-mono) !important;
+  /* Force all code blocks to use JetBrains */
+  font-size: 0.9em;
+}
+
+/* 3. SUBTLE TEXT SELECTION COLOR */
+::selection {
+  background-color: rgba(99, 102, 241, 0.2);
+  /* Soft indigo highlight */
+  color: inherit;
+}

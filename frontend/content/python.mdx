@@ -1,0 +1,734 @@
+---
+title: "Python"
+description: "A versatile, readable language built for both beginners and professionals. Core syntax, data structures, functions, OOP, and essential patterns."
+category: "Core Programming"
+---
+
+## Getting Started
+
+Python is a high-level, interpreted programming language known for its clean, readable syntax and rapid development cycle. It powers everything from web backends and data science to automation and machine learning, making it one of the most versatile languages in use today.
+
+### Installation & Environment
+
+Python can be installed from [python.org](https://www.python.org) or via package managers like Homebrew (macOS) or your system's package manager.
+
+```bash
+# Check your Python version
+python --version
+
+# Create a virtual environment (recommended)
+python -m venv venv
+
+# Activate the virtual environment
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
+
+# Install packages
+pip install package-name
+```
+
+### Your First Script
+
+```python
+# hello.py
+message = "Hello, Python!"
+print(message)
+
+# Run it
+# python hello.py
+```
+
+---
+
+## Variables & Data Types
+
+Python uses dynamic typing — you don't declare types, they're inferred at runtime. Variables are names that reference objects in memory.
+
+### Core Data Types
+
+```python
+# String: Immutable sequence of characters
+name = "Alice"
+greeting = 'Hello'  # Single and double quotes are equivalent
+multiline = """This is a
+multi-line
+string"""
+
+# Integer: Whole numbers (no size limit in Python 3)
+count = 42
+negative = -10
+
+# Float: Decimal numbers
+price = 19.99
+scientific = 1.5e-3  # 0.0015
+
+# Boolean: True or False
+is_active = True
+is_empty = False
+
+# NoneType: Represents absence of value (like null in other languages)
+result = None
+
+# Check types
+type(name)  # <class 'str'>
+isinstance(count, int)  # True
+```
+
+### Type Conversion
+
+```python
+# Convert between types
+str(42)  # "42"
+int("100")  # 100
+float("3.14")  # 3.14
+bool(0)  # False
+bool(1)  # True
+bool("")  # False
+bool("hello")  # True
+
+# Common mistake: bool("0") is True (non-empty string)
+```
+
+---
+
+## Strings & Formatting
+
+### String Operations
+
+Strings are immutable in Python — operations create new strings rather than modifying the original.
+
+```python
+text = "Python"
+
+# Indexing (0-based, supports negative indices)
+text[0]  # "P"
+text[-1]  # "n"
+
+# Slicing
+text[0:3]  # "Pyt"
+text[1:]  # "ython"
+text[:-1]  # "Pytho"
+text[::2]  # "Pto" (every 2nd character)
+
+# Common methods
+text.lower()  # "python"
+text.upper()  # "PYTHON"
+text.replace("P", "J")  # "Jython"
+text.startswith("Py")  # True
+text.split("t")  # ["Py", "hon"]
+"_".join(["a", "b", "c"])  # "a_b_c"
+```
+
+### String Formatting
+
+Modern Python (3.6+) uses f-strings for clean, readable formatting:
+
+```python
+name = "Bob"
+age = 30
+salary = 75000.50
+
+# f-strings (preferred)
+message = f"{name} is {age} years old"
+formatted_salary = f"Salary: ${salary:.2f}"  # "Salary: $75000.50"
+padded = f"{name:>10}"  # Right-aligned in 10 chars
+binary = f"{15:b}"  # "1111" (binary representation)
+
+# .format() method (older, still valid)
+"Hello, {}".format(name)  # "Hello, Bob"
+"Value: {:.2f}".format(3.14159)  # "Value: 3.14"
+
+# % formatting (legacy, avoid in new code)
+"Hello, %s" % name  # "Hello, Bob"
+```
+
+---
+
+## Conditionals & Logic
+
+### if, elif, else
+
+```python
+age = 18
+income = 30000
+
+if age < 13:
+    status = "child"
+elif age < 18:
+    status = "teenager"
+elif age < 65:
+    status = "adult"
+else:
+    status = "senior"
+
+# Inline conditional (ternary)
+message = "eligible" if age >= 18 else "not eligible"
+
+# Membership testing
+if status in ["adult", "senior"]:
+    print("Eligible for benefits")
+```
+
+### Logical Operators
+
+```python
+# 'and', 'or', 'not' (Python uses words, not symbols)
+is_member = True
+is_premium = False
+
+if is_member and is_premium:
+    discount = 0.20  # 20% discount
+
+if is_member or is_premium:
+    show_banner = True  # Show to either member or premium
+
+if not is_premium:
+    show_upgrade_prompt = True
+
+# Truthy and Falsy values
+# Falsy: None, False, 0, 0.0, "", [], {}, ()
+# Truthy: Everything else
+
+if 0:
+    print("Never runs")
+
+if 1:
+    print("Always runs")
+
+# Use explicit checks to avoid bugs
+if count > 0:  # Better than: if count:
+    process_items()
+```
+
+---
+
+## Functions
+
+### Basic Function Definition
+
+Functions are reusable blocks of code. Use them to avoid repetition and organize logic.
+
+```python
+# Simple function with return value
+def greet(name):
+    return f"Hello, {name}!"
+
+result = greet("Alice")  # "Hello, Alice!"
+
+# Function with default arguments
+def power(base, exponent=2):
+    return base ** exponent
+
+power(3)  # 9
+power(3, 3)  # 27
+
+# Function with multiple return values
+def get_coordinates():
+    return 10, 20  # Returns a tuple
+
+x, y = get_coordinates()
+```
+
+### Arguments & Parameters
+
+```python
+# Positional arguments (order matters)
+def add(a, b):
+    return a + b
+
+add(5, 3)  # 8
+
+# Keyword arguments (order doesn't matter, more readable)
+def create_user(name, age, city):
+    return {"name": name, "age": age, "city": city}
+
+create_user(name="Bob", city="NYC", age=30)
+
+# Mixing positional and keyword (positional must come first)
+create_user("Alice", age=25, city="LA")
+
+# *args: Capture arbitrary positional arguments as tuple
+def sum_all(*numbers):
+    return sum(numbers)
+
+sum_all(1, 2, 3, 4, 5)  # 15
+
+# **kwargs: Capture arbitrary keyword arguments as dict
+def configure(**options):
+    for key, value in options.items():
+        print(f"{key}: {value}")
+
+configure(host="localhost", port=8000, debug=True)
+```
+
+### Docstrings & Type Hints
+
+```python
+# Docstrings document what a function does
+def calculate_area(radius):
+    """
+    Calculate the area of a circle.
+
+    Args:
+        radius (float): The radius of the circle
+
+    Returns:
+        float: The area of the circle
+    """
+    return 3.14159 * radius ** 2
+
+# Type hints (Python 3.5+) make code clearer and enable IDE support
+def greet(name: str) -> str:
+    return f"Hello, {name}!"
+
+def divide(a: float, b: float) -> float:
+    if b == 0:
+        raise ValueError("Cannot divide by zero")
+    return a / b
+```
+
+---
+
+## Collections: Lists, Tuples & Dictionaries
+
+### Lists: Ordered, Mutable Collections
+
+```python
+# Creating lists
+fruits = ["apple", "banana", "cherry"]
+numbers = [1, 2, 3, 4, 5]
+mixed = [1, "hello", 3.14, True]  # Lists can hold different types
+empty = []
+
+# Indexing and slicing (same as strings)
+fruits[0]  # "apple"
+fruits[-1]  # "cherry"
+fruits[1:3]  # ["banana", "cherry"]
+
+# Modifying lists
+fruits.append("orange")  # Add one item
+fruits.extend(["grape", "kiwi"])  # Add multiple items
+fruits.insert(1, "blueberry")  # Insert at index
+fruits.remove("banana")  # Remove by value (removes first occurrence)
+removed = fruits.pop()  # Remove and return last item
+removed = fruits.pop(0)  # Remove and return item at index
+
+# Checking membership
+"apple" in fruits  # True
+"pear" in fruits  # False
+
+# Iterating
+for fruit in fruits:
+    print(fruit)
+
+# List comprehension (creating lists efficiently)
+squares = [x ** 2 for x in range(5)]  # [0, 1, 4, 9, 16]
+evens = [x for x in range(10) if x % 2 == 0]  # [0, 2, 4, 6, 8]
+```
+
+### Tuples: Ordered, Immutable Collections
+
+Tuples are like lists but cannot be changed after creation — useful for data that shouldn't be modified.
+
+```python
+# Creating tuples
+point = (10, 20)
+colors = ("red", "green", "blue")
+single = (42,)  # Trailing comma makes it a tuple (not a value in parens)
+
+# Accessing and slicing (same as lists)
+point[0]  # 10
+colors[1:3]  # ("green", "blue")
+
+# Tuples cannot be modified
+# point[0] = 15  # TypeError
+
+# Unpacking (breaking tuple into variables)
+x, y = point
+r, g, b = colors
+
+# Tuples as dictionary keys (because they're immutable)
+location_map = {
+    (0, 0): "origin",
+    (1, 1): "diagonal"
+}
+```
+
+### Dictionaries: Key-Value Mappings
+
+```python
+# Creating dictionaries
+person = {"name": "Alice", "age": 30, "city": "NYC"}
+empty_dict = {}
+
+# Accessing values
+person["name"]  # "Alice"
+person.get("email")  # None (safe, doesn't raise error)
+person.get("email", "unknown@example.com")  # Provide default
+
+# Modifying dictionaries
+person["email"] = "alice@example.com"  # Add/update
+person["age"] = 31  # Update
+del person["city"]  # Remove key-value pair
+person.pop("age")  # Remove and return value
+
+# Checking keys
+"name" in person  # True
+"city" in person  # False
+
+# Iterating
+for key in person:  # Iterate over keys
+    print(key)
+
+for key, value in person.items():  # Iterate over key-value pairs
+    print(f"{key}: {value}")
+
+# Dictionary comprehension
+squares = {x: x ** 2 for x in range(5)}  # {0: 0, 1: 1, 2: 4, 3: 9, 4: 16}
+```
+
+---
+
+## Loops
+
+### for Loops
+
+```python
+# Iterate over list
+colors = ["red", "green", "blue"]
+for color in colors:
+    print(color)
+
+# range(): Generate sequence of numbers
+for i in range(5):  # 0, 1, 2, 3, 4
+    print(i)
+
+for i in range(1, 10, 2):  # Start, stop (exclusive), step
+    print(i)  # 1, 3, 5, 7, 9
+
+# Enumerate: Get index and value
+for index, color in enumerate(colors):
+    print(f"{index}: {color}")
+
+# zip(): Iterate over multiple collections together
+names = ["Alice", "Bob", "Charlie"]
+ages = [25, 30, 35]
+
+for name, age in zip(names, ages):
+    print(f"{name} is {age} years old")
+
+# Loop with else (runs when loop completes without break)
+for i in range(5):
+    if i == 10:
+        break
+else:
+    print("Loop completed")  # This prints
+```
+
+### while Loops
+
+```python
+# Basic while loop
+count = 0
+while count < 5:
+    print(count)
+    count += 1
+
+# while with break and continue
+while True:
+    user_input = input("Enter 'quit' to exit: ")
+    if user_input == "quit":
+        break
+    if user_input.startswith("#"):
+        continue  # Skip this iteration
+    print(f"You entered: {user_input}")
+```
+
+---
+
+## Classes & Object-Oriented Programming
+
+### Basic Class Definition
+
+```python
+class Dog:
+    """Represents a dog with a name and age."""
+
+    species = "Canis familiaris"  # Class variable (shared by all instances)
+
+    def __init__(self, name: str, age: int):
+        """Constructor: runs when object is created."""
+        self.name = name  # Instance variable
+        self.age = age
+
+    def bark(self) -> str:
+        """Instance method: operates on the specific object."""
+        return f"{self.name} says: Woof!"
+
+    def birthday(self) -> None:
+        """Increment age by 1."""
+        self.age += 1
+
+    def __str__(self) -> str:
+        """Return human-readable string representation."""
+        return f"{self.name} ({self.age} years old)"
+
+# Create instances
+dog1 = Dog("Buddy", 3)
+dog2 = Dog("Max", 5)
+
+# Access attributes
+dog1.name  # "Buddy"
+dog1.age  # 3
+
+# Call methods
+print(dog1.bark())  # "Buddy says: Woof!"
+dog1.birthday()
+print(dog1)  # "Buddy (4 years old)" — calls __str__
+```
+
+### Inheritance
+
+```python
+class Animal:
+    """Base class."""
+    def __init__(self, name: str):
+        self.name = name
+
+    def make_sound(self) -> str:
+        return "Some generic sound"
+
+class Cat(Animal):
+    """Inherits from Animal."""
+    def make_sound(self) -> str:
+        """Override parent method."""
+        return f"{self.name} says: Meow!"
+
+class Bird(Animal):
+    def make_sound(self) -> str:
+        return f"{self.name} says: Chirp!"
+
+# Polymorphism in action
+animals = [Cat("Whiskers"), Bird("Tweety")]
+
+for animal in animals:
+    print(animal.make_sound())
+    # "Whiskers says: Meow!"
+    # "Tweety says: Chirp!"
+```
+
+---
+
+## Exception Handling
+
+### try, except, finally
+
+Exceptions are runtime errors that can be caught and handled gracefully.
+
+```python
+# Basic exception handling
+try:
+    number = int("not a number")  # ValueError
+except ValueError:
+    print("That's not a valid integer")
+
+# Catch multiple exceptions
+try:
+    result = 10 / 0  # ZeroDivisionError
+except (ValueError, ZeroDivisionError) as e:
+    print(f"Error: {e}")
+
+# Use 'as' to access the exception object
+try:
+    file = open("missing.txt")
+except FileNotFoundError as e:
+    print(f"File not found: {e.filename}")
+
+# finally: Runs regardless of whether exception occurred
+try:
+    file = open("data.txt")
+    content = file.read()
+except FileNotFoundError:
+    print("File not found")
+finally:
+    file.close()  # Always closes the file
+```
+
+### Raising Exceptions
+
+```python
+def validate_age(age: int) -> None:
+    """Raise an exception if age is invalid."""
+    if age < 0:
+        raise ValueError("Age cannot be negative")
+    if age > 150:
+        raise ValueError("Age seems unrealistic")
+
+# Usage
+try:
+    validate_age(-5)
+except ValueError as e:
+    print(f"Validation error: {e}")
+```
+
+---
+
+## File I/O
+
+### Reading and Writing Files
+
+```python
+# Writing to a file
+with open("greeting.txt", "w") as file:
+    file.write("Hello, World!\n")
+    file.write("This is Python.")
+
+# Reading entire file
+with open("greeting.txt", "r") as file:
+    content = file.read()  # String with entire file
+    print(content)
+
+# Reading line by line
+with open("greeting.txt", "r") as file:
+    for line in file:
+        print(line.strip())  # .strip() removes trailing newlines
+
+# Reading into list
+with open("greeting.txt", "r") as file:
+    lines = file.readlines()  # List of lines
+```
+
+The `with` statement automatically closes the file, even if an error occurs.
+
+```python
+# File modes
+# "r"  - Read (default)
+# "w"  - Write (overwrites existing file)
+# "a"  - Append (adds to end of file)
+# "r+" - Read and write
+
+# Working with JSON
+import json
+
+data = {"name": "Alice", "age": 30}
+
+# Write JSON
+with open("data.json", "w") as file:
+    json.dump(data, file)
+
+# Read JSON
+with open("data.json", "r") as file:
+    loaded_data = json.load(file)
+```
+
+---
+
+## Common Built-in Functions
+
+```python
+# Type and value checking
+type(42)  # <class 'int'>
+isinstance("hello", str)  # True
+len([1, 2, 3])  # 3
+
+# Iteration and sequences
+list(range(5))  # [0, 1, 2, 3, 4]
+list("hello")  # ['h', 'e', 'l', 'l', 'o']
+sorted([3, 1, 2])  # [1, 2, 3]
+reversed([1, 2, 3])  # Reversed iterator
+list(reversed([1, 2, 3]))  # [3, 2, 1]
+
+# Aggregation
+sum([1, 2, 3, 4])  # 10
+min([3, 1, 4, 1])  # 1
+max([3, 1, 4, 1])  # 4
+all([True, True, True])  # True
+any([False, False, True])  # True
+
+# Transformation
+abs(-5)  # 5
+round(3.7)  # 4
+pow(2, 3)  # 8
+divmod(17, 5)  # (3, 2) — quotient and remainder
+
+# map, filter
+numbers = [1, 2, 3, 4]
+doubled = list(map(lambda x: x * 2, numbers))  # [2, 4, 6, 8]
+evens = list(filter(lambda x: x % 2 == 0, numbers))  # [2, 4]
+```
+
+---
+
+## Essential Imports
+
+Python's standard library provides powerful modules for common tasks:
+
+```python
+# Math operations
+import math
+math.sqrt(16)  # 4.0
+math.ceil(3.2)  # 4
+math.floor(3.8)  # 3
+
+# Date and time
+from datetime import datetime, timedelta
+now = datetime.now()
+tomorrow = now + timedelta(days=1)
+
+# Regular expressions
+import re
+pattern = re.compile(r"\d{3}-\d{4}")
+match = pattern.search("Call me at 555-1234")
+
+# System operations
+import os
+os.getcwd()  # Current working directory
+os.listdir(".")  # Files in current directory
+
+# Random number generation
+import random
+random.randint(1, 10)  # Random integer between 1 and 10
+random.choice(["apple", "banana", "cherry"])  # Random element
+random.shuffle(numbers)  # Shuffle list in place
+```
+
+---
+
+## Best Practices
+
+```python
+# 1. Use descriptive variable names
+customer_age = 25  # Good
+ca = 25  # Avoid
+
+# 2. Follow PEP 8 style guide
+# Use lowercase with underscores for variables
+my_variable = 10  # Good
+myVariable = 10  # Avoid
+MyVariable = 10  # Use only for class names
+
+# 3. Prefer f-strings over older formatting
+name = "Alice"
+age = 30
+f"{name} is {age}"  # Good
+
+# 4. Use functions to avoid repetition
+def send_email(to, subject, body):
+    """Send an email."""
+    pass
+
+# Better than copy-pasting the same code multiple times
+
+# 5. Handle errors explicitly
+try:
+    value = int(user_input)
+except ValueError:
+    print("Please enter a valid integer")
+
+# Better than assuming input is always valid
+
+# 6. Use list comprehensions for simple transformations
+squares = [x ** 2 for x in range(10)]  # Cleaner than a loop
+```
