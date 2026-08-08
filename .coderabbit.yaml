@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: "en-US"
+
+# The tone the AI will use when talking to you and your contributors
+tone_instructions: 'You are a senior full-stack developer reviewing code for an open-source Next.js project. Be encouraging, highly technical, and concise. Always suggest best practices for TypeScript and Next.js App Router.'
+
+reviews:
+  # 'chill' means it won't nitpick tiny style things that ESLint should catch
+  profile: "chill"
+  
+  # When set to true, CodeRabbit will automatically "Approve" the PR when its requested changes are resolved
+  request_changes_workflow: true
+  
+  # Adds a fun, auto-generated summary and a poem about the code at the top of the PR!
+  high_level_summary: true
+  poem: true
+  
+  # Automatically review all new PRs
+  auto_review:
+    enabled: true
+    drafts: false # Won't waste reviews if a contributor opens a "Draft" PR
+
+  # Specific rules for specific folders!
+  path_instructions:
+    - path: "frontend/**/*.tsx"
+      instructions: "Ensure React components are using modern hooks, avoid unnecessary re-renders, and use TailwindCSS properly."
+    - path: "frontend/content/**/*.mdx"
+      instructions: "Ensure MDX files have proper frontmatter, clean Markdown formatting, and that code blocks specify a language."
+
+# Allows you and contributors to chat with the bot in the PR comments
+chat:
+  auto_reply: true
