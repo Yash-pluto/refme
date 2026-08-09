@@ -1,0 +1,83 @@
+---
+title: "APIs"
+description: "Web API fundamentals for request design, REST principles, authentication, and client-server contracts."
+category: "Backend & systems"
+---
+
+## Getting Started
+
+APIs define how clients and servers communicate. HTTP-based APIs are the most common, using structured requests and responses.
+
+### HTTP Basics
+
+- `GET` for reading
+- `POST` for creating
+- `PUT` / `PATCH` for updating
+- `DELETE` for removing
+
+A typical request includes a URL, headers, and optionally a body.
+
+---
+
+## REST & Resources
+
+A RESTful API treats entities as resources and uses consistent URLs.
+
+```http
+GET /users
+POST /users
+GET /users/42
+PATCH /users/42
+DELETE /users/42
+```
+
+Use nouns for resources and avoid verb-based paths.
+
+---
+
+## Status Codes
+
+Use standardized HTTP status codes:
+
+- `200 OK` successful read
+- `201 Created` new resource created
+- `204 No Content` successful action with no body
+- `400 Bad Request` invalid input
+- `401 Unauthorized` missing credentials
+- `403 Forbidden` credentials are valid but not permitted
+- `404 Not Found` resource missing
+- `500 Internal Server Error` server failure
+
+---
+
+## Request & Response Body
+
+JSON is the most common payload format.
+
+```json
+{
+  "id": 42,
+  "name": "Alice",
+  "email": "alice@example.com"
+}
+```
+
+Include clear field names and consistent shapes.
+
+---
+
+## Authentication & Security
+
+Protect APIs with authentication and validation.
+
+- Use bearer tokens (`Authorization: Bearer <token>`)
+- Validate input on the server
+- Avoid leaking sensitive internals in error messages
+
+---
+
+## API Documentation
+
+Document available endpoints, request formats, and responses.
+
+OpenAPI/Swagger is a common standard for describing REST APIs and generating client code.

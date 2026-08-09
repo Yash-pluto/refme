@@ -1,0 +1,74 @@
+---
+title: "Kubernetes"
+description: "Container orchestration for deploying, scaling, and managing modern cloud-native applications."
+category: "Architecture & infrastructure"
+---
+
+## Getting Started
+
+Kubernetes orchestrates containers across a cluster, managing deployment, scaling, and healing.
+
+---
+
+## Core concepts
+
+- **Pod**: smallest deployable unit, usually one or more containers
+- **Service**: stable network endpoint for pods
+- **Deployment**: manages replica sets and rollout updates
+- **ConfigMap / Secret**: stores configuration and sensitive data
+
+---
+
+## Example deployment
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+        - name: web
+          image: my-app:latest
+          ports:
+            - containerPort: 3000
+```
+
+---
+
+## Example service
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-service
+spec:
+  selector:
+    app: my-app
+  ports:
+    - port: 80
+      targetPort: 3000
+  type: ClusterIP
+```
+
+---
+
+## Scaling
+
+Kubernetes can scale pods horizontally using `kubectl scale` or the Horizontal Pod Autoscaler.
+
+---
+
+## Health checks
+
+Use readiness and liveness probes to keep pods healthy and traffic flowing to ready instances.

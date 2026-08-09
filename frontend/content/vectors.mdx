@@ -1,0 +1,95 @@
+---
+title: "Vectors"
+description: "Vector embeddings, similarity search, and retrieval patterns for modern AI applications."
+category: "Data & AI"
+---
+
+## Getting Started
+
+Vector embeddings transform data into numeric arrays that capture semantic relationships. They enable meaningful similarity search, clustering, and retrieval across text, images, and other modalities.
+
+---
+
+## What is a vector?
+
+A vector is an ordered list of numbers. In AI, embeddings map items like sentences, documents, or images to vectors so that similar items are close in vector space.
+
+---
+
+## Generating embeddings
+
+Common ways to get embeddings:
+
+- pretrained language models for text
+- image encoders for visual content
+- custom models trained on domain-specific data
+
+Example:
+
+```python
+embedding = model.encode("Natural language search")
+```
+
+---
+
+## Similarity metrics
+
+Choose a similarity measure based on your use case:
+
+- cosine similarity for direction-based similarity
+- dot product for scaled similarity
+- Euclidean distance for absolute closeness
+
+---
+
+## Vector databases
+
+Vector databases store embeddings and support fast nearest-neighbor search.
+
+Popular systems include:
+
+- Pinecone
+- Milvus
+- Weaviate
+- FAISS
+
+---
+
+## Retrieval patterns
+
+Common vector search workflows:
+
+1. embed the user query
+2. search the index for nearest vectors
+3. retrieve associated documents or metadata
+4. optionally re-rank with a secondary model
+
+---
+
+## Use cases
+
+- semantic search over documents
+- recommendation engines
+- duplicate detection
+- retrieval-augmented generation (RAG)
+
+---
+
+## Production considerations
+
+- choose an indexing strategy for latency and scale
+- refresh embeddings when content changes
+- monitor vector quality and search relevance
+- cache hot queries and results
+
+---
+
+## Failure modes
+
+Keep an eye on:
+
+- stale embeddings when the source data changes
+- poor cross-domain generalization
+- vector drift due to mismatched model versions
+
+A well-designed vector system makes similarity search fast, reliable, and easy to integrate into AI workflows.

@@ -1,0 +1,100 @@
+---
+title: "Algorithms"
+description: "Core algorithm techniques for searching, sorting, traversal, and performance analysis."
+category: "Concepts"
+---
+
+## Getting Started
+
+Algorithms are step-by-step procedures for solving problems. The right algorithm makes code faster, more reliable, and easier to scale.
+
+### Complexity
+
+Measure performance using time and space complexity.
+
+- `O(1)` constant
+- `O(n)` linear
+- `O(n log n)` linearithmic
+- `O(n^2)` quadratic
+
+---
+
+## Searching
+
+Linear search examines every item; binary search divides the search space in half.
+
+```js
+function binarySearch(arr, target) {
+  let left = 0;
+  let right = arr.length - 1;
+
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2);
+    if (arr[mid] === target) return mid;
+    if (arr[mid] < target) left = mid + 1;
+    else right = mid - 1;
+  }
+
+  return -1;
+}
+```
+
+Use binary search on sorted data for fast lookup.
+
+---
+
+## Sorting
+
+Common sorts include quicksort, mergesort, and heapsort.
+
+- `O(n log n)` average for quicksort/mergesort
+- stable sorts preserve equal-item order
+
+JavaScript's native `array.sort()` is typically implemented as a tuned quicksort or mergesort.
+
+---
+
+## Traversal
+
+Traverse structures like trees and graphs using depth-first search (DFS) or breadth-first search (BFS).
+
+```js
+function dfs(node) {
+  if (!node) return;
+  console.log(node.value);
+  dfs(node.left);
+  dfs(node.right);
+}
+```
+
+---
+
+## Greedy algorithms
+
+Make the locally optimal choice at each step. Greedy strategies are simple and efficient but may not always produce the best global solution.
+
+---
+
+## Dynamic programming
+
+Use memoization or tabulation to avoid repeated work when subproblems overlap.
+
+```js
+const memo = {};
+function fib(n) {
+  if (n <= 1) return n;
+  if (memo[n]) return memo[n];
+  return (memo[n] = fib(n - 1) + fib(n - 2));
+}
+```
+
+---
+
+## Algorithm design
+
+Match the algorithm to the problem:
+
+- use sorting for order-related tasks
+- use search techniques for lookup tasks
+- use graph algorithms for networked data
+- use dynamic programming when overlapping subproblems appear

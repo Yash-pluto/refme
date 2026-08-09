@@ -1,0 +1,145 @@
+---
+title: "TypeScript"
+description: "A typed layer on JavaScript for safer app-scale code, interfaces, and modern developer tooling."
+category: "Core Programming"
+---
+
+## Getting Started
+
+TypeScript is a superset of JavaScript that adds optional static types. It compiles to plain JavaScript and helps catch errors earlier, improve editor tooling, and document intent.
+
+### Installation
+
+```bash
+npm install --save-dev typescript
+npx tsc --init
+```
+
+A minimal `tsconfig.json` includes:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
+  }
+}
+```
+
+---
+
+## Types & Interfaces
+
+TypeScript uses type annotations to describe values and enforce contracts at compile time.
+
+```ts
+// Primitives
+let count: number = 10;
+let name: string = "RefMe";
+let isActive: boolean = true;
+
+// Arrays
+const ids: number[] = [1, 2, 3];
+const names: Array<string> = ["Alice", "Bob"];
+
+// Objects
+interface User {
+  id: number;
+  name: string;
+  email?: string;
+}
+
+const user: User = {
+  id: 1,
+  name: "Alice",
+};
+```
+
+### Type Aliases vs Interfaces
+
+```ts
+type Status = "pending" | "success" | "error";
+
+interface Product {
+  id: number;
+  title: string;
+  price: number;
+}
+```
+
+---
+
+## Type Narrowing
+
+TypeScript can infer and narrow unions with control flow.
+
+```ts
+function format(value: string | number) {
+  if (typeof value === "string") {
+    return value.toUpperCase();
+  }
+  return value.toFixed(2);
+}
+```
+
+Discriminated unions are a powerful pattern for safe branching:
+
+```ts
+type Shape =
+  | { kind: "circle"; radius: number }
+  | { kind: "rectangle"; width: number; height: number };
+
+function area(shape: Shape) {
+  switch (shape.kind) {
+    case "circle":
+      return Math.PI * shape.radius ** 2;
+    case "rectangle":
+      return shape.width * shape.height;
+  }
+}
+```
+
+---
+
+## Generics
+
+Generics let you write reusable abstractions that preserve type information.
+
+```ts
+function identity<T>(value: T): T {
+  return value;
+}
+
+const result = identity<string>("hello");
+```
+
+Common generic patterns:
+
+```ts
+function mapArray<T, U>(items: T[], transform: (item: T) => U): U[] {
+  return items.map(transform);
+}
+```
+
+---
+
+## Modules & Compilation
+
+TypeScript supports ES module syntax and works naturally with modern bundlers.
+
+```ts
+// src/math.ts
+export function add(a: number, b: number) {
+  return a + b;
+}
+
+// src/index.ts
+import { add } from "./math";
+console.log(add(3, 4));
+```
+
+Compile with `npx tsc` or use a framework build step. The type system provides safety without changing runtime behavior.

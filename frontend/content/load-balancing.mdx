@@ -1,0 +1,54 @@
+---
+title: "Load Balancing"
+description: "Distribute traffic across servers to improve reliability, capacity, and response times."
+category: "Architecture & infrastructure"
+---
+
+## Getting Started
+
+Load balancing distributes incoming requests across multiple backend instances. It improves availability, reduces latency, and helps prevent any single server from becoming a bottleneck.
+
+---
+
+## Common strategies
+
+- round robin: distribute requests evenly
+- least connections: send traffic to the least busy server
+- IP hash: route users to the same backend based on their IP
+
+---
+
+## Nginx example
+
+Nginx is a common reverse proxy and load balancer.
+
+```nginx
+http {
+  upstream app_servers {
+    server app1.example.com;
+    server app2.example.com;
+  }
+
+  server {
+    listen 80;
+
+    location / {
+      proxy_pass http://app_servers;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+    }
+  }
+}
+```
+
+---
+
+## Health checks
+
+Use health checks to route traffic only to healthy instances. This prevents failed services from receiving requests.
+
+---
+
+## Sticky sessions
+
+Sticky sessions bind a user to the same backend instance, which can simplify session handling but reduces load distribution flexibility.

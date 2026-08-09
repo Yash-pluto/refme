@@ -1,0 +1,50 @@
+---
+title: "GitHub Actions"
+description: "CI/CD workflows built directly in GitHub to automate builds, tests, and deployments."
+category: "Dev tools"
+---
+
+## Getting Started
+
+GitHub Actions runs workflows in response to repository events like push, pull request, or schedule.
+
+---
+
+## Workflow file
+
+```yaml
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: npm install
+      - name: Run tests
+        run: npm test
+```
+
+---
+
+## Reusable workflows
+
+Use composite actions or reusable workflow files to share logic across repositories.
+
+---
+
+## Secrets
+
+Store credentials in repository secrets and reference them as `${{ secrets.MY_SECRET }}`.
+
+---
+
+## Deployment
+
+Use actions to deploy to cloud platforms, containers, or package registries.

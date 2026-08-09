@@ -1,0 +1,120 @@
+---
+title: "Data Science"
+description: "Core data science concepts for analysis, reporting, and building insight-driven applications."
+category: "Data & AI"
+---
+
+## Getting Started
+
+Data science combines statistics, programming, domain knowledge, and communication. It helps teams turn raw data into actionable insights, forecasts, and better product decisions.
+
+---
+
+## Data science workflow
+
+A robust workflow typically includes:
+
+- data collection and ingestion
+- cleaning, validation, and transformation
+- exploratory data analysis (EDA)
+- feature engineering
+- model selection and training
+- evaluation and validation
+- reporting and deployment
+
+Each step builds on the last, and good data science keeps reproducibility and traceability in mind.
+
+---
+
+## Data collection
+
+Collect data from reliable sources:
+
+- internal databases
+- application logs
+- third-party APIs
+- external datasets
+
+Document the origin, frequency, and quality of each source so you can trust your analysis.
+
+---
+
+## Cleaning & validation
+
+Clean data before modeling. Common tasks include:
+
+- removing duplicate rows
+- normalizing inconsistent formats (dates, categorical labels)
+- filling or dropping missing values
+- validating ranges and data types
+
+Example with Python/pandas:
+
+```python
+import pandas as pd
+
+df = pd.read_csv("data.csv")
+df["date"] = pd.to_datetime(df["date"], errors="coerce")
+df = df.dropna(subset=["date", "target"])
+```
+
+---
+
+## Exploratory Data Analysis (EDA)
+
+EDA helps you understand the shape of the data, spot anomalies, and discover relationships.
+
+- summary statistics: mean, median, variance
+- distributions and histograms
+- correlation matrices and scatter plots
+- group-level comparisons
+
+Document findings with charts and narrative so stakeholders can understand the path from raw data to results.
+
+---
+
+## Feature engineering
+
+Features are the inputs your model uses. Better features often matter more than the choice of algorithm.
+
+- extract time features from timestamps
+- encode categorical values with one-hot or ordinal techniques
+- aggregate transactional data into summary metrics
+- scale values when using distance-based models
+
+---
+
+## Modeling & evaluation
+
+Choose the right model for the problem:
+
+- linear models for interpretable trends
+- tree-based models for non-linear relationships
+- clustering for unsupervised structure
+
+Use validation splits, cross-validation, and hold-out test sets to measure performance honestly.
+
+---
+
+## Communication
+
+Translate results into clear conclusions and next steps.
+
+- what changed?
+- how confident are we?
+- what actions should the product or engineering team take?
+
+Visualizations, short summaries, and reproducible notebooks make analysis easier to review.
+
+---
+
+## Production readiness
+
+When moving from analysis to production, consider:
+
+- automated data pipelines
+- model retraining schedules
+- monitoring data drift and model performance
+- versioning data and models
+
+Good data science is not just a one-time experiment; it is an ongoing, observable process.

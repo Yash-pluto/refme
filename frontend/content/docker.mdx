@@ -1,0 +1,70 @@
+---
+title: "Docker"
+description: "Containerization fundamentals for images, containers, and reproducible deployments."
+category: "Backend & systems"
+---
+
+## Getting Started
+
+Docker packages applications and dependencies into containers for consistent deployment across environments.
+
+### Basic Commands
+
+```bash
+docker build -t my-app .
+docker run --rm -p 3000:3000 my-app
+docker ps
+```
+
+---
+
+## Dockerfile
+
+A Dockerfile defines how to build an image.
+
+```dockerfile
+FROM node:20-alpine
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm install
+COPY . .
+CMD ["npm", "start"]
+```
+
+---
+
+## Containers
+
+Run containers with networking and volume options.
+
+```bash
+docker run --rm -p 8080:80 my-app
+docker run --rm -v $(pwd):/app my-app
+```
+
+---
+
+## Images & Layers
+
+Docker caches image layers for faster rebuilds. Keep frequently changing steps later in the Dockerfile.
+
+---
+
+## Compose
+
+Use `docker-compose.yml` to define multi-container apps.
+
+```yaml
+version: "3.9"
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: mydb
+```
+
+Use `docker compose up` to start the application stack.

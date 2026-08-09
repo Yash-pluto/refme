@@ -1,0 +1,103 @@
+---
+title: "Node.js"
+description: "A JavaScript runtime for building servers, CLI tools, and backend services with event-driven architecture."
+category: "Backend & systems"
+---
+
+## Getting Started
+
+Node.js runs JavaScript outside the browser and provides access to the file system, network, and process APIs.
+
+### Installation & Project Setup
+
+```bash
+node --version
+npm init -y
+npm install express
+```
+
+### Simple Server
+
+```js
+import http from "http";
+
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.end("Hello, Node.js\n");
+});
+
+server.listen(3000, () => {
+  console.log("Server listening on http://localhost:3000");
+});
+```
+
+---
+
+## Modules
+
+Use ESM or CommonJS to organize code.
+
+```js
+// ESM
+import { readFile } from "fs/promises";
+
+// CommonJS
+const fs = require("fs");
+```
+
+### Package Scripts
+
+```json
+{
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  }
+}
+```
+
+---
+
+## Async Patterns
+
+Node.js is event-driven and non-blocking.
+
+```js
+import { readFile } from "fs/promises";
+
+async function load() {
+  const data = await readFile("data.txt", "utf8");
+  console.log(data);
+}
+
+load();
+```
+
+Prefer promises or `async/await` over callback hell.
+
+---
+
+## Common APIs
+
+### File system
+
+```js
+import { writeFile } from "fs/promises";
+await writeFile("hello.txt", "Hello, Node!");
+```
+
+### HTTP requests
+
+```js
+import fetch from "node-fetch";
+const res = await fetch("https://api.example.com/data");
+const json = await res.json();
+```
+
+---
+
+## Tooling & Deployment
+
+Node.js apps are usually packaged with `npm` or `yarn`, and deployed to platforms that support long-lived server processes.
+
+Use `nodemon` for local development and keep dependencies up to date.

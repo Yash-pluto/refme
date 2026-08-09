@@ -1,0 +1,89 @@
+---
+title: "Accessibility"
+description: "Inclusive web development practices for keyboard navigation, screen readers, and semantic structure."
+category: "Frontend & Web"
+---
+
+## Getting Started
+
+Accessibility ensures all users can interact with your interface, including people using keyboards, screen readers, or assistive technologies. Good accessibility improves usability for everyone.
+
+### Semantic HTML
+
+Use semantic elements to communicate structure and meaning.
+
+```html
+<header>
+  <h1>My site</h1>
+</header>
+<nav>
+  <a href="/">Home</a>
+  <a href="/about">About</a>
+</nav>
+<main>
+  <article>
+    <h2>Article title</h2>
+  </article>
+</main>
+<footer>© 2026</footer>
+```
+
+---
+
+## Keyboard Navigation
+
+Ensure interactive elements are reachable with Tab and can be operated with the keyboard.
+
+```html
+<button type="button">Submit</button>
+<a href="/more">Learn more</a>
+<input type="text" placeholder="Search" />
+```
+
+Avoid disabling focus or relying on mouse-only interactions.
+
+---
+
+## ARIA & Labels
+
+Use accessible labels when native semantics are not enough.
+
+```html
+<label for="email">Email</label>
+<input id="email" type="email" />
+
+<div role="alert">Form submission failed</div>
+```
+
+Prefer native controls first, then add ARIA roles, states, and properties as needed.
+
+---
+
+## Contrast & Visual Design
+
+Sufficient color contrast helps users with low vision or color blindness.
+
+```css
+button {
+  color: #ffffff;
+  background: #1d4ed8;
+}
+```
+
+Check contrast ratios, avoid relying on color alone, and ensure text is readable at different sizes.
+
+---
+
+## Accessible Forms
+
+Group related inputs and use clear labels.
+
+```html
+<fieldset>
+  <legend>Shipping information</legend>
+  <label for="name">Name</label>
+  <input id="name" name="name" />
+</fieldset>
+```
+
+Provide helpful error messages, and keep form fields predictable and easy to complete.

@@ -1,0 +1,50 @@
+---
+title: "State Management"
+description: "Patterns for managing application state, synchronization, and predictable UI behavior."
+category: "Concepts"
+---
+
+## Getting Started
+
+State management is how applications keep track of data over time. Good state design keeps UI consistent, reduces bugs, and makes updates predictable.
+
+---
+
+## Local vs global state
+
+- **Local state** belongs to a single component or module
+- **Global state** is shared across many parts of an app
+
+Use local state for isolated UI concerns and global state for cross-cutting data like user auth.
+
+---
+
+## Immutable updates
+
+Treat state as immutable to avoid unexpected side effects.
+
+```js
+const nextState = { ...state, count: state.count + 1 };
+```
+
+Immutable updates make change detection and debugging easier.
+
+---
+
+## Common patterns
+
+- React hooks (`useState`, `useReducer`)
+- state containers (`Redux`, `MobX`, `Zustand`)
+- server state libraries (`React Query`, `SWR`)
+
+---
+
+## Event-driven state
+
+Use actions or events to describe state changes, rather than mutating state directly. This keeps updates traceable and testable.
+
+---
+
+## Synchronizing state
+
+Keep local and remote state in sync with caching, background refresh, and optimistic updates. Handle stale data and conflict resolution clearly.

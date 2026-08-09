@@ -1,0 +1,132 @@
+---
+title: "Go"
+description: "A simple, fast compiled language for network services, tooling, and concurrent systems."
+category: "Core Programming"
+---
+
+## Getting Started
+
+Go is a statically typed compiled language designed for simplicity and reliability. It ships with a fast compiler, built-in tooling, and a strong standard library.
+
+### Installation
+
+```bash
+# Confirm Go is installed
+go version
+
+# Create a new module
+mkdir hello-go
+cd hello-go
+go mod init example.com/hello
+```
+
+### Hello World
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, Go!")
+}
+```
+
+---
+
+## Packages & Modules
+
+Go code is organized into packages. The package path is the module import path.
+
+```go
+package math
+
+func Add(a, b int) int {
+    return a + b
+}
+```
+
+```go
+package main
+
+import (
+    "fmt"
+    "example.com/hello-go/math"
+)
+
+func main() {
+    fmt.Println(math.Add(2, 3))
+}
+```
+
+---
+
+## Concurrency
+
+Go uses goroutines and channels for lightweight concurrent execution.
+
+```go
+go func() {
+    fmt.Println("running concurrently")
+}()
+
+ch := make(chan string)
+go func() {
+    ch <- "done"
+}()
+
+message := <-ch
+fmt.Println(message)
+```
+
+### Select
+
+```go
+select {
+case msg := <-ch:
+    fmt.Println(msg)
+case <-time.After(time.Second):
+    fmt.Println("timeout")
+}
+```
+
+---
+
+## Error Handling
+
+Go prefers explicit error returns instead of exceptions.
+
+```go
+func divide(a, b float64) (float64, error) {
+    if b == 0 {
+        return 0, fmt.Errorf("division by zero")
+    }
+    return a / b, nil
+}
+
+result, err := divide(10, 0)
+if err != nil {
+    log.Fatal(err)
+}
+```
+
+---
+
+## Structs & Interfaces
+
+```go
+type User struct {
+    ID   int
+    Name string
+}
+
+type Greeter interface {
+    Greet() string
+}
+
+func (u User) Greet() string {
+    return "Hello, " + u.Name
+}
+```
+
+Go interfaces are satisfied implicitly, which makes them easy to compose across packages.

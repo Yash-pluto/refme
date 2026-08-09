@@ -1,0 +1,53 @@
+---
+title: "System Design"
+description: "High-level architecture patterns for scalable, reliable, and maintainable systems."
+category: "Concepts"
+---
+
+## Getting Started
+
+System design is about building applications that meet performance, reliability, and scalability goals. It focuses on components, data flow, and operational trade-offs.
+
+---
+
+## Core concepts
+
+- **Scalability**: ability to grow with demand
+- **Reliability**: ability to stay available under failure
+- **Maintainability**: ability to change safely and quickly
+
+---
+
+## Service boundaries
+
+Design clear boundaries between services to reduce coupling. Microservices, APIs, and message-based communication help separate concerns.
+
+---
+
+## Data flow
+
+Map how data moves through the system from request to storage and back. Use caching, queues, and event streams to optimize throughput and latency.
+
+---
+
+## Caching & load balancing
+
+Cache frequently read data near the client; use load balancers to distribute traffic across services.
+
+---
+
+## Trade-offs
+
+Every choice has trade-offs:
+
+- consistency vs availability
+- latency vs throughput
+- simplicity vs flexibility
+
+Document trade-offs clearly so design decisions are easier to maintain.
+
+---
+
+## Observability
+
+Build systems with monitoring, logging, and tracing in mind. Observability helps you diagnose failures and understand runtime behavior.

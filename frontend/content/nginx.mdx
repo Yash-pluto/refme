@@ -1,0 +1,73 @@
+---
+title: "Nginx"
+description: "Nginx basics for reverse proxying, load balancing, and web server configuration."
+category: "Dev tools"
+---
+
+## Getting Started
+
+Nginx is a high-performance HTTP server and reverse proxy used to serve static content, proxy requests, and load balance traffic.
+
+---
+
+## Basic server block
+
+```nginx
+server {
+  listen 80;
+  server_name example.com;
+
+  location / {
+    proxy_pass http://localhost:3000;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+  }
+}
+```
+
+---
+
+## Static file hosting
+
+```nginx
+server {
+  listen 80;
+  server_name example.com;
+
+  root /var/www/html;
+  index index.html;
+}
+```
+
+---
+
+## Load balancing
+
+Use an upstream block to distribute requests.
+
+```nginx
+upstream backend {
+  server app1.example.com;
+  server app2.example.com;
+}
+
+server {
+  listen 80;
+  location / {
+    proxy_pass http://backend;
+  }
+}
+```
+
+---
+
+## Caching
+
+Enable caching for faster responses and reduced backend load.
+
+```nginx
+location /static/ {
+  expires 30d;
+  add_header Cache-Control "public, max-age=2592000";
+}
+```

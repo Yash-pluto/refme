@@ -1,0 +1,74 @@
+---
+title: "Git"
+description: "Version control fundamentals for commits, branches, merging, and collaboration workflows."
+category: "Backend & systems"
+---
+
+## Getting Started
+
+Git is a distributed version control system used for tracking changes and collaborating on code.
+
+### Basic Setup
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "you@example.com"
+```
+
+### Initialize a Repository
+
+```bash
+git init
+```
+
+---
+
+## Common Commands
+
+```bash
+git status
+git add .
+git commit -m "Initial commit"
+git log --oneline
+```
+
+### Branching
+
+```bash
+git branch feature/login
+git checkout feature/login
+# or
+git switch feature/login
+```
+
+---
+
+## Merging & Rebasing
+
+Merge to combine branches:
+
+```bash
+git checkout main
+git merge feature/login
+```
+
+Rebase to keep history linear:
+
+```bash
+git checkout feature/login
+git rebase main
+```
+
+---
+
+## Collaboration
+
+Push and pull changes with remote repositories.
+
+```bash
+git remote add origin git@github.com:user/repo.git
+git push -u origin main
+git pull origin main
+```
+
+Use feature branches, descriptive commits, and pull requests for clear collaboration.

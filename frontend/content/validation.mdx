@@ -1,0 +1,48 @@
+---
+title: "Validation"
+description: "Input and data validation patterns for safe, predictable applications."
+category: "Architecture & infrastructure"
+---
+
+## Getting Started
+
+Validation ensures incoming data matches expected structure and constraints before it is used. It protects applications from bad input, security issues, and runtime errors.
+
+---
+
+## Validation layers
+
+- client-side validation improves user experience
+- server-side validation enforces security and correctness
+- schema validation verifies data shape and types
+
+---
+
+## Common patterns
+
+- type checking (strings, numbers, booleans)
+- required field enforcement
+- format validation (email, URL, dates)
+- range limits and length checks
+
+---
+
+## Example
+
+```js
+const schema = {
+  name: { type: "string", minLength: 1 },
+  email: { type: "string", format: "email" },
+};
+
+function validate(user) {
+  if (typeof user.name !== "string" || user.name.length === 0) {
+    throw new Error("Name is required");
+  }
+  if (!user.email.includes("@")) {
+    throw new Error("Email is invalid");
+  }
+}
+```
+
+Use validation libraries or a centralized schema layer to keep rules consistent across the app.
