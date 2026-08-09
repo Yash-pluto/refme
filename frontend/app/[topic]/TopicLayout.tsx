@@ -2,7 +2,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "../../src/context/ThemeContext";
 import { useRouter } from "next/navigation";
-import { FaGithub} from "react-icons/fa";
+import { FaGithub } from "react-icons/fa";
+import toast, { Toaster } from "react-hot-toast";
+import Fuse from "fuse.js"; // <-- Imported Fuse.js
 import {
   ArrowLeft,
   ArrowUp,
@@ -47,6 +49,9 @@ export default function TopicLayout({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileTocOpen, setIsMobileTocOpen] = useState(false);
 
+  // User Engagement State
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+
   // Scroll to Top state
   const [showScrollTop, setShowScrollTop] = useState(false);
 
@@ -56,14 +61,12 @@ export default function TopicLayout({
 
   useEffect(() => {
     setIsMounted(true);
-    // Detect if the user is on a Mac or Apple device
     if (typeof window !== "undefined") {
       const isMac = /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform);
       setModifierKey(isMac ? "⌘" : "Ctrl ");
     }
   }, []);
 
-  // Prevent background scrolling when mobile menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -75,7 +78,6 @@ export default function TopicLayout({
     };
   }, [isMobileMenuOpen]);
 
-  // Scroll to Top listener
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 400);
@@ -98,46 +100,49 @@ export default function TopicLayout({
     }));
 
     setDomHeadings(nextHeadings);
+    
+    // Reset feedback state when navigating to a new topic
+    setFeedbackSubmitted(false);
   }, [children, topicKey]);
 
   const activeHeadings = headings.length > 0 ? headings : domHeadings;
-  const normalizedQuery = docSearch.trim().toLowerCase();
-  const hasSearchQuery = normalizedQuery.length > 0;
+  const hasSearchQuery = docSearch.trim().length > 0;
+
+  // --- FUZZY SEARCH IMPLEMENTATION ---
+  const searchableData = useMemo(() => {
+    const sectionDocs = activeHeadings.map((heading) => ({
+      id: heading.id,
+      title: heading.title,
+      type: "section" as const,
+      depth: heading.depth,
+    }));
+
+    const topicDocs = topics.map((item) => ({
+      id: item.id,
+      title: item.title || item.id,
+      description: item.description || "",
+      type: "topic" as const,
+      depth: 1,
+    }));
+
+    return [...topicDocs, ...sectionDocs];
+  }, [activeHeadings, topics]);
+
+  const fuse = useMemo(() => {
+    return new Fuse(searchableData, {
+      keys: ["title", "description"],
+      includeMatches: true,
+      threshold: 0.3, // 0.0 is exact match, 1.0 is anything. 0.3 is perfect for slight typos
+      ignoreLocation: true,
+    });
+  }, [searchableData]);
 
   const searchResults = useMemo(() => {
     if (!hasSearchQuery) return [];
+    return fuse.search(docSearch.trim()).slice(0, 12);
+  }, [docSearch, hasSearchQuery, fuse]);
+  // -----------------------------------
 
-    const sectionMatches = activeHeadings
-      .filter((heading) =>
-        heading.title.toLowerCase().includes(normalizedQuery),
-      )
-      .map((heading) => ({
-        id: heading.id,
-        title: heading.title,
-        type: "section" as const,
-        depth: heading.depth,
-      }));
-
-    const topicMatches = topics
-      .filter((item) => {
-        const title = (item.title || item.id || "").toLowerCase();
-        const description = (item.description || "").toLowerCase();
-        return (
-          title.includes(normalizedQuery) ||
-          description.includes(normalizedQuery)
-        );
-      })
-      .map((item) => ({
-        id: item.id,
-        title: item.title || item.id,
-        type: "topic" as const,
-        depth: 1,
-      }));
-
-    return [...sectionMatches, ...topicMatches].slice(0, 12);
-  }, [activeHeadings, hasSearchQuery, normalizedQuery, topics]);
-
-  // Decoupled outlineGroups from search state
   const outlineGroups = useMemo(() => {
     const groups: Array<{
       id: string;
@@ -265,10 +270,8 @@ export default function TopicLayout({
 
   const scrollToSection = (id: string) => {
     if (!id) return;
-
     const target = document.getElementById(id);
     if (!target) return;
-
     const headerOffset = 88;
     const top = target.getBoundingClientRect().top + window.scrollY - headerOffset;
     window.scrollTo({ top, behavior: "smooth" });
@@ -278,12 +281,36 @@ export default function TopicLayout({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Helper to extract the proper title for the breadcrumb
+  const handleFeedback = (isPositive: boolean) => {
+    setFeedbackSubmitted(true);
+    if (isPositive) {
+      toast.success("Glad it helped! Thanks for the feedback.");
+    } else {
+      toast("Thanks for the feedback! We'll work on improving this.", {
+        icon: '📝',
+      });
+    }
+  };
+
   const currentTopicTitle = topics.find((t) => t.id === topicKey)?.title || frontmatter?.title || topicKey;
 
   return (
     <div className={`${theme.page} min-h-screen font-sans selection:bg-[#C699FF]/25 transition-colors duration-200`}>
       
+      {/* TOAST CONTAINER */}
+      <Toaster 
+        position="bottom-center"
+        toastOptions={{
+          style: {
+            background: darkMode ? '#111111' : '#fff',
+            color: darkMode ? '#fff' : '#111111',
+            border: `1px solid ${darkMode ? '#1A1A1A' : '#DFE1DA'}`,
+            fontSize: '14px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          },
+        }}
+      />
+
       {/* MOBILE DRAWER OVERLAY */}
       {isMobileMenuOpen && (
         <div
@@ -361,7 +388,6 @@ export default function TopicLayout({
       <header className={`sticky top-0 z-40 h-16 border-b ${theme.border} ${theme.header} backdrop-blur-md`}>
         <div className="mx-auto flex h-full max-w-[1700px] items-center justify-between gap-3 px-4 md:gap-4 md:px-6">
           <div className="flex items-center gap-3 shrink-0">
-            {/* MOBILE HAMBURGER BUTTON */}
             <button
               onClick={() => setIsMobileMenuOpen(true)}
               className={`lg:hidden -ml-1 p-2 transition-colors ${theme.muted} ${theme.hoverAccent}`}
@@ -383,11 +409,8 @@ export default function TopicLayout({
 
           <div className="flex-1 flex items-center justify-center">
             <div className="relative w-full max-w-xl">
-              
-              {/* SEARCH BAR */}
               <div className={`relative flex w-full items-center rounded-full border transition-all duration-200 ${theme.border} ${theme.input} ${docSearch ? "border-[#C699FF]/70 shadow-[0_0_0_1px_rgba(198,153,255,0.38)]" : "focus-within:border-[#C699FF]/60"}`}>
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-70" />
-                
                 <input
                   ref={searchInputRef}
                   value={docSearch}
@@ -397,7 +420,6 @@ export default function TopicLayout({
                   placeholder="Search topics..."
                   className="w-full bg-transparent py-2 pl-10 pr-16 text-sm outline-none placeholder:text-current placeholder:opacity-50"
                 />
-                
                 <div className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center justify-end">
                   {docSearch ? (
                     <button
@@ -418,35 +440,39 @@ export default function TopicLayout({
                 </div>
               </div>
 
-              {/* SEARCH RESULTS DROPDOWN */}
+              {/* FUZZY SEARCH RESULTS DROPDOWN */}
               {hasSearchQuery && (
                 <div className={`absolute left-0 right-0 z-50 mt-2 overflow-hidden rounded-2xl border shadow-lg ${theme.border} ${theme.panel}`}>
                   {searchResults.length > 0 ? (
                     <div className="max-h-[320px] overflow-y-auto p-2">
-                      {searchResults.map((result) => (
-                        <button
-                          key={`${result.type}-${result.id}`}
-                          type="button"
-                          onClick={() => {
-                            if (result.type === "topic") {
-                              router.push(`/${result.id}`);
-                            } else {
-                              scrollToSection(result.id);
-                            }
-                            setDocSearch("");
-                          }}
-                          className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left transition-colors hover:bg-current/5"
-                        >
-                          <div className="min-w-0">
-                            <div className="truncate text-sm font-medium">
-                              {result.title}
+                      {searchResults.map(({ item, matches }) => {
+                        const titleMatches = matches?.find(m => m.key === "title")?.indices;
+                        
+                        return (
+                          <button
+                            key={`${item.type}-${item.id}`}
+                            type="button"
+                            onClick={() => {
+                              if (item.type === "topic") {
+                                router.push(`/${item.id}`);
+                              } else {
+                                scrollToSection(item.id);
+                              }
+                              setDocSearch("");
+                            }}
+                            className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left transition-colors hover:bg-current/5"
+                          >
+                            <div className="min-w-0">
+                              <div className="truncate text-sm font-medium">
+                                <HighlightText text={item.title} matches={titleMatches} />
+                              </div>
+                              <div className="mt-0.5 text-[10px] uppercase tracking-[0.18em] opacity-60">
+                                {item.type === "topic" ? "Topic" : item.depth === 2 ? "Section" : "Subsection"}
+                              </div>
                             </div>
-                            <div className="mt-0.5 text-[10px] uppercase tracking-[0.18em] opacity-60">
-                              {result.type === "topic" ? "Topic" : result.depth === 2 ? "Section" : "Subsection"}
-                            </div>
-                          </div>
-                        </button>
-                      ))}
+                          </button>
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className={`px-3 py-3 text-sm ${theme.muted}`}>
@@ -614,21 +640,47 @@ export default function TopicLayout({
             </nav>
 
             <article className="prose prose-sm max-w-none min-w-0 overflow-x-auto dark:prose-invert">
+              {/* AUTOMATIC DOCUMENT TITLE INJECTION */}
+              <div className="mb-10">
+                <h1 className="mb-2 text-3xl font-extrabold tracking-tight sm:text-4xl capitalize">
+                  {currentTopicTitle}
+                </h1>
+                {frontmatter?.description && (
+                  <p className={`text-lg ${theme.muted} mt-2 leading-relaxed`}>
+                    {frontmatter.description}
+                  </p>
+                )}
+              </div>
+              {/* MDX CONTENT */}
               {children}
             </article>
 
             {/* USER ENGAGEMENT & GITHUB EDIT */}
             <div className={`mt-16 flex flex-col items-center justify-between gap-6 border-t pt-8 sm:flex-row sm:gap-4 ${theme.border}`}>
               <div className="flex items-center gap-4">
-                <span className={`text-[13px] font-medium ${theme.muted}`}>Was this page helpful?</span>
-                <div className="flex gap-2">
-                  <button className={`flex h-8 w-8 items-center justify-center rounded-lg border bg-transparent transition-all hover:bg-current/5 ${theme.border} ${theme.hoverAccent}`}>
-                    <span className="text-sm">👍</span>
-                  </button>
-                  <button className={`flex h-8 w-8 items-center justify-center rounded-lg border bg-transparent transition-all hover:bg-current/5 ${theme.border} ${theme.hoverAccent}`}>
-                    <span className="text-sm">👎</span>
-                  </button>
-                </div>
+                {feedbackSubmitted ? (
+                  <span className={`text-[13px] font-medium text-[#C699FF]`}>
+                    Thank you for your feedback! 🎉
+                  </span>
+                ) : (
+                  <>
+                    <span className={`text-[13px] font-medium ${theme.muted}`}>Was this page helpful?</span>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => handleFeedback(true)}
+                        className={`flex h-8 w-8 items-center justify-center rounded-lg border bg-transparent transition-all hover:bg-current/5 ${theme.border} ${theme.hoverAccent}`}
+                      >
+                        <span className="text-sm">👍</span>
+                      </button>
+                      <button 
+                        onClick={() => handleFeedback(false)}
+                        className={`flex h-8 w-8 items-center justify-center rounded-lg border bg-transparent transition-all hover:bg-current/5 ${theme.border} ${theme.hoverAccent}`}
+                      >
+                        <span className="text-sm">👎</span>
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
               <a
                 href={`https://github.com/yash-pluto/refme/edit/main/frontend/content/${topicKey}.mdx`}
@@ -778,4 +830,33 @@ export default function TopicLayout({
       </button>
     </div>
   );
+}
+
+// --- HELPER COMPONENT FOR FUZZY MATCH HIGHLIGHTING ---
+function HighlightText({ text, matches }: { text: string; matches?: readonly [number, number][] }) {
+  if (!matches || matches.length === 0) return <span>{text}</span>;
+
+  const elements: React.ReactNode[] = [];
+  let lastIndex = 0;
+
+  matches.forEach(([start, end], i) => {
+    // Text before the match
+    if (start > lastIndex) {
+      elements.push(<span key={`unmatch-${i}`}>{text.substring(lastIndex, start)}</span>);
+    }
+    // The exact matched characters
+    elements.push(
+      <span key={`match-${i}`} className="font-bold text-[#C699FF] bg-[#C699FF]/10 rounded-sm">
+        {text.substring(start, end + 1)}
+      </span>
+    );
+    lastIndex = end + 1;
+  });
+
+  // Text after the final match
+  if (lastIndex < text.length) {
+    elements.push(<span key="unmatch-end">{text.substring(lastIndex)}</span>);
+  }
+
+  return <>{elements}</>;
 }

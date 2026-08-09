@@ -4,6 +4,7 @@ import { useTheme } from "../src/context/ThemeContext";
 import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
+import Fuse from "fuse.js"; // <-- Imported Fuse.js
 import {
   Binary,
   Braces,
@@ -125,26 +126,44 @@ export const REFERENCE_DATA = [
   },
 ];
 
-// Helper component to highlight matched text
-function HighlightText({ text, highlight, highlightStyle }: { text: string; highlight: string; highlightStyle: string }) {
-  if (!highlight.trim()) return <>{text}</>;
-  
-  const regex = new RegExp(`(${highlight})`, "gi");
-  const parts = text.split(regex);
-  
-  return (
-    <>
-      {parts.map((part, i) =>
-        regex.test(part) ? (
-          <span key={i} className={`rounded-[3px] px-[2px] font-medium ${highlightStyle}`}>
-            {part}
-          </span>
-        ) : (
-          <span key={i}>{part}</span>
-        )
-      )}
-    </>
-  );
+// --- FUZZY SEARCH HIGHLIGHT HELPER ---
+function HighlightText({
+  text,
+  matches,
+  fieldKey,
+  highlightStyle,
+}: {
+  text: string;
+  matches?: any[];
+  fieldKey: string;
+  highlightStyle: string;
+}) {
+  const match = matches?.find((m) => m.key === fieldKey);
+  if (!match || !match.indices || match.indices.length === 0) return <span>{text}</span>;
+
+  const elements: React.ReactNode[] = [];
+  let lastIndex = 0;
+
+  match.indices.forEach(([start, end]: [number, number], i: number) => {
+    // Text before the match
+    if (start > lastIndex) {
+      elements.push(<span key={`unmatch-${i}`}>{text.substring(lastIndex, start)}</span>);
+    }
+    // The exact matched characters
+    elements.push(
+      <span key={`match-${i}`} className={`font-medium ${highlightStyle} rounded-[3px] px-[2px]`}>
+        {text.substring(start, end + 1)}
+      </span>
+    );
+    lastIndex = end + 1;
+  });
+
+  // Text after the final match
+  if (lastIndex < text.length) {
+    elements.push(<span key="unmatch-end">{text.substring(lastIndex)}</span>);
+  }
+
+  return <>{elements}</>;
 }
 
 export default function LandingPage() {
@@ -163,7 +182,6 @@ export default function LandingPage() {
     border: darkMode ? "border-white/10" : "border-black/10",
     muted: darkMode ? "text-zinc-400" : "text-zinc-500",
     accent: darkMode ? "text-zinc-100" : "text-zinc-900",
-    // Clean, professional hover states without translations
     cardHover: darkMode
       ? "hover:border-[#C699FF]/40 hover:bg-[#C699FF]/[0.03]"
       : "hover:border-[#6f45d6]/40 hover:bg-[#6f45d6]/[0.03]",
@@ -204,20 +222,48 @@ export default function LandingPage() {
     }
   };
 
-  // Fast client-side filtering logic
+  // --- FUZZY SEARCH SETUP ---
+  const flattenedItems = useMemo(() => {
+    return REFERENCE_DATA.flatMap(cat =>
+      cat.items.map(item => ({ 
+        ...item, 
+        categoryName: cat.category, 
+        categoryIcon: cat.icon 
+      }))
+    );
+  }, []);
+
+  const fuse = useMemo(() => new Fuse(flattenedItems, {
+    keys: ["name", "desc"],
+    includeMatches: true,
+    threshold: 0.3, // Allows slight typos like 'reac' or 'jaavscript'
+    ignoreLocation: true,
+  }), [flattenedItems]);
+
   const filteredData = useMemo(() => {
     if (!searchQuery.trim()) return REFERENCE_DATA;
 
-    const query = searchQuery.toLowerCase();
-    return REFERENCE_DATA.map((category) => ({
-      ...category,
-      items: category.items.filter(
-        (item) =>
-          item.name.toLowerCase().includes(query) ||
-          item.desc.toLowerCase().includes(query)
-      ),
-    })).filter((category) => category.items.length > 0);
-  }, [searchQuery]);
+    const results = fuse.search(searchQuery.trim());
+
+    // Re-group the search results back into their original UI categories
+    const grouped = new Map();
+    results.forEach(({ item, matches }) => {
+      if (!grouped.has(item.categoryName)) {
+        grouped.set(item.categoryName, {
+          category: item.categoryName,
+          icon: item.categoryIcon,
+          items: []
+        });
+      }
+      grouped.get(item.categoryName).items.push({
+        ...item,
+        matches, // Append the match indices to pass to our Highlight component
+      });
+    });
+
+    return Array.from(grouped.values());
+  }, [searchQuery, fuse]);
+  // --------------------------
 
   return (
     <div className={`${theme.page} min-h-screen flex flex-col transition-colors duration-200`}>
@@ -256,7 +302,6 @@ export default function LandingPage() {
             Find the syntax, patterns, and implementation notes you need without digging through scattered docs. Built for speed and focus.
           </p>
 
-          {/* SEARCH BAR (Refactored to match TopicLayout component) */}
           <div className="mx-auto mt-12 max-w-2xl">
             <div
               className={`relative flex w-full items-center rounded-2xl border shadow-sm transition-all duration-200 ${theme.border} ${theme.panel} focus-within:border-[#C699FF]/60 focus-within:ring-4 focus-within:ring-[#C699FF]/10`}
@@ -272,7 +317,6 @@ export default function LandingPage() {
                 className="w-full bg-transparent py-4 pl-12 pr-20 text-base outline-none placeholder:opacity-50"
               />
               
-              {/* Absolute positioned elements to prevent layout shift */}
               <div className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center justify-end">
                 {searchQuery ? (
                   <button
@@ -318,7 +362,7 @@ export default function LandingPage() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {category.items.map((item) => (
+                  {category.items.map((item: any) => (
                     <Link
                       key={item.name}
                       href={item.href}
@@ -331,11 +375,11 @@ export default function LandingPage() {
                           {item.icon}
                         </div>
                         <h3 className="font-semibold tracking-tight transition-colors duration-300 group-hover:text-current">
-                          <HighlightText text={item.name} highlight={searchQuery} highlightStyle={theme.highlightText} />
+                          <HighlightText text={item.name} matches={item.matches} fieldKey="name" highlightStyle={theme.highlightText} />
                         </h3>
                       </div>
                       <p className={`text-sm leading-relaxed transition-colors duration-300 ${theme.muted} group-hover:opacity-90`}>
-                        <HighlightText text={item.desc} highlight={searchQuery} highlightStyle={theme.highlightText} />
+                        <HighlightText text={item.desc} matches={item.matches} fieldKey="desc" highlightStyle={theme.highlightText} />
                       </p>
                     </Link>
                   ))}

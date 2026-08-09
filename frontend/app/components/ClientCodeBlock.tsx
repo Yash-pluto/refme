@@ -1,15 +1,19 @@
 "use client";
 import { useTheme } from "../../src/context/ThemeContext";
 import { useState, useEffect } from "react";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, FileCode2 } from "lucide-react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 
 export default function ClientCodeBlock({
   code,
   language,
+  filename,
+  highlightLines = [],
 }: {
   code: string;
   language: string;
+  filename?: string;
+  highlightLines?: number[];
 }) {
   const { darkMode } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -168,7 +172,6 @@ export default function ClientCodeBlock({
     iconHover: darkMode ? "hover:text-zinc-100" : "hover:text-indigo-600",
   };
 
-  // Render a seamless skeleton placeholder while server is syncing with client
   if (!mounted) {
     return (
       <div
@@ -183,36 +186,64 @@ export default function ClientCodeBlock({
     >
       {/* Code Header Bar */}
       <div
-        className={`flex items-center justify-between px-4 py-2 border-b ${theme.border} ${theme.headerBg} transition-colors duration-200`}
+        className={`flex items-center justify-between px-4 py-2.5 border-b ${theme.border} ${theme.headerBg} transition-colors duration-200`}
       >
-        <span
-          className={`font-mono text-[10px] font-bold uppercase tracking-widest ${theme.text}`}
-        >
-          {language}
-        </span>
+        <div className="flex items-center gap-2">
+          {filename ? (
+            <>
+              <FileCode2 size={14} className="opacity-60" />
+              <span className={`font-mono text-xs font-medium ${theme.text}`}>
+                {filename}
+              </span>
+            </>
+          ) : (
+            <span
+              className={`font-mono text-[10px] font-bold uppercase tracking-widest opacity-70 ${theme.text}`}
+            >
+              {language}
+            </span>
+          )}
+        </div>
         <button
           onClick={copyToClipboard}
           className={`opacity-50 ${theme.iconHover} transition-colors`}
-          aria-label='Copy code'
+          aria-label="Copy code"
         >
           {copied ? (
             <Check
-              size={16}
+              size={15}
               className={darkMode ? "text-emerald-500" : "text-emerald-600"}
             />
           ) : (
-            <Copy size={16} />
+            <Copy size={15} />
           )}
         </button>
       </div>
 
       {/* Code Area */}
       <div
-        className={`p-4 overflow-x-auto ${theme.codeBg} transition-colors duration-200`}
+        className={`py-4 overflow-x-auto ${theme.codeBg} transition-colors duration-200`}
       >
         <SyntaxHighlighter
           language={language}
           style={darkMode ? pitchBlackModernStyle : softLightModernStyle}
+          wrapLines={true}
+          lineProps={(lineNumber) => {
+            const isHighlighted = highlightLines.includes(lineNumber);
+            return {
+              style: {
+                display: "block",
+                backgroundColor: isHighlighted 
+                  ? (darkMode ? "rgba(198, 153, 255, 0.1)" : "rgba(111, 69, 214, 0.1)") 
+                  : "transparent",
+                borderLeft: isHighlighted 
+                  ? (darkMode ? "3px solid #C699FF" : "3px solid #6f45d6") 
+                  : "3px solid transparent",
+                paddingLeft: "13px", // 16px total minus the 3px border
+                paddingRight: "16px",
+              }
+            };
+          }}
           customStyle={{
             background: "transparent",
             padding: 0,
