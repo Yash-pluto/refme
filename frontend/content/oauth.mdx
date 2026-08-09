@@ -1,0 +1,80 @@
+---
+title: "OAuth"
+description: "OAuth 2.0 authorization basics and Google's OAuth flow for secure third-party access."
+category: "Concepts"
+---
+
+## Getting Started
+
+OAuth is a protocol for granting third-party access without sharing credentials. Google's OAuth flow lets apps request permission to act on a user's behalf.
+
+---
+
+## OAuth 2.0 Roles
+
+- **Resource owner**: the user
+- **Client**: the app requesting access
+- **Authorization server**: issues tokens
+- **Resource server**: provides the protected data
+
+---
+
+## Authorization code flow
+
+1. Redirect the user to Google's authorization URL.
+2. User signs in and consents.
+3. Google redirects back with a code.
+4. Exchange the code for access and refresh tokens.
+
+---
+
+## Example request URL
+
+```text
+https://accounts.google.com/o/oauth2/v2/auth?
+  client_id=YOUR_CLIENT_ID&
+  redirect_uri=YOUR_REDIRECT_URI&
+  response_type=code&
+  scope=openid%20email%20profile&
+  access_type=offline
+```
+
+---
+
+## Token exchange
+
+```bash
+POST https://oauth2.googleapis.com/token
+Content-Type: application/x-www-form-urlencoded
+
+code=AUTH_CODE&
+client_id=YOUR_CLIENT_ID&
+client_secret=YOUR_CLIENT_SECRET&
+redirect_uri=YOUR_REDIRECT_URI&
+grant_type=authorization_code
+```
+
+---
+
+## Refresh tokens
+
+Use refresh tokens to obtain new access tokens when the current one expires.
+
+```bash
+POST https://oauth2.googleapis.com/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id=YOUR_CLIENT_ID&
+client_secret=YOUR_CLIENT_SECRET&
+refresh_token=REFRESH_TOKEN&
+grant_type=refresh_token
+```
+
+---
+
+## Best practices
+
+- keep client secrets private
+- use HTTPS for all OAuth redirects and token exchange
+- validate the `state` parameter to prevent CSRF
+- request only the scopes your app needs

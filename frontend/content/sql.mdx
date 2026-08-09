@@ -1,0 +1,96 @@
+---
+title: "SQL"
+description: "Structured Query Language for querying, modeling, and managing relational data stores."
+category: "Backend & systems"
+---
+
+## Getting Started
+
+SQL is used to create, read, update, and delete data from relational databases.
+
+### Basic Query
+
+```sql
+SELECT id, name, email
+FROM users
+WHERE active = true
+ORDER BY name ASC;
+```
+
+---
+
+## Data Definition
+
+Create tables and define columns.
+
+```sql
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+---
+
+## Joins
+
+Combine data from related tables.
+
+```sql
+SELECT o.id, u.name, o.total
+FROM orders o
+JOIN users u ON o.user_id = u.id
+WHERE o.status = 'completed';
+```
+
+### Types of joins
+
+- `INNER JOIN`: rows matching both tables
+- `LEFT JOIN`: all left rows, plus matching right rows
+- `RIGHT JOIN`: all right rows, plus matching left rows
+- `FULL JOIN`: all rows from both sides
+
+---
+
+## Modification
+
+```sql
+INSERT INTO users (name, email)
+VALUES ('Alice', 'alice@example.com');
+
+UPDATE users
+SET active = false
+WHERE id = 42;
+
+DELETE FROM users
+WHERE last_login < '2024-01-01';
+```
+
+---
+
+## Indexes & Performance
+
+Indexes speed reads on indexed columns.
+
+```sql
+CREATE INDEX idx_users_email ON users(email);
+```
+
+Use indexes selectively, and avoid indexing low-cardinality columns unnecessarily.
+
+---
+
+## Transactions
+
+Group statements to keep data consistent.
+
+```sql
+BEGIN;
+UPDATE accounts SET balance = balance - 100 WHERE id = 1;
+UPDATE accounts SET balance = balance + 100 WHERE id = 2;
+COMMIT;
+```
+
+Rollback on error to avoid partial updates.

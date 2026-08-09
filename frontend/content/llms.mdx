@@ -1,0 +1,109 @@
+---
+title: "LLMs"
+description: "Large language model concepts, prompt design, and safe integration patterns."
+category: "Data & AI"
+---
+
+## Getting Started
+
+Large language models (LLMs) are foundation models trained on vast amounts of text. They can generate coherent text, answer questions, summarize content, and perform many natural language tasks.
+
+---
+
+## What is an LLM?
+
+LLMs are typically transformer-based neural networks. They predict the next token in a sequence and can be conditioned on prompts or context.
+
+Key attributes:
+
+- large parameter counts
+- pretrained on diverse corpora
+- adaptable through prompt design or fine-tuning
+
+---
+
+## Prompting LLMs
+
+Prompts define the task and shape the output. Good prompts are:
+
+- clear and concise
+- specific about format and constraints
+- accompanied by examples when needed
+
+Example:
+
+```text
+Translate the following sentence to French:
+
+English: "The weather is nice today."
+French:
+```
+
+---
+
+## Output behavior
+
+LLMs are probabilistic. They generate outputs based on token likelihood, so results may vary each call unless you fix the seed or control temperature.
+
+Common parameters:
+
+- `temperature`: controls randomness
+- `top_p`: controls sampling diversity
+- `max_tokens`: limits output length
+
+---
+
+## Strengths and limitations
+
+Strengths:
+
+- fluent text generation
+- strong pattern recognition
+- flexible task handling
+
+Limitations:
+
+- can hallucinate facts
+- may repeat or drift from instructions
+- sensitive to prompt phrasing
+
+---
+
+## Safety and guardrails
+
+When using LLMs in products:
+
+- filter or review sensitive outputs
+- use content policies and guardrails
+- avoid exposing private or regulated data in prompts
+- log prompts and responses for auditing
+
+---
+
+## Practical applications
+
+LLMs power:
+
+- chatbots and assistants
+- summarization and note-taking
+- code completion and generation
+- semantic search and retrieval
+
+---
+
+## Deployment patterns
+
+Use LLMs with retrieval or external knowledge to improve grounding. Combine them with validation layers and human review for mission-critical flows.
+
+---
+
+## Monitoring and evaluation
+
+Track:
+
+- response quality
+- latency
+- token usage
+- error or unsafe output rates
+
+Improve systems through prompt iteration, fine-tuning, or retrieval augmentation.

@@ -1,0 +1,129 @@
+---
+title: "Java"
+description: "A widely used, object-oriented language for backend systems, JVM tooling, and enterprise applications."
+category: "Core Programming"
+---
+
+## Getting Started
+
+Java is a statically typed, class-based language that runs on the Java Virtual Machine (JVM). It is commonly used for backend services, Android apps, and large-scale systems.
+
+### Installation
+
+```bash
+java -version
+javac -version
+```
+
+### Hello World
+
+```java
+public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello, Java!");
+    }
+}
+```
+
+Compile and run:
+
+```bash
+javac HelloWorld.java
+java HelloWorld
+```
+```
+
+---
+
+## Classes & Objects
+
+Java uses classes as the primary building blocks.
+
+```java
+public class User {
+    private int id;
+    private String name;
+
+    public User(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+```
+
+### Inheritance
+
+```java
+public class Animal {
+    public void speak() {
+        System.out.println("..." );
+    }
+}
+
+public class Dog extends Animal {
+    @Override
+    public void speak() {
+        System.out.println("Woof");
+    }
+}
+```
+
+---
+
+## Collections & Streams
+
+The Java Collections Framework provides lists, sets, maps, and more.
+
+```java
+List<String> names = List.of("Alice", "Bob", "Charlie");
+Map<String, Integer> ages = Map.of("Alice", 30, "Bob", 25);
+```
+
+Java Streams enable expressive, functional-style operations:
+
+```java
+List<String> filtered = names.stream()
+    .filter(name -> name.startsWith("A"))
+    .map(String::toUpperCase)
+    .toList();
+```
+
+---
+
+## Exception Handling
+
+Java uses exceptions for error handling.
+
+```java
+try {
+    int result = divide(10, 0);
+} catch (ArithmeticException e) {
+    System.err.println("Cannot divide by zero");
+} finally {
+    System.out.println("Cleanup code");
+}
+```
+
+Checked exceptions must be declared or handled.
+
+```java
+public void loadFile(String path) throws IOException {
+    Files.readString(Path.of(path));
+}
+```
+
+---
+
+## JVM & Tooling
+
+Java code compiles to bytecode that runs on the JVM. Modern JVM tooling includes `javac`, `jshell`, and build systems like Maven and Gradle.
+
+```bash
+mvn clean install
+# or
+./gradlew build
+```

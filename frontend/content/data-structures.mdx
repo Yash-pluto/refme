@@ -1,0 +1,84 @@
+---
+title: "Data Structures"
+description: "Common data organization patterns, choosing the right structure for speed and simplicity."
+category: "Concepts"
+---
+
+## Getting Started
+
+Data structures organize information so programs can access, insert, and update it efficiently. Choosing the right structure greatly impacts performance and clarity.
+
+---
+
+## Arrays & Lists
+
+Arrays store ordered values and support fast indexed access.
+
+```js
+const items = [1, 2, 3, 4];
+console.log(items[2]); // 3
+```
+
+Use arrays when order matters and insertions are mostly at the end.
+
+---
+
+## Stacks & Queues
+
+Stacks use LIFO order; queues use FIFO order.
+
+```js
+const stack = [];
+stack.push(1);
+stack.pop();
+
+const queue = [];
+queue.push(1);
+queue.shift();
+```
+
+These are useful for traversal, backtracking, and processing streams.
+
+---
+
+## Maps & Sets
+
+Maps associate keys with values; sets store unique values.
+
+```js
+const map = new Map([["a", 1]]);
+const set = new Set([1, 2, 2]);
+```
+
+Use maps for lookup by unique keys and sets for membership tests.
+
+---
+
+## Trees
+
+Trees represent hierarchical data like file systems or parse structures.
+
+Binary search trees let you search, insert, and delete in logarithmic time on average.
+
+---
+
+## Graphs
+
+Graphs model relationships between nodes.
+
+- **Directed** edges have direction
+- **Undirected** edges do not
+- **Weighted** graphs assign a cost to edges
+
+Graphs are used for routing, dependencies, and social networks.
+
+---
+
+## Choosing the right structure
+
+- use arrays for sequential data
+- use maps for key/value lookup
+- use trees for hierarchical relationships
+- use graphs for complex connections
+
+Consider access patterns, mutation frequency, and memory use.

@@ -1,0 +1,47 @@
+---
+title: "Databases"
+description: "Database concepts, storage models, and guidance for choosing the right data store."
+category: "Architecture & infrastructure"
+---
+
+## Getting Started
+
+Databases store and manage application data. Choosing the right database depends on your access patterns, consistency needs, and scale.
+
+---
+
+## Relational databases
+
+Use SQL databases when data is structured and relationships matter.
+
+```sql
+SELECT * FROM users WHERE active = true;
+```
+
+---
+
+## NoSQL databases
+
+NoSQL stores are useful for flexible schemas and high write throughput.
+
+- document stores: MongoDB, Couchbase
+- key-value stores: Redis, DynamoDB
+- wide-column stores: Cassandra
+
+---
+
+## Transactions
+
+Use transactions to keep related operations atomic and consistent.
+
+---
+
+## Indexes
+
+Index columns used frequently in queries to improve read performance.
+
+---
+
+## Backups
+
+Regular backups and restore plans are essential for data durability.

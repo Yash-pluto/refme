@@ -1,0 +1,47 @@
+---
+title: "Linux"
+description: "Linux fundamentals for filesystems, processes, permissions, and command-line workflows."
+category: "Dev tools"
+---
+
+## Getting Started
+
+Linux is a widely used operating system for development and servers. The command line is its primary interface for managing files, processes, and services.
+
+---
+
+## File permissions
+
+Use `ls -l` to see permissions and `chmod` to update them.
+
+```bash
+chmod +x script.sh
+chown user:group file.txt
+```
+
+---
+
+## Package management
+
+Common package managers include `apt`, `yum`, and `pacman`, depending on the distribution.
+
+---
+
+## Processes
+
+Use `ps`, `top`, or `htop` to inspect running processes.
+
+```bash
+ps aux | grep node
+kill <pid>
+```
+
+---
+
+## Shell workflows
+
+Use pipes, redirects, and command substitution to compose powerful one-liners.
+
+```bash
+grep "error" logs.txt | sort | uniq -c
+```

@@ -1,0 +1,64 @@
+---
+title: "Deployment"
+description: "End-to-end deployment from domain purchase to DNS setup, hosting, and release management."
+category: "Architecture & infrastructure"
+---
+
+## Getting Started
+
+Deployment is the process of getting code from development into a live environment. It covers domain setup, hosting configuration, publishing, and updating services.
+
+---
+
+## Domain ownership
+
+Purchase a domain from a registrar such as Namecheap, Google Domains, or Cloudflare. Keep the account secure and document the registrar credentials.
+
+---
+
+## DNS setup
+
+Point your domain to the hosting provider using DNS records.
+
+- `A` records map a hostname to an IPv4 address
+- `CNAME` records alias one hostname to another
+- `TXT` records verify ownership and configure email
+
+---
+
+## Example CNAME setup
+
+For a managed platform with a custom domain:
+
+- `www.example.com` → `app.examplehost.com` (CNAME)
+- `example.com` → `@` or use an A record if the provider requires it
+
+---
+
+## SSL/TLS
+
+Enable HTTPS by configuring TLS certificates. Many hosts provide automatic certificate management.
+
+---
+
+## Hosting options
+
+- static hosts: Vercel, Netlify, GitHub Pages
+- platform services: AWS Elastic Beanstalk, Azure App Service, Google App Engine
+- container platforms: Kubernetes, Docker Cloud
+
+---
+
+## Deployment flow
+
+1. push code to version control
+2. build artifacts
+3. run tests
+4. deploy to staging
+5. promote to production
+
+---
+
+## Rollbacks and updates
+
+Use versioned deployments or blue/green and canary releases so you can safely roll back if needed.

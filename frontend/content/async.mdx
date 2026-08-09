@@ -1,0 +1,71 @@
+---
+title: "Async"
+description: "Asynchronous programming concepts for promises, tasks, event loops, and concurrency."
+category: "Concepts"
+---
+
+## Getting Started
+
+Async programming lets applications perform work without blocking the main flow. It is essential for handling I/O, timers, and concurrent operations.
+
+---
+
+## Promises
+
+A promise represents a future value.
+
+```js
+const fetchData = () =>
+  new Promise((resolve) => {
+    setTimeout(() => resolve("done"), 1000);
+  });
+
+fetchData().then((result) => console.log(result));
+```
+
+---
+
+## Async/Await
+
+Cleaner async control flow using `async` and `await`.
+
+```js
+async function load() {
+  const result = await fetchData();
+  console.log(result);
+}
+
+load();
+```
+
+---
+
+## Event Loop
+
+The event loop schedules callbacks and microtasks.
+
+- Call stack: executes code
+- Task queue: user events, timers, I/O
+- Microtask queue: promises, `queueMicrotask`
+
+`await` pauses the async function and resumes it after the promise resolves.
+
+---
+
+## Concurrency Patterns
+
+Common approaches for running multiple async tasks.
+
+```js
+const [data1, data2] = await Promise.all([
+  fetchData(),
+  fetchData(),
+]);
+
+const first = await Promise.race([
+  fetchData(),
+  fetchData(),
+]);
+```
+
+Use `Promise.allSettled` for independent tasks where failures should not cancel all operations.

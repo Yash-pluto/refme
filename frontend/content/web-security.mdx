@@ -1,0 +1,58 @@
+---
+title: "Web Security"
+description: "Protecting web applications against common threats like XSS, CSRF, and injection attacks."
+category: "Concepts"
+---
+
+## Getting Started
+
+Web security focuses on protecting browser-based applications from attackers who can manipulate user input, network requests, or client-side code.
+
+---
+
+## Cross-site scripting (XSS)
+
+XSS occurs when untrusted input is rendered as executable code in the browser.
+
+- escape or sanitize user-generated content
+- use safe templating and frameworks that auto-escape
+
+---
+
+## Cross-site request forgery (CSRF)
+
+CSRF tricks authenticated users into making unintended requests.
+
+- use anti-CSRF tokens
+- require same-site cookies or `SameSite=Lax`
+- verify origin and referrer headers
+
+---
+
+## Injection attacks
+
+Prevent SQL, command, and script injection by avoiding direct interpolation of untrusted input.
+
+- use parameterized queries
+- validate and sanitize inputs
+
+---
+
+## Security headers
+
+Add headers to harden browser behavior.
+
+```http
+Content-Security-Policy: default-src 'self';
+X-Content-Type-Options: nosniff;
+X-Frame-Options: DENY;
+Referrer-Policy: no-referrer-when-downgrade;
+```
+
+---
+
+## Authentication & session security
+
+- use `HttpOnly` and `Secure` cookies
+- rotate session identifiers
+- avoid storing sensitive data on the client

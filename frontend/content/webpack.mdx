@@ -1,0 +1,62 @@
+---
+title: "Webpack"
+description: "A module bundler for JavaScript applications, handling assets, code splitting, and build optimization."
+category: "Dev tools"
+---
+
+## Getting Started
+
+Webpack bundles JavaScript, CSS, images, and other assets for deployment. It transforms modules into optimized output for the browser.
+
+---
+
+## Basic configuration
+
+```js
+const path = require("path");
+
+module.exports = {
+  entry: "./src/index.js",
+  output: {
+    path: path.resolve(__dirname, "dist"),
+    filename: "bundle.js",
+  },
+  module: {
+    rules: [
+      {
+        test: /\.jsx?$/,
+        use: "babel-loader",
+        exclude: /node_modules/,
+      },
+    ],
+  },
+};
+```
+
+---
+
+## Loaders
+
+Loaders transform files before bundling.
+
+- `babel-loader` for JavaScript
+- `css-loader` and `style-loader` for CSS
+- `file-loader` for images
+
+---
+
+## Plugins
+
+Plugins extend Webpack's behavior, such as optimizing bundles or generating HTML.
+
+---
+
+## Code splitting
+
+Use dynamic imports or entry points to split code for faster initial loads.
+
+```js
+import("./module").then((module) => {
+  module.doSomething();
+});
+```

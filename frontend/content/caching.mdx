@@ -1,0 +1,62 @@
+---
+title: "Caching"
+description: "Caching strategies for faster reads, lower latency, and reduced backend load."
+category: "Concepts"
+---
+
+## Getting Started
+
+Caching stores computed or retrieved data closer to the consumer so repeated requests are faster. It is a key technique for improving performance and scaling systems.
+
+---
+
+## Cache locations
+
+- Browser cache
+- CDN cache
+- In-memory cache
+- Distributed cache (Redis, Memcached)
+
+---
+
+## Cache keys
+
+Use stable, unique keys that clearly identify the cached item.
+
+```js
+const cacheKey = `user:${userId}:profile`;
+```
+
+---
+
+## Expiration
+
+Set TTL values to avoid stale data.
+
+```js
+cache.set(key, value, { ttl: 60 });
+```
+
+Use shorter TTL for frequently changing data and longer TTL for stable content.
+
+---
+
+## Cache invalidation
+
+Invalidate cached data when the underlying source changes.
+
+- write-through: update cache on writes
+- cache-aside: load from cache, fall back to source
+- time-based expiry
+
+---
+
+## Cache-control
+
+Web caches use headers to manage freshness.
+
+```http
+Cache-Control: public, max-age=3600, stale-while-revalidate=60
+```
+
+Control how browsers and CDNs store responses.

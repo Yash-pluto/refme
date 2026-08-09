@@ -1,0 +1,50 @@
+---
+title: "Dependency Injection"
+description: "A design approach for decoupling components by providing dependencies from the outside."
+category: "Architecture & infrastructure"
+---
+
+## Getting Started
+
+Dependency injection is a technique where an object receives its dependencies from external code rather than creating them itself. This makes components easier to test, replace, and maintain.
+
+---
+
+## Key benefits
+
+- decouples configuration from implementation
+- improves testability by allowing mocks/stubs
+- centralizes object creation logic
+
+---
+
+## Common forms
+
+- constructor injection: dependencies are provided through constructor parameters
+- setter injection: dependencies are assigned via properties or setters
+- interface injection: the dependency exposes an interface for injection
+
+---
+
+## Example
+
+```ts
+class Logger {
+  log(message: string) {
+    console.log(message);
+  }
+}
+
+class UserService {
+  constructor(private logger: Logger) {}
+
+  createUser(name: string) {
+    this.logger.log(`Creating user ${name}`);
+  }
+}
+
+const logger = new Logger();
+const service = new UserService(logger);
+```
+
+Injecting the logger keeps `UserService` independent from the concrete `Logger` implementation.

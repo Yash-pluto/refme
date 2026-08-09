@@ -1,0 +1,56 @@
+---
+title: "Terraform"
+description: "Infrastructure as code for provisioning cloud resources in a repeatable, version-controlled way."
+category: "Dev tools"
+---
+
+## Getting Started
+
+Terraform defines infrastructure using declarative configuration files. It can provision resources across many cloud providers from a single workflow.
+
+---
+
+## Basic configuration
+
+```hcl
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "~> 4.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = "us-east-1"
+}
+```
+
+---
+
+## Resources
+
+```hcl
+resource "aws_s3_bucket" "example" {
+  bucket = "my-terraform-bucket"
+  acl    = "private"
+}
+```
+
+---
+
+## Workflow
+
+```bash
+terraform init
+tf plan
+tf apply
+tf destroy
+```
+
+---
+
+## State
+
+Terraform stores state to track resources. Use remote state backends like S3 or Terraform Cloud for shared teams.

@@ -1,0 +1,43 @@
+---
+title: "RAG"
+description: "Retrieval-augmented generation for grounded language model responses using external knowledge."
+category: "Data & AI"
+---
+
+## Getting Started
+
+Retrieval-augmented generation (RAG) combines retrieval from external sources with language model generation. It helps produce more accurate, grounded responses.
+
+---
+
+## Core flow
+
+1. convert the query to an embedding
+2. search a vector store for relevant documents
+3. use the retrieved text as context for the model
+
+---
+
+## Benefits
+
+- reduces hallucinations
+- keeps responses grounded in real data
+- allows up-to-date retrieval without retraining the model
+
+---
+
+## Example
+
+Use retrieved passages in the prompt to help the model answer accurately.
+
+```text
+Context: <retrieved documents>
+Question: <user query>
+Answer:
+```
+
+---
+
+## Practical tips
+
+Keep context concise, rank the best documents first, and validate the final output.

@@ -1,0 +1,120 @@
+---
+title: "CSS"
+description: "Cascading Style Sheets for layout, responsive design, and visual presentation on the web."
+category: "Frontend & Web"
+---
+
+## Getting Started
+
+CSS styles web content using selectors, properties, and values. It controls layout, typography, spacing, and visual details separately from HTML structure.
+
+### Basic Syntax
+
+```css
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  color: #111;
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+```
+
+---
+
+## Selectors
+
+Common selectors include element, class, ID, and attribute selectors.
+
+```css
+p {
+  line-height: 1.6;
+}
+
+.button {
+  display: inline-block;
+}
+
+#header {
+  background: #f3f3f3;
+}
+
+input[type="text"] {
+  border: 1px solid #ccc;
+}
+```
+
+---
+
+## Layout
+
+Flexbox and Grid handle modern layout patterns.
+
+```css
+.container {
+  display: flex;
+  gap: 1rem;
+}
+
+.card {
+  flex: 1;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+```
+
+---
+
+## Responsive Design
+
+Media queries adapt layouts for different screen sizes.
+
+```css
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+```
+
+---
+
+## Box Model
+
+The box model determines how width, padding, border, and margin combine.
+
+```css
+.box {
+  width: 200px;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  margin: 1rem;
+}
+```
+
+Use `box-sizing: border-box;` to include padding and border in the total width.
+
+---
+
+## Common Properties
+
+```css
+button {
+  background-color: #2563eb;
+  color: white;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+```

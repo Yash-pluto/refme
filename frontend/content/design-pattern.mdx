@@ -1,0 +1,94 @@
+---
+title: "Design Patterns"
+description: "Reusable software design patterns for organizing code and solving common problems."
+category: "Concepts"
+---
+
+## Getting Started
+
+Design patterns are proven solutions for common software design challenges. They help structure code, improve reuse, and make systems easier to understand.
+
+---
+
+## Creational patterns
+
+Create objects in a controlled, flexible way.
+
+### Factory
+
+```js
+class CarFactory {
+  create(type) {
+    if (type === "sedan") return new Sedan();
+    if (type === "suv") return new SUV();
+    throw new Error("Unknown type");
+  }
+}
+```
+
+### Singleton
+
+```js
+class Logger {
+  static instance;
+  static getInstance() {
+    if (!Logger.instance) {
+      Logger.instance = new Logger();
+    }
+    return Logger.instance;
+  }
+}
+```
+
+---
+
+## Structural patterns
+
+Compose objects to share behavior.
+
+### Adapter
+
+```js
+class OldPaymentService {
+  pay(amount) {
+    return `Paid ${amount}`;
+  }
+}
+
+class PaymentAdapter {
+  constructor(service) {
+    this.service = service;
+  }
+  makePayment(amount) {
+    return this.service.pay(amount);
+  }
+}
+```
+
+---
+
+## Behavioral patterns
+
+Encapsulate communication and control flow.
+
+### Observer
+
+```js
+class EventEmitter {
+  constructor() {
+    this.handlers = [];
+  }
+  subscribe(fn) {
+    this.handlers.push(fn);
+  }
+  emit(value) {
+    this.handlers.forEach((fn) => fn(value));
+  }
+}
+```
+
+---
+
+## When to use patterns
+
+Use patterns when they simplify architecture or reduce repeated code. Avoid over-engineering: prefer simple, direct solutions until a pattern clearly improves maintainability.

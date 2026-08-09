@@ -1,0 +1,108 @@
+---
+title: "Next.js"
+description: "A React framework for hybrid rendering, routing, and production-ready web applications."
+category: "Frontend & Web"
+---
+
+## Getting Started
+
+Next.js is a React framework that supports server-side rendering, static generation, and client-side transitions out of the box.
+
+### Create a Project
+
+```bash
+npx create-next-app@latest my-app
+cd my-app
+npm run dev
+```
+
+---
+
+## Pages & Routing
+
+Next.js uses the `app/` directory for file-based routing.
+
+```bash
+app/
+  page.tsx        # Home route
+  about/page.tsx  # /about route
+  blog/[slug]/page.tsx # Dynamic route
+```
+
+### Static Page Example
+
+```tsx
+// app/page.tsx
+export default function Home() {
+  return <h1>Welcome to Next.js</h1>;
+}
+```
+
+---
+
+## Data Fetching
+
+Next.js supports server components and data fetching with `fetch` or framework helpers.
+
+```tsx
+export default async function Page() {
+  const res = await fetch("https://api.example.com/data");
+  const data = await res.json();
+
+  return <div>{data.title}</div>;
+}
+```
+
+### Client Components
+
+A file becomes a client component when it includes `"use client"` at the top.
+
+```tsx
+"use client";
+import { useState } from "react";
+
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  return <button onClick={() => setCount((c) => c + 1)}>{count}</button>;
+}
+```
+
+---
+
+## Layouts
+
+Layouts in Next.js can wrap pages and preserve shared UI across routes.
+
+```tsx
+// app/layout.tsx
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+---
+
+## API Routes
+
+API routes can be implemented inside `app/api`.
+
+```ts
+// app/api/hello/route.ts
+import { NextResponse } from "next/server";
+
+export async function GET() {
+  return NextResponse.json({ message: "Hello from Next.js API" });
+}
+```
+
+---
+
+## Performance
+
+Next.js provides optimized image handling, route prefetching, and built-in caching.
+
+Use `next/image`, `app/` directory server rendering, and edge functions for fast, scalable applications.

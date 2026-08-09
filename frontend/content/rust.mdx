@@ -1,0 +1,108 @@
+---
+title: "Rust"
+description: "A systems language focused on memory safety, performance, and concurrency without a garbage collector."
+category: "Core Programming"
+---
+
+## Getting Started
+
+Rust is a compiled language that guarantees memory safety through ownership and borrowing rules. It is well-suited for systems work, CLI tools, and high-performance services.
+
+### Installation
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+rustup default stable
+rustc --version
+```
+
+### Hello World
+
+```rust
+fn main() {
+    println!("Hello, Rust!");
+}
+```
+
+Build and run with `cargo run`.
+
+---
+
+## Ownership & Borrowing
+
+Ownership is Rust's core safety mechanism.
+
+```rust
+let s = String::from("hello");
+let t = s; // move occurs here
+// s is no longer valid
+println!("{}", t);
+```
+
+Borrowing lets you reference values without taking ownership.
+
+```rust
+fn length(s: &String) -> usize {
+    s.len()
+}
+
+let s = String::from("hello");
+println!("{}", length(&s));
+```
+
+---
+
+## Pattern Matching
+
+`match` is exhaustive and powerful.
+
+```rust
+enum Shape {
+    Circle(f64),
+    Rectangle { width: f64, height: f64 },
+}
+
+fn area(shape: Shape) -> f64 {
+    match shape {
+        Shape::Circle(radius) => std::f64::consts::PI * radius * radius,
+        Shape::Rectangle { width, height } => width * height,
+    }
+}
+```
+
+### Option & Result
+
+```rust
+fn divide(a: f64, b: f64) -> Result<f64, String> {
+    if b == 0.0 {
+        Err(String::from("division by zero"))
+    } else {
+        Ok(a / b)
+    }
+}
+
+match divide(4.0, 2.0) {
+    Ok(value) => println!("{}", value),
+    Err(err) => println!("Error: {}", err),
+}
+```
+
+---
+
+## Cargo & Crates
+
+Cargo is Rust's package manager and build tool.
+
+```bash
+cargo new my-app
+cd my-app
+cargo build
+cargo test
+```
+
+Dependencies are declared in `Cargo.toml`:
+
+```toml
+[dependencies]
+serde = "1.0"
+```

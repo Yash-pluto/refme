@@ -1,0 +1,62 @@
+---
+title: "Security"
+description: "Foundational security practices for protecting applications, data, and infrastructure."
+category: "Concepts"
+---
+
+## Getting Started
+
+Security is a core part of software development, not an afterthought. It includes authentication, authorization, input validation, encryption, and safe defaults.
+
+### Principle of least privilege
+
+Grant the minimum access needed for each component or user. This reduces the impact of compromised credentials and unintended actions.
+
+---
+
+## Authentication vs Authorization
+
+- **Authentication** verifies identity.
+- **Authorization** determines permissions.
+
+A user can be authenticated without being authorized to perform every action.
+
+---
+
+## Input Validation
+
+Never trust external data. Validate shapes, types, and values on the server before processing or storing them.
+
+```js
+if (typeof email !== "string" || !email.includes("@")) {
+  throw new Error("Invalid email");
+}
+```
+
+Use schema validation libraries or built-in guards whenever possible.
+
+---
+
+## Encryption
+
+Protect sensitive information both in transit and at rest.
+
+- Use TLS/HTTPS for network communication
+- Hash passwords with adaptive algorithms like bcrypt or Argon2
+- Encrypt sensitive data with strong, well-tested libraries
+
+---
+
+## Secure Defaults
+
+Defaults should be safe by design:
+
+- disable debug output in production
+- enable CSP headers for web applications
+- require strong passwords or MFA for privileged actions
+
+---
+
+## Security Monitoring
+
+Detect problems before they become incidents. Use logging, alerts, and regular audits to identify anomalies.

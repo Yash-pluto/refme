@@ -1,0 +1,126 @@
+---
+title: "Prompt Engineering"
+description: "Techniques for writing effective prompts, structuring input, and getting reliable outputs from language models."
+category: "Data & AI"
+---
+
+## Getting Started
+
+Prompt engineering is the practice of writing instructions that guide a language model toward the output you want. It is critical when building applications with large language models because small wording changes can dramatically alter results.
+
+---
+
+## Prompt structure
+
+A strong prompt typically includes:
+
+- a clear task description
+- the input or context
+- explicit output requirements
+- examples when helpful
+
+Example structure:
+
+```text
+Task: Extract email addresses from the text below.
+
+Text:
+<user text>
+
+Output: A JSON array of email addresses.
+```
+
+---
+
+## Prompt patterns
+
+### Zero-shot
+
+Ask the model to complete a task without examples.
+
+```text
+Translate this sentence to Spanish:
+Hello, how are you?
+```
+
+### Few-shot
+
+Provide examples that show the desired format.
+
+```text
+English: Hello
+Spanish: Hola
+
+English: Thank you
+Spanish: Gracias
+
+English: Good morning
+Spanish:
+```
+
+### Chain-of-thought
+
+Ask the model to explain its reasoning before answering. This can improve accuracy for complex tasks.
+
+```text
+Explain your reasoning step by step, then provide the final answer.
+```
+
+---
+
+## Prompt tuning
+
+Refine prompts through iteration:
+
+- simplify language
+- remove ambiguity
+- constrain output format
+- test with edge cases
+
+Example: prefer specific output markers like `JSON:` or `Answer:` to reduce variation.
+
+---
+
+## Common failure modes
+
+Be aware of:
+
+- ambiguous instructions
+- overly broad tasks
+- missing data context
+- prompt injection or malicious input
+
+Mitigate by validating outputs and sanitizing inputs.
+
+---
+
+## Prompt evaluation
+
+Measure prompt performance with metrics such as:
+
+- accuracy against expected results
+- output validity (JSON, code, etc.)
+- fuzziness of responses across similar prompts
+
+Try A/B testing prompt variants and keeping the best prompt as the canonical version.
+
+---
+
+## Developer tooling
+
+Use prompt templates, wrapper libraries, and prompt versioning to manage complexity.
+
+- keep prompts in source control
+- document the purpose and constraints of each prompt
+- separate dynamic input from the static prompt text
+
+---
+
+## Practical advice
+
+- prefer explicit instructions over implied intent
+- ask for exact output structure when the downstream system depends on it
+- avoid asking the model to make up unsupported facts
+- use system messages or role prompts when supported by the API
+
+Prompt engineering is part craft and part experimentation. The best prompts are those that are easy to maintain, test, and adapt over time.

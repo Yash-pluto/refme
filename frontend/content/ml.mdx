@@ -1,0 +1,128 @@
+---
+title: "ML"
+description: "Machine learning fundamentals for supervised, unsupervised, and model evaluation techniques."
+category: "Data & AI"
+---
+
+## Getting Started
+
+Machine learning (ML) automates decision-making by training models to find patterns in data. ML systems learn from examples, and the quality of data and training directly affects results.
+
+---
+
+## Core learning paradigms
+
+### Supervised learning
+
+Models learn from labeled examples.
+
+- classification predicts discrete labels, such as spam vs. not spam
+- regression predicts continuous values, such as price or temperature
+
+### Unsupervised learning
+
+Models discover structure in unlabeled data.
+
+- clustering groups similar items
+- dimensionality reduction identifies important features
+
+### Reinforcement learning
+
+Agents learn by trial and error, optimizing rewards over time.
+
+- useful for games, robotics, and decision-making systems
+
+---
+
+## The training loop
+
+A typical supervised ML workflow includes:
+
+1. gather labeled examples
+2. split into train, validation, and test sets
+3. choose a model architecture
+4. fit the model on training data
+5. evaluate on validation data
+6. tune hyperparameters
+7. verify on a test set
+
+---
+
+## Feature engineering
+
+Features are the inputs to your model. Better features can yield better predictions.
+
+- normalize numeric values
+- encode categories with one-hot or ordinal encoding
+- create interaction features or aggregated statistics
+- remove irrelevant or duplicate features
+
+Example with Python:
+
+```python
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+```
+
+---
+
+## Model selection
+
+Choose a model based on problem type and dataset size.
+
+- logistic regression for interpretable classification
+- random forests for robust, non-linear problems
+- gradient boosting for high accuracy on tabular data
+- neural networks for image, text, and complex feature interactions
+
+Consider latency and explainability when selecting a model for production.
+
+---
+
+## Hyperparameters & tuning
+
+Hyperparameters control model complexity and training behavior.
+
+- learning rate
+- tree depth
+- regularization strength
+- batch size
+
+Use grid search, random search, or Bayesian optimization to find good values.
+
+---
+
+## Evaluation metrics
+
+Pick metrics that match the business goal.
+
+- accuracy for balanced classification
+- precision/recall for imbalanced classes
+- mean absolute error for regression
+- F1 score for trade-offs between precision and recall
+
+---
+
+## Deployment considerations
+
+ML in production requires more than a trained model.
+
+- monitor input data drift
+- retrain when performance degrades
+- manage model versions and data lineage
+- store artifacts and metadata for reproducibility
+
+---
+
+## Practical pitfalls
+
+Watch out for:
+
+- leaking future information into training data
+- using test data during feature engineering
+- overfitting to the training set
+- ignoring the business context behind metrics
+
+A strong ML workflow balances experimentation with engineering discipline.

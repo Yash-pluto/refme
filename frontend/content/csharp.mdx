@@ -1,0 +1,121 @@
+---
+title: "C#"
+description: "A modern, object-oriented language for .NET applications, web services, and desktop development."
+category: "Core Programming"
+---
+
+## Getting Started
+
+C# is a statically typed language developed by Microsoft for the .NET ecosystem. It is widely used for web APIs, desktop apps, cloud services, and game development.
+
+### Hello World
+
+```csharp
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        Console.WriteLine("Hello, C#!");
+    }
+}
+```
+
+### Run
+
+```bash
+dotnet new console -o HelloApp
+cd HelloApp
+dotnet run
+```
+
+---
+
+## Types & Variables
+
+C# has strong typing and supports both reference types and value types.
+
+```csharp
+int count = 5;
+string name = "RefMe";
+bool isActive = true;
+decimal price = 19.99m;
+```
+
+### Nullable types
+
+```csharp
+int? optionalNumber = null;
+string? maybeText = null;
+```
+
+---
+
+## Classes & Methods
+
+```csharp
+public class User
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+
+    public User(int id, string name)
+    {
+        Id = id;
+        Name = name;
+    }
+
+    public void Greet()
+    {
+        Console.WriteLine($"Hello, {Name}!");
+    }
+}
+```
+
+---
+
+## Async & Await
+
+Asynchronous programming uses `Task` and `async` methods.
+
+```csharp
+using System.Threading.Tasks;
+
+public async Task<string> FetchDataAsync()
+{
+    await Task.Delay(1000);
+    return "Data loaded";
+}
+
+public async Task MainAsync()
+{
+    string result = await FetchDataAsync();
+    Console.WriteLine(result);
+}
+```
+
+---
+
+## LINQ
+
+LINQ provides expressive queries over collections.
+
+```csharp
+var numbers = new[] { 1, 2, 3, 4, 5 };
+var even = numbers.Where(n => n % 2 == 0).ToList();
+var names = new[] { "Alice", "Bob", "Charlie" };
+var upper = names.Select(n => n.ToUpper());
+```
+
+---
+
+## .NET Tooling
+
+The `.NET CLI` is used to build, run, and test projects.
+
+```bash
+dotnet build
+dotnet test
+dotnet publish -c Release
+```

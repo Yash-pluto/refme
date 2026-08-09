@@ -1,0 +1,92 @@
+---
+title: "Testing"
+description: "Testing fundamentals for unit tests, assertions, and Jest workflows."
+category: "Concepts"
+---
+
+## Getting Started
+
+Testing verifies code behavior and prevents regressions. Jest is a popular JavaScript testing framework for unit and integration tests.
+
+### Installation
+
+```bash
+npm install --save-dev jest @types/jest ts-jest
+npx jest --init
+```
+
+Add a script in `package.json`:
+
+```json
+{
+  "scripts": {
+    "test": "jest"
+  }
+}
+```
+
+---
+
+## Writing Tests
+
+A basic Jest test uses `test` and `expect`.
+
+```js
+// sum.test.js
+import { sum } from "./sum";
+
+test("adds two numbers", () => {
+  expect(sum(1, 2)).toBe(3);
+});
+```
+
+---
+
+## Assertions
+
+Common assertions:
+
+```js
+expect(value).toBe(expected);
+expect(array).toContain(item);
+expect(value).toHaveLength(3);
+expect(fn).toThrow("Error message");
+```
+
+---
+
+## Async Tests
+
+Use `async`/`await` for promises.
+
+```js
+test("fetches data", async () => {
+  const data = await fetchData();
+  expect(data).toEqual({ success: true });
+});
+```
+
+---
+
+## Mocking
+
+Mock dependencies to isolate test behavior.
+
+```js
+jest.mock("./api");
+import { fetchUser } from "./api";
+
+fetchUser.mockResolvedValue({ id: 1, name: "Alice" });
+```
+
+---
+
+## Coverage
+
+Run Jest with coverage to track tested code.
+
+```bash
+npx jest --coverage
+```
+
+Use coverage reports to identify missing test paths and improve confidence.

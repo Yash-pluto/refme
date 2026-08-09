@@ -1,0 +1,91 @@
+---
+title: "Bash"
+description: "Shell scripting fundamentals, command composition, pipelines, and automation workflows."
+category: "Backend & systems"
+---
+
+## Getting Started
+
+Bash is a Unix shell and scripting language used for command-line automation and system tasks.
+
+### Basic Commands
+
+```bash
+pwd          # Print working directory
+ls -la       # List files with details
+cd /path     # Change directory
+mkdir project
+```
+
+### Shebang
+
+```bash
+#!/usr/bin/env bash
+```
+
+Add this at the top of scripts to run them with Bash.
+
+---
+
+## Variables & Expansion
+
+```bash
+name="RefMe"
+echo "Hello, $name"
+
+readonly PROJECT="refme"
+```
+
+Use braces for safe expansion in strings.
+
+```bash
+echo "${name}_docs"
+```
+
+---
+
+## Pipes & Redirection
+
+Compose commands with pipes and redirect output.
+
+```bash
+cat file.txt | grep "search"
+ls > files.txt
+sort < unsorted.txt
+```
+
+Append instead of overwrite with `>>`.
+
+---
+
+## Conditionals & Loops
+
+```bash
+if [[ -f "config.sh" ]]; then
+  source config.sh
+fi
+
+for file in *.md; do
+  echo "$file"
+done
+```
+
+Use `while` loops for streaming input.
+
+---
+
+## Functions & Scripts
+
+```bash
+log() {
+  echo "[$(date +'%H:%M:%S')] $*"
+}
+
+main() {
+  log "Starting script"
+}
+
+main "$@"
+```
+
+Make scripts executable with `chmod +x script.sh`.

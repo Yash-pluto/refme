@@ -1,0 +1,42 @@
+---
+title: "Event-Driven"
+description: "Architecture based on events, decoupled services, and asynchronous communication."
+category: "Architecture & infrastructure"
+---
+
+## Getting Started
+
+Event-driven architecture uses events as the primary mechanism for communication between services or components. Systems react to state changes rather than polling for updates.
+
+---
+
+## Event types
+
+- **Domain events** describe meaningful business changes
+- **Integration events** share state across systems
+- **Command events** request actions from another service
+
+---
+
+## Benefits
+
+- decouples producers from consumers
+- enables asynchronous workflows
+- improves scalability and resilience
+
+---
+
+## Example flow
+
+1. An order is created.
+2. The order service emits `order.created`.
+3. Inventory, billing, and notification services consume the event.
+
+---
+
+## Design concerns
+
+- event schema versioning
+- duplicate delivery and idempotency
+- ordering guarantees
+- observability across event flows
