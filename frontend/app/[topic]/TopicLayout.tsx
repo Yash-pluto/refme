@@ -1,10 +1,11 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTheme } from "../../src/context/ThemeContext";
 import { useRouter } from "next/navigation";
 import { FaGithub } from "react-icons/fa";
 import toast, { Toaster } from "react-hot-toast";
-import Fuse from "fuse.js"; // <-- Imported Fuse.js
+import Fuse from "fuse.js"; 
+import { Command } from "cmdk";
 import {
   ArrowLeft,
   ArrowUp,
@@ -13,11 +14,14 @@ import {
   ChevronDown,
   ChevronRight,
   Code2,
+  Globe,
   Menu,
   Search,
   TerminalSquare,
   Workflow,
   X,
+  Monitor,
+  Link as LinkIcon,
 } from "lucide-react";
 
 export default function TopicLayout({
@@ -39,11 +43,13 @@ export default function TopicLayout({
 }) {
   const { darkMode, toggleTheme } = useTheme();
   const router = useRouter();
-  const searchInputRef = useRef<HTMLInputElement | null>(null);
   const [docSearch, setDocSearch] = useState("");
   const [domHeadings, setDomHeadings] = useState<
     Array<{ id: string; title: string; depth: number }>
   >([]);
+
+  // Global Command Palette State
+  const [cmdOpen, setCmdOpen] = useState(false);
 
   // Mobile navigation state
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -68,7 +74,7 @@ export default function TopicLayout({
   }, []);
 
   useEffect(() => {
-    if (isMobileMenuOpen) {
+    if (isMobileMenuOpen || cmdOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -76,7 +82,7 @@ export default function TopicLayout({
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isMobileMenuOpen]);
+  }, [isMobileMenuOpen, cmdOpen]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -132,7 +138,7 @@ export default function TopicLayout({
     return new Fuse(searchableData, {
       keys: ["title", "description"],
       includeMatches: true,
-      threshold: 0.3, // 0.0 is exact match, 1.0 is anything. 0.3 is perfect for slight typos
+      threshold: 0.3,
       ignoreLocation: true,
     });
   }, [searchableData]);
@@ -142,6 +148,10 @@ export default function TopicLayout({
     return fuse.search(docSearch.trim()).slice(0, 12);
   }, [docSearch, hasSearchQuery, fuse]);
   // -----------------------------------
+
+  // Smart check for Home/Directory
+  const searchLower = docSearch.trim().toLowerCase();
+  const showHomeAction = searchLower.length > 0 && ("home".includes(searchLower) || "directory".includes(searchLower) || "index".includes(searchLower));
 
   const outlineGroups = useMemo(() => {
     const groups: Array<{
@@ -212,26 +222,24 @@ export default function TopicLayout({
     };
   }, [outlineGroups]);
 
+  // Global Command Palette Shortcut and Escape handling
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setCmdOpen(false);
+        return;
+      }
+      
       const isModifier = event.metaKey || event.ctrlKey;
       if (!isModifier || event.key.toLowerCase() !== "k") return;
 
       event.preventDefault();
-      searchInputRef.current?.focus();
-      searchInputRef.current?.select();
+      setCmdOpen((open) => !open);
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
-
-  const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Escape") {
-      setDocSearch("");
-      searchInputRef.current?.blur();
-    }
-  };
 
   useEffect(() => {
     setExpandedOutline((previous) => {
@@ -245,10 +253,10 @@ export default function TopicLayout({
 
   const theme = {
     page: darkMode ? "bg-[#050505] text-[#F5F5F5]" : "bg-[#F5F3EE] text-[#111111]",
-    header: darkMode ? "bg-[#050505]/85" : "bg-[#F5F3EE]/85",
-    panel: darkMode ? "bg-[#050505]" : "bg-[#F5F3EE]",
-    border: darkMode ? "border-[#1A1A1A]" : "border-[#DFE1DA]",
-    muted: darkMode ? "text-[#8A8A8A]" : "text-[#666C73]",
+    header: darkMode ? "bg-[#050505]/85" : "bg-[#fcfbf9]/85",
+    panel: darkMode ? "bg-[#050505]" : "bg-white",
+    border: darkMode ? "border-white/10" : "border-black/10",
+    muted: darkMode ? "text-zinc-400" : "text-zinc-500",
     soft: darkMode ? "bg-[#0D0D0D] text-[#F5F5F5]" : "bg-[#F0EFEA] text-[#111111]",
     active: darkMode ? "bg-[#111111] text-white" : "bg-white text-black",
     accent: darkMode ? "text-zinc-100" : "text-zinc-800",
@@ -310,6 +318,144 @@ export default function TopicLayout({
           },
         }}
       />
+
+      {/* CMDK GLOBAL COMMAND PALETTE OVERLAY */}
+      {cmdOpen && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-start justify-center bg-black/40 pt-[15vh] backdrop-blur-sm sm:pt-[20vh]" 
+          onClick={() => setCmdOpen(false)}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()} 
+            className={`w-full max-w-2xl overflow-hidden rounded-xl border shadow-2xl mx-4 ${theme.panel} ${theme.border}`}
+          >
+            <Command shouldFilter={false} className="flex h-full w-full flex-col overflow-hidden bg-transparent">
+              <div className={`flex items-center border-b px-4 ${theme.border}`}>
+                <Search className={`mr-3 h-5 w-5 opacity-50 ${theme.muted}`} />
+                <Command.Input
+                  autoFocus
+                  value={docSearch}
+                  onValueChange={setDocSearch}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") {
+                      e.preventDefault();
+                      setCmdOpen(false);
+                    }
+                  }}
+                  placeholder="Search documentation or type a command..."
+                  className={`flex h-14 w-full bg-transparent text-sm outline-none placeholder:text-current placeholder:opacity-50 ${theme.navItem}`}
+                />
+                <button 
+                  onClick={() => setCmdOpen(false)} 
+                  className={`rounded p-1 opacity-50 transition-opacity hover:opacity-100 ${theme.hoverAccent}`}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <Command.List className="max-h-[60vh] overflow-y-auto p-2 sm:max-h-[400px]">
+                {hasSearchQuery && searchResults.length === 0 && !showHomeAction && (
+                  <Command.Empty className={`py-6 text-center text-sm ${theme.muted}`}>
+                    No results found for "{docSearch}".
+                  </Command.Empty>
+                )}
+
+                {!hasSearchQuery && (
+                  <Command.Group heading={<div className={`px-2 py-2 text-xs font-semibold uppercase tracking-wider ${theme.muted}`}>Quick Actions</div>}>
+                    <Command.Item
+                      onSelect={() => {
+                        router.push("/");
+                        setCmdOpen(false);
+                      }}
+                      className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-3 text-sm transition-colors hover:bg-current/10 aria-selected:bg-current/10 ${theme.navItem}`}
+                    >
+                      <Globe size={16} className="opacity-70" />
+                      <span>Go to Directory (Home)</span>
+                    </Command.Item>
+                    <Command.Item
+                      onSelect={() => { toggleTheme(); setCmdOpen(false); }}
+                      className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-3 text-sm transition-colors hover:bg-current/10 aria-selected:bg-current/10 ${theme.navItem}`}
+                    >
+                      <Monitor size={16} className="opacity-70" />
+                      <span>Switch to {darkMode ? "Light" : "Dark"} Mode</span>
+                    </Command.Item>
+                    <Command.Item
+                      onSelect={() => {
+                        navigator.clipboard.writeText(window.location.href);
+                        toast.success("URL copied to clipboard!");
+                        setCmdOpen(false);
+                      }}
+                      className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-3 text-sm transition-colors hover:bg-current/10 aria-selected:bg-current/10 ${theme.navItem}`}
+                    >
+                      <LinkIcon size={16} className="opacity-70" />
+                      <span>Copy Current URL</span>
+                    </Command.Item>
+                    <Command.Item
+                      onSelect={() => {
+                        window.open("https://github.com/yash-pluto/refme", "_blank");
+                        setCmdOpen(false);
+                      }}
+                      className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-3 text-sm transition-colors hover:bg-current/10 aria-selected:bg-current/10 ${theme.navItem}`}
+                    >
+                      <FaGithub size={16} className="opacity-70" />
+                      <span>Go to GitHub Repo</span>
+                    </Command.Item>
+                  </Command.Group>
+                )}
+
+                {/* Specific match for "Home" or "Directory" */}
+                {showHomeAction && (
+                  <Command.Group heading={<div className={`px-2 py-2 text-xs font-semibold uppercase tracking-wider ${theme.muted}`}>Navigation</div>}>
+                    <Command.Item
+                      onSelect={() => {
+                        router.push("/");
+                        setDocSearch("");
+                        setCmdOpen(false);
+                      }}
+                      className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-3 text-sm transition-colors hover:bg-current/10 aria-selected:bg-current/10 ${theme.navItem}`}
+                    >
+                      <Globe size={16} className="opacity-70" />
+                      <span>Go to Directory (Home)</span>
+                    </Command.Item>
+                  </Command.Group>
+                )}
+
+                {hasSearchQuery && searchResults.length > 0 && (
+                  <Command.Group heading={<div className={`px-2 py-2 text-xs font-semibold uppercase tracking-wider ${theme.muted}`}>Documentation</div>}>
+                    {searchResults.map(({ item, matches }) => {
+                      const titleMatches = matches?.find(m => m.key === "title")?.indices;
+                      return (
+                        <Command.Item
+                          key={`${item.type}-${item.id}`}
+                          onSelect={() => {
+                            if (item.type === "topic") {
+                              router.push(`/${item.id}`);
+                            } else {
+                              scrollToSection(item.id);
+                            }
+                            setDocSearch("");
+                            setCmdOpen(false);
+                          }}
+                          className={`flex cursor-pointer items-center justify-between gap-3 rounded-lg px-3 py-3 text-sm transition-colors hover:bg-current/10 aria-selected:bg-current/10 ${theme.navItem}`}
+                        >
+                          <div className="min-w-0">
+                            <div className="truncate font-medium">
+                              <HighlightText text={item.title} matches={titleMatches} />
+                            </div>
+                          </div>
+                          <div className={`shrink-0 text-[10px] uppercase tracking-[0.18em] opacity-60`}>
+                            {item.type === "topic" ? "Topic" : item.depth === 2 ? "Section" : "Subsection"}
+                          </div>
+                        </Command.Item>
+                      );
+                    })}
+                  </Command.Group>
+                )}
+              </Command.List>
+            </Command>
+          </div>
+        </div>
+      )}
 
       {/* MOBILE DRAWER OVERLAY */}
       {isMobileMenuOpen && (
@@ -407,81 +553,20 @@ export default function TopicLayout({
             </div>
           </div>
 
-          <div className="flex-1 flex items-center justify-center">
-            <div className="relative w-full max-w-xl">
-              <div className={`relative flex w-full items-center rounded-full border transition-all duration-200 ${theme.border} ${theme.input} ${docSearch ? "border-[#C699FF]/70 shadow-[0_0_0_1px_rgba(198,153,255,0.38)]" : "focus-within:border-[#C699FF]/60"}`}>
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-70" />
-                <input
-                  ref={searchInputRef}
-                  value={docSearch}
-                  onChange={(event) => setDocSearch(event.target.value)}
-                  onKeyDown={handleInputKeyDown}
-                  aria-label="Search docs"
-                  placeholder="Search topics..."
-                  className="w-full bg-transparent py-2 pl-10 pr-16 text-sm outline-none placeholder:text-current placeholder:opacity-50"
-                />
-                <div className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center justify-end">
-                  {docSearch ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setDocSearch("");
-                        searchInputRef.current?.focus();
-                      }}
-                      className="rounded-full border border-current/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.16em] opacity-70 transition hover:opacity-100"
-                    >
-                      Clear
-                    </button>
-                  ) : (
-                    <span className={`hidden md:block rounded-full border border-current/15 px-1.5 py-0.5 text-[10px] font-medium uppercase opacity-60 transition-opacity duration-200 ${isMounted ? "opacity-60" : "opacity-0"}`}>
-                      {modifierKey}K
-                    </span>
-                  )}
-                </div>
+          <div className="flex-1 flex items-center justify-center px-4">
+            <button
+              type="button"
+              onClick={() => setCmdOpen(true)}
+              className={`flex w-full max-w-xl items-center justify-between rounded-full border px-4 py-2 transition-all duration-200 hover:border-[#C699FF]/60 ${theme.border} ${theme.input}`}
+            >
+              <div className="flex items-center gap-3 text-sm opacity-50">
+                <Search className="h-4 w-4" />
+                <span>Search topics or commands...</span>
               </div>
-
-              {/* FUZZY SEARCH RESULTS DROPDOWN */}
-              {hasSearchQuery && (
-                <div className={`absolute left-0 right-0 z-50 mt-2 overflow-hidden rounded-2xl border shadow-lg ${theme.border} ${theme.panel}`}>
-                  {searchResults.length > 0 ? (
-                    <div className="max-h-[320px] overflow-y-auto p-2">
-                      {searchResults.map(({ item, matches }) => {
-                        const titleMatches = matches?.find(m => m.key === "title")?.indices;
-                        
-                        return (
-                          <button
-                            key={`${item.type}-${item.id}`}
-                            type="button"
-                            onClick={() => {
-                              if (item.type === "topic") {
-                                router.push(`/${item.id}`);
-                              } else {
-                                scrollToSection(item.id);
-                              }
-                              setDocSearch("");
-                            }}
-                            className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left transition-colors hover:bg-current/5"
-                          >
-                            <div className="min-w-0">
-                              <div className="truncate text-sm font-medium">
-                                <HighlightText text={item.title} matches={titleMatches} />
-                              </div>
-                              <div className="mt-0.5 text-[10px] uppercase tracking-[0.18em] opacity-60">
-                                {item.type === "topic" ? "Topic" : item.depth === 2 ? "Section" : "Subsection"}
-                              </div>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className={`px-3 py-3 text-sm ${theme.muted}`}>
-                      No matching topics or sections
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+              <span className={`hidden rounded-full border border-current/15 px-1.5 py-0.5 text-[10px] font-medium uppercase opacity-60 transition-opacity duration-200 md:block ${isMounted ? "opacity-60" : "opacity-0"}`}>
+                {modifierKey}K
+              </span>
+            </button>
           </div>
 
           <button

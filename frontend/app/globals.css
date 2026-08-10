@@ -53,7 +53,6 @@ article iframe {
 
 /* 3. SUBTLE TEXT SELECTION COLOR */
 ::selection {
-  background-color: rgba(99, 102, 241, 0.2);
-  /* Soft indigo highlight */
-  color: inherit;
+  background-color: #c599ff6f !important;
+  color: wheat !important;
 }
