@@ -149,8 +149,7 @@ function HighlightText({
   const elements: React.ReactNode[] = [];
   let lastIndex = 0;
 
-  // FIX: Also typed the tuple as readonly just to be safe with strict TS configs
-  match.indices.forEach(([start, end]: readonly [number, number], i: number) => {
+  match.indices.forEach(([start, end]: [number, number], i: number) => {
     if (start > lastIndex) {
       elements.push(<span key={`unmatch-${i}`}>{text.substring(lastIndex, start)}</span>);
     }
