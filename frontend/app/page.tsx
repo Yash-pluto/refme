@@ -138,7 +138,8 @@ function HighlightText({
   highlightStyle,
 }: {
   text: string;
-  matches?: any[];
+  // FIX: Added 'readonly' to match Fuse.js's return type
+  matches?: readonly any[]; 
   fieldKey: string;
   highlightStyle: string;
 }) {
