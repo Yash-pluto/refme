@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import { useTheme } from "../../src/context/ThemeContext";
 import { useRouter } from "next/navigation";
 import { FaGithub } from "react-icons/fa";
@@ -58,12 +58,20 @@ export default function TopicLayout({
   // User Engagement State
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
 
-  // Scroll to Top state
-  const [showScrollTop, setShowScrollTop] = useState(false);
-
   // UX Enhancements: OS detection for the shortcut hint
   const [isMounted, setIsMounted] = useState(false);
   const [modifierKey, setModifierKey] = useState("⌘");
+
+  // Track active headings
+  const [expandedOutline, setExpandedOutline] = useState<Record<string, boolean>>({});
+  const [activeOutlineId, setActiveOutlineId] = useState<string | null>(null);
+  
+  // High-performance refs to bypass React state re-renders on scroll
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const scrollTopBtnRef = useRef<HTMLButtonElement>(null);
+  const isClickScrolling = useRef(false);
+  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+  const headingElementsRef = useRef<{ id: string; el: HTMLElement }[]>([]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -85,15 +93,6 @@ export default function TopicLayout({
   }, [isMobileMenuOpen, cmdOpen]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 400);
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
     const article = document.querySelector("article");
     const headingNodes = article
       ? Array.from(article.querySelectorAll("h2[id], h3[id]"))
@@ -106,8 +105,6 @@ export default function TopicLayout({
     }));
 
     setDomHeadings(nextHeadings);
-    
-    // Reset feedback state when navigating to a new topic
     setFeedbackSubmitted(false);
   }, [children, topicKey]);
 
@@ -147,7 +144,6 @@ export default function TopicLayout({
     if (!hasSearchQuery) return [];
     return fuse.search(docSearch.trim()).slice(0, 12);
   }, [docSearch, hasSearchQuery, fuse]);
-  // -----------------------------------
 
   // Smart check for Home/Directory
   const searchLower = docSearch.trim().toLowerCase();
@@ -180,47 +176,90 @@ export default function TopicLayout({
     return groups;
   }, [activeHeadings]);
 
-  const [expandedOutline, setExpandedOutline] = useState<Record<string, boolean>>({});
-  const [activeOutlineId, setActiveOutlineId] = useState<string | null>(null);
-
+  // Cache heading DOM nodes to avoid querying on every frame
   useEffect(() => {
     const ids = outlineGroups.flatMap((group) => [
       group.id,
       ...group.items.map((item) => item.id),
     ]);
-    if (ids.length === 0) {
-      setActiveOutlineId(null);
-      return;
-    }
-
-    const updateActiveOutline = () => {
-      const offset = 140;
-      let currentId: string | null = ids[0] ?? null;
-
-      for (const id of ids) {
-        const element = document.getElementById(id);
-        if (!element) continue;
-
-        const rect = element.getBoundingClientRect();
-        if (rect.top <= offset) {
-          currentId = id;
-        }
-      }
-
-      setActiveOutlineId((previous) =>
-        previous === currentId ? previous : currentId,
-      );
-    };
-
-    updateActiveOutline();
-    window.addEventListener("scroll", updateActiveOutline, { passive: true });
-    window.addEventListener("resize", updateActiveOutline);
-
-    return () => {
-      window.removeEventListener("scroll", updateActiveOutline);
-      window.removeEventListener("resize", updateActiveOutline);
-    };
+    
+    headingElementsRef.current = ids
+      .map((id) => {
+        const el = document.getElementById(id);
+        return el ? { id, el } : null;
+      })
+      .filter(Boolean) as { id: string; el: HTMLElement }[];
   }, [outlineGroups]);
+
+  // --- UNIFIED HIGH-PERFORMANCE SCROLL LOOP ---
+  useEffect(() => {
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          
+          // 1. Scroll-to-Top Button (Direct DOM update)
+          if (scrollTopBtnRef.current) {
+            if (currentScrollY > 400) {
+              scrollTopBtnRef.current.classList.remove("translate-y-8", "opacity-0", "pointer-events-none");
+              scrollTopBtnRef.current.classList.add("translate-y-0", "opacity-100");
+            } else {
+              scrollTopBtnRef.current.classList.add("translate-y-8", "opacity-0", "pointer-events-none");
+              scrollTopBtnRef.current.classList.remove("translate-y-0", "opacity-100");
+            }
+          }
+
+          // 2. Reading Progress (Direct DOM update, bypassing React state)
+          if (progressBarRef.current) {
+            const totalHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            if (totalHeight > 0) {
+              const progress = (currentScrollY / totalHeight) * 100;
+              const safeProgress = Math.min(100, Math.max(0, progress));
+              progressBarRef.current.style.width = `${safeProgress}%`;
+              progressBarRef.current.style.boxShadow = safeProgress > 0 ? '0 0 10px rgba(198, 153, 255, 0.5)' : 'none';
+            }
+          }
+
+          // 3. Scroll Spy (Active Heading Tracking)
+          // Bypass calculation if user just clicked a TOC link (prevents flicker)
+          if (!isClickScrolling.current && headingElementsRef.current.length > 0) {
+            let currentActiveId = null;
+
+            for (const { id, el } of headingElementsRef.current) {
+              const rect = el.getBoundingClientRect();
+              // 120px offset to account for sticky header and trigger breathing room
+              if (rect.top <= 120) {
+                currentActiveId = id;
+              } else {
+                break; // Elements are in DOM order; stop iterating once we find one below threshold
+              }
+            }
+
+            // Fallback: If scrolled to absolute top, highlight the first item
+            if (!currentActiveId && currentScrollY < 50) {
+              currentActiveId = headingElementsRef.current[0].id;
+            }
+
+            if (currentActiveId) {
+              // React state is fine here because we only update when the ID actually changes
+              setActiveOutlineId((prev) => (prev !== currentActiveId ? currentActiveId : prev));
+            }
+          }
+
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // Init immediately on mount
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []); // Empty dependency array ensures scroll listener is only bound once
+  // ---------------------------------------------
 
   // Global Command Palette Shortcut and Escape handling
   useEffect(() => {
@@ -268,7 +307,6 @@ export default function TopicLayout({
 
   const getTopicIcon = (topicId: string) => {
     const value = topicId.toLowerCase();
-
     if (value.includes("javascript") || value.includes("js")) return TerminalSquare;
     if (value.includes("python")) return Braces;
     if (value.includes("react")) return Workflow;
@@ -276,14 +314,27 @@ export default function TopicLayout({
     return BookOpenText;
   };
 
-  const scrollToSection = (id: string) => {
+  const scrollToSection = useCallback((id: string) => {
     if (!id) return;
     const target = document.getElementById(id);
     if (!target) return;
+    
+    // Lock scroll spy to prevent flickering
+    isClickScrolling.current = true;
+    setActiveOutlineId(id);
+
+    // Clear existing timeout if multiple clicks happen quickly
+    if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+
     const headerOffset = 88;
     const top = target.getBoundingClientRect().top + window.scrollY - headerOffset;
     window.scrollTo({ top, behavior: "smooth" });
-  };
+
+    // Unlock scroll spy after smooth scroll finishes
+    scrollTimeout.current = setTimeout(() => {
+      isClickScrolling.current = false;
+    }, 800);
+  }, []);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -305,6 +356,13 @@ export default function TopicLayout({
   return (
     <div className={`${theme.page} min-h-screen font-sans selection:bg-[#C699FF]/25 transition-colors duration-200`}>
       
+      {/* READING PROGRESS BAR - Updated for high performance rendering */}
+      <div 
+        ref={progressBarRef}
+        className="fixed left-0 top-0 z-[100] h-1 bg-[#C699FF] will-change-[width]" 
+        style={{ width: "0%" }} 
+      />
+
       {/* TOAST CONTAINER */}
       <Toaster 
         position="bottom-center"
@@ -870,7 +928,6 @@ export default function TopicLayout({
                                     href={`#${item.id}`}
                                     onClick={(event) => {
                                       event.preventDefault();
-                                      setActiveOutlineId(item.id);
                                       scrollToSection(item.id);
                                     }}
                                     className={`block truncate rounded-md px-2 py-1 text-[13px] font-medium transition-colors duration-200 ${
@@ -902,13 +959,12 @@ export default function TopicLayout({
         </aside>
       </div>
 
-      {/* SCROLL TO TOP FAB */}
+      {/* SCROLL TO TOP FAB - Updated to completely avoid state triggers */}
       <button
+        ref={scrollTopBtnRef}
         type="button"
         onClick={scrollToTop}
-        className={`fixed bottom-6 right-6 z-50 flex h-10 w-10 items-center justify-center rounded-full border shadow-sm transition-all duration-300 md:bottom-10 md:right-10 ${
-          showScrollTop ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-8 opacity-0"
-        } ${theme.panel} ${theme.border} ${theme.hoverAccent}`}
+        className={`fixed bottom-6 right-6 z-50 flex h-10 w-10 items-center justify-center rounded-full border shadow-sm transition-all duration-300 md:bottom-10 md:right-10 pointer-events-none translate-y-8 opacity-0 ${theme.panel} ${theme.border} ${theme.hoverAccent}`}
         aria-label="Scroll to top"
       >
         <ArrowUp size={18} />
