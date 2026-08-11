@@ -1,47 +1,962 @@
 ---
 title: "Linux"
-description: "Linux fundamentals for filesystems, processes, permissions, and command-line workflows."
+description: "Comprehensive Linux fundamentals covering filesystems, processes, permissions, system administration, networking, security, and command-line workflows."
 category: "Dev tools"
 ---
 
-## Getting Started
+## Getting Started with Linux
 
-Linux is a widely used operating system for development and servers. The command line is its primary interface for managing files, processes, and services.
+Linux is a free, open-source operating system that powers everything from personal desktops to enterprise servers and cloud infrastructure. It's essential for modern software development, DevOps, and system administration. The command line (shell) is the primary interface for interacting with Linux, offering power and flexibility that graphical interfaces cannot match.
+
+### Why Linux?
+
+Linux provides:
+- **Stability**: Runs for years without requiring a restart
+- **Security**: Multi-user, multi-task architecture with robust permission systems
+- **Flexibility**: Customize everything from the kernel to user applications
+- **Cost**: Free and open-source, no licensing fees
+- **Community**: Massive community support and extensive documentation
+
+### Linux Distributions
+
+Popular distributions include:
+- **Ubuntu**: Beginner-friendly, extensive support, widely used
+- **CentOS/RHEL**: Enterprise-focused, long-term support
+- **Debian**: Stable, minimal, perfect for servers
+- **Fedora**: Cutting-edge features, good for development
+- **Alpine**: Lightweight, ideal for containers
+- **Arch Linux**: Minimalist, rolling release, for advanced users
 
 ---
 
-## File permissions
+## Understanding the File System
 
-Use `ls -l` to see permissions and `chmod` to update them.
+### Filesystem Hierarchy
+
+Linux follows the Filesystem Hierarchy Standard (FHS). Key directories include:
+
+```
+/               # Root directory
+/bin            # Essential user binaries (ls, cp, mv)
+/sbin           # System binaries (for root/admin use)
+/lib            # Shared libraries needed by binaries
+/etc            # Configuration files
+/home           # User home directories
+/root           # Root user's home directory
+/tmp            # Temporary files
+/var            # Variable data (logs, caches, databases)
+/opt            # Optional packages
+/usr            # User programs and data
+/proc           # Process information (virtual filesystem)
+/sys            # System information (virtual filesystem)
+/dev            # Device files
+/boot           # Boot files and kernel
+/srv            # Service data
+/mnt            # Mount points for temporary mounts
+```
+
+### Navigating the Filesystem
 
 ```bash
-chmod +x script.sh
-chown user:group file.txt
+# Print working directory
+pwd
+
+# List directory contents
+ls
+ls -l              # Long format with permissions
+ls -la             # Include hidden files
+ls -lh             # Human-readable sizes
+ls -lS             # Sort by file size
+ls -lt             # Sort by modification time
+
+# Change directory
+cd /path/to/dir
+cd ~               # Home directory
+cd -               # Previous directory
+cd ..              # Parent directory
+
+# Show absolute path
+readlink -f file.txt
+
+# Find files
+find /path -name "*.txt"
+find /path -type f -mtime -7    # Modified in last 7 days
+find /path -type d              # Directories only
+find /path -size +100M          # Files larger than 100MB
+locate filename                 # Faster search (requires database)
+
+# Show current directory size
+du -sh .
+du -sh *           # Size of each item
+du -h --max-depth=1 /path
+```
+
+### File Operations
+
+```bash
+# Create files and directories
+touch filename                  # Create empty file or update timestamp
+mkdir dirname                   # Create directory
+mkdir -p /path/to/nested/dir   # Create nested directories
+
+# Copy files and directories
+cp source.txt destination.txt
+cp -r source_dir dest_dir      # Recursive copy
+cp -v source dest              # Verbose output
+
+# Move and rename
+mv old_name new_name
+mv source_dir /new/location
+mv -v source dest              # Verbose output
+
+# Remove files and directories
+rm filename
+rm -f filename                 # Force (no confirmation)
+rm -r directory                # Recursive delete
+rm -rf directory               # Force recursive delete (be careful!)
+
+# View file contents
+cat file.txt                   # Print entire file
+head -n 20 file.txt            # First 20 lines
+tail -n 20 file.txt            # Last 20 lines
+tail -f file.txt               # Follow file in real-time
+less file.txt                  # Paginated view
+more file.txt                  # Basic pagination
+
+# Search within files
+grep "pattern" file.txt
+grep -i "pattern" file.txt     # Case insensitive
+grep -r "pattern" /path        # Recursive search
+grep -n "pattern" file.txt     # Show line numbers
+grep -v "pattern" file.txt     # Invert match (exclude)
+grep -E "regex" file.txt       # Extended regex
+
+# Text processing
+sed 's/old/new/' file.txt      # Replace first occurrence per line
+sed 's/old/new/g' file.txt     # Replace all occurrences
+awk '{print $1}' file.txt      # Extract fields
+cut -d',' -f1,3 file.csv       # Extract columns
+
+# Word and line counts
+wc -l file.txt                 # Count lines
+wc -w file.txt                 # Count words
+wc -c file.txt                 # Count bytes
 ```
 
 ---
 
-## Package management
+## File Permissions and Ownership
 
-Common package managers include `apt`, `yum`, and `pacman`, depending on the distribution.
+### Understanding Permissions
 
----
-
-## Processes
-
-Use `ps`, `top`, or `htop` to inspect running processes.
+Permissions use a three-layer model: Owner (User) | Group | Others. Each layer has three permissions: Read (r/4), Write (w/2), Execute (x/1).
 
 ```bash
-ps aux | grep node
-kill <pid>
+# View permissions
+ls -l
+
+# Example output:
+# -rw-r--r-- 1 user group 1024 Jan 1 12:00 file.txt
+# [permissions] [links] [owner] [group] [size] [date] [name]
+
+# Permissions breakdown:
+# -        rw-        r--        r--
+# type     owner      group      others
+# -=file   r=read     r=read     r=read
+# d=dir    w=write    -=none     -=none
+# l=link   x=execute  x=execute  x=execute
+```
+
+### Changing Permissions
+
+```bash
+# Symbolic notation (easier to read)
+chmod u+x script.sh            # Add execute for owner
+chmod g+r file.txt             # Add read for group
+chmod o-w file.txt             # Remove write from others
+chmod u=rwx,g=rx,o= file.txt   # Set specific permissions
+chmod a+x script.sh            # Add execute for all
+
+# Numeric notation (octal)
+chmod 755 script.sh            # rwxr-xr-x
+chmod 644 file.txt             # rw-r--r--
+chmod 700 secure_dir           # rwx------
+chmod 600 private_file         # rw-------
+
+# Recursive changes
+chmod -R 755 directory/
+chmod -R u+w directory/
+```
+
+### Changing Ownership
+
+```bash
+# Change owner
+chown user file.txt
+chown user:group file.txt      # Change owner and group
+
+# Change group only
+chgrp group file.txt
+
+# Recursive changes (must be root)
+sudo chown -R user:group directory/
+
+# Common ownership patterns
+sudo chown root:root /etc/config.conf
+sudo chown www-data:www-data /var/www/html
+```
+
+### Special Permissions
+
+```bash
+# Set User ID (SUID) - run as owner
+chmod u+s script.sh            # Numeric: 4755
+ls -l script.sh                # Shows 's' in owner execute position
+
+# Set Group ID (SGID) - run as group
+chmod g+s directory/           # Numeric: 2755
+
+# Sticky bit - only owner can delete
+chmod o+t /tmp                 # Numeric: 1777
+ls -ld /tmp                    # Shows 't' in others execute position
 ```
 
 ---
 
-## Shell workflows
+## Package Management
 
-Use pipes, redirects, and command substitution to compose powerful one-liners.
+### APT (Debian/Ubuntu)
 
 ```bash
-grep "error" logs.txt | sort | uniq -c
+# Update package lists
+sudo apt update
+
+# Upgrade packages
+sudo apt upgrade               # Safe upgrade
+sudo apt full-upgrade          # More thorough upgrade
+sudo apt dist-upgrade          # Distribution upgrade
+
+# Install packages
+sudo apt install package_name
+sudo apt install package1 package2 package3
+
+# Remove packages
+sudo apt remove package_name
+sudo apt purge package_name    # Also remove config files
+sudo apt autoremove            # Remove unused dependencies
+
+# Search packages
+apt search search_term
+apt-cache search package_name
+
+# Show package info
+apt show package_name
+apt-cache policy package_name
+
+# List installed packages
+apt list --installed
+dpkg -l                        # Alternative method
+dpkg -l | grep pattern
+
+# Clean cache
+sudo apt clean                 # Remove cache files
+sudo apt autoclean             # Remove old cache files
 ```
+
+### YUM/DNF (RedHat/CentOS/Fedora)
+
+```bash
+# Update system
+sudo yum update
+sudo dnf update                # Newer systems use dnf
+
+# Install packages
+sudo yum install package_name
+sudo dnf install package_name
+
+# Remove packages
+sudo yum remove package_name
+sudo dnf remove package_name
+
+# Search packages
+yum search search_term
+dnf search search_term
+
+# List installed packages
+yum list installed
+dnf list installed
+
+# Clean cache
+sudo yum clean all
+sudo dnf clean all
+```
+
+### Pacman (Arch Linux)
+
+```bash
+# Sync database and upgrade
+sudo pacman -Syu
+
+# Install packages
+sudo pacman -S package_name
+sudo pacman -S package1 package2
+
+# Remove packages
+sudo pacman -R package_name
+sudo pacman -Rns package_name  # Remove dependencies too
+
+# Search packages
+pacman -Ss search_term
+
+# List installed packages
+pacman -Q
+pacman -Qe                     # Explicitly installed
+
+# Clean cache
+sudo pacman -Sc
+sudo pacman -Scc               # Remove all cache
+```
+
+### Managing Services
+
+```bash
+# Systemd (most modern systems)
+sudo systemctl start service_name
+sudo systemctl stop service_name
+sudo systemctl restart service_name
+sudo systemctl status service_name
+sudo systemctl enable service_name    # Start on boot
+sudo systemctl disable service_name   # Don't start on boot
+sudo systemctl list-units --type=service
+sudo systemctl list-unit-files
+
+# Older init systems
+sudo service service_name start
+sudo /etc/init.d/service_name restart
+```
+
+---
+
+## Process Management
+
+### Viewing Processes
+
+```bash
+# Process list
+ps                             # Current shell processes
+ps aux                         # All processes (BSD format)
+ps -ef                         # All processes (UNIX format)
+ps -eo pid,user,%cpu,%mem,command  # Custom columns
+
+# Real-time process viewer
+top                            # Interactive process viewer
+htop                           # Enhanced top (requires install)
+atop                           # Advanced system monitor
+
+# Find specific process
+ps aux | grep process_name
+pgrep process_name             # Get PID directly
+pgrep -l process_name          # Get PID and name
+
+# Show process tree
+ps aux --forest
+pstree
+pstree -p                      # Include PIDs
+```
+
+### Controlling Processes
+
+```bash
+# Terminate processes
+kill PID                       # Send SIGTERM (graceful)
+kill -9 PID                    # Send SIGKILL (force)
+kill -SIGTERM PID              # Named signal
+kill -SIGSTOP PID              # Pause process
+kill -SIGCONT PID              # Resume process
+
+# Kill by name
+killall process_name
+killall -9 process_name        # Force kill
+
+# Kill multiple processes
+pkill -f "command pattern"
+killall -9 process_name process2
+
+# Send signals
+kill -l                        # List all signals
+# Common signals:
+# SIGTERM (15) - Graceful termination
+# SIGKILL (9)  - Forced termination
+# SIGSTOP (19) - Pause
+# SIGCONT (18) - Resume
+# SIGHUP (1)   - Reload config
+# SIGUSR1 (10) - Custom signal
+```
+
+### Background and Foreground
+
+```bash
+# Run in background
+command &
+
+# Run in background, immune to logout
+nohup command &
+
+# Suspend current process
+Ctrl+Z
+
+# List suspended/background jobs
+jobs
+jobs -l                       # With PIDs
+
+# Bring to foreground
+fg
+fg %1                         # Bring job 1 to foreground
+
+# Continue in background
+bg
+bg %1
+
+# Disown job (survive shell exit)
+disown %1
+disown -a                     # All jobs
+```
+
+---
+
+## User and Group Management
+
+### User Management
+
+```bash
+# Add user
+sudo useradd username
+sudo useradd -m -s /bin/bash username  # With home and shell
+sudo useradd -m -s /bin/bash -G sudo username  # With sudo access
+
+# Create user with password
+sudo useradd -m -p $(openssl passwd -1 password) username
+
+# Modify user
+sudo usermod -l newname oldname        # Rename
+sudo usermod -s /bin/bash username     # Change shell
+sudo usermod -aG sudo username         # Add to group
+sudo usermod -G group1,group2 username # Set groups
+sudo usermod -d /new/home username     # Change home
+
+# Delete user
+sudo userdel username
+sudo userdel -r username               # Remove home and mail
+
+# View users
+cat /etc/passwd
+getent passwd
+id                             # Current user
+id username                    # Specific user
+whoami                         # Current user name
+```
+
+### Group Management
+
+```bash
+# Create group
+sudo groupadd groupname
+
+# Add user to group
+sudo usermod -aG groupname username
+
+# Remove user from group
+sudo delgroup username groupname
+sudo gpasswd -d username groupname
+
+# List groups
+cat /etc/group
+groups                         # Current user's groups
+groups username                # Specific user's groups
+
+# Change group
+sudo groupmod -n newname oldname
+
+# Delete group
+sudo groupdel groupname
+```
+
+### Sudo Configuration
+
+```bash
+# Edit sudoers file (safe method)
+sudo visudo
+
+# Common sudoers configurations
+# Allow user to run all commands without password:
+username ALL=(ALL) NOPASSWD:ALL
+
+# Allow user to run specific command without password:
+username ALL=(ALL) NOPASSWD:/usr/bin/systemctl
+
+# Allow group to run commands:
+%sudo ALL=(ALL:ALL) ALL
+
+# Check sudoers syntax without editing
+sudo visudo -c
+
+# View current sudo rules
+sudo visudo -c -f /etc/sudoers
+```
+
+---
+
+## Shell and Command-Line Workflows
+
+### Working with Shells
+
+```bash
+# Check current shell
+echo $SHELL
+
+# List available shells
+cat /etc/shells
+
+# Change default shell
+chsh -s /bin/bash
+chsh -s /bin/zsh
+
+# Execute commands in different shell
+bash -c "command"
+zsh -c "command"
+```
+
+### Command Redirection and Piping
+
+```bash
+# Redirect output to file
+command > file.txt             # Overwrite
+command >> file.txt            # Append
+
+# Redirect errors
+command 2> error.txt           # Stderr only
+command 2>> error.txt          # Append errors
+command &> output.txt          # Both stdout and stderr
+command > out.txt 2>&1         # Redirect stderr to stdout
+
+# Redirect input
+command < input.txt
+command << EOF
+multi
+line
+input
+EOF
+
+# Pipe output to another command
+command1 | command2
+command1 | command2 | command3
+
+# Combine multiple outputs
+(command1; command2) | command3
+
+# Discard output
+command > /dev/null
+command 2> /dev/null
+command &> /dev/null
+```
+
+### Advanced Text Processing
+
+```bash
+# Powerful grep examples
+grep -r "pattern" /path        # Recursive search
+grep -i "pattern" file         # Case insensitive
+grep -n "pattern" file         # Show line numbers
+grep -v "pattern" file         # Invert match
+grep -E "regex" file           # Extended regex
+grep -A 5 "pattern" file       # 5 lines after
+grep -B 3 "pattern" file       # 3 lines before
+grep -C 2 "pattern" file       # 2 lines around
+grep "^pattern" file           # Start of line
+grep "pattern$" file           # End of line
+
+# Sed examples
+sed 's/old/new/' file          # Replace first per line
+sed 's/old/new/g' file         # Replace all
+sed 's/old/new/2' file         # Replace 2nd occurrence
+sed -n '5,10p' file            # Print lines 5-10
+sed '5d' file                  # Delete line 5
+sed '/pattern/d' file          # Delete matching lines
+sed 's/\t/ /g' file            # Replace tabs with spaces
+
+# Awk examples
+awk '{print $1}' file          # Print first field
+awk -F: '{print $1}' /etc/passwd  # Use different delimiter
+awk '{sum+=$1} END {print sum}' file  # Sum column
+awk '$1 > 100' file            # Conditional print
+awk 'NR==1' file               # Print first line
+awk '{print NF}' file          # Print field count
+
+# Sort, uniq, and count
+sort file.txt
+sort -n file.txt               # Numeric sort
+sort -r file.txt               # Reverse sort
+sort -k2 file.txt              # Sort by column
+uniq file.txt                  # Remove duplicates
+uniq -c file.txt               # Count occurrences
+sort file.txt | uniq -c | sort -rn  # Count and sort
+
+# Head and tail
+head file.txt                  # First 10 lines
+head -n 20 file.txt            # First 20 lines
+tail file.txt                  # Last 10 lines
+tail -n 20 file.txt            # Last 20 lines
+tail -f file.txt               # Follow file updates
+tail -f file.txt | grep "error"    # Monitor for patterns
+
+# Cut and paste
+cut -d: -f1 /etc/passwd        # Extract usernames
+cut -d, -f2,4 file.csv         # Extract CSV columns
+paste file1.txt file2.txt      # Merge files side by side
+```
+
+### Common One-Liners
+
+```bash
+# Find and process files
+find /path -name "*.log" -exec rm {} \;  # Delete matching files
+find /path -type f -exec chmod 644 {} \;  # Change permissions
+
+# Search and replace in multiple files
+find /path -name "*.txt" -exec sed -i 's/old/new/g' {} \;
+
+# Count files
+find /path -type f | wc -l
+
+# List files by size
+find /path -type f -exec ls -lh {} \; | awk '{print $5, $9}' | sort -h
+
+# Monitor command output
+watch -n 1 'ps aux | grep process'
+
+# Create backup
+cp -r directory directory.backup
+tar -czf backup.tar.gz directory
+
+# Compress old files
+find /path -type f -mtime +30 -exec gzip {} \;
+```
+
+---
+
+## System Administration
+
+### Disk Management
+
+```bash
+# Check disk usage
+df                             # Filesystem usage
+df -h                          # Human-readable
+df -i                          # Inode usage
+
+# Directory sizes
+du -sh /path                   # Total size
+du -h --max-depth=1 /path      # Sizes of items
+du -sh * | sort -h             # Sorted by size
+
+# List block devices
+lsblk                          # Block device tree
+lsblk -f                       # With filesystems
+fdisk -l                       # Disk partitions (root only)
+
+# Mount/unmount filesystems
+mount                          # Show mounted filesystems
+mount /dev/sdb1 /mnt/drive     # Mount device
+umount /mnt/drive              # Unmount
+umount -l /mnt/drive           # Lazy unmount (force if busy)
+
+# Create filesystem
+sudo mkfs.ext4 /dev/sdb1
+sudo mkfs.xfs /dev/sdb1
+
+# Check filesystem
+sudo fsck /dev/sdb1
+sudo fsck.ext4 -n /dev/sdb1    # Read-only check
+```
+
+### Network Configuration
+
+```bash
+# View network info
+ifconfig                       # Show all interfaces (older)
+ip addr                        # Show addresses (modern)
+ip link                        # Show interfaces
+ip route                       # Show routes
+route -n                       # Show routing table
+
+# Test connectivity
+ping hostname
+ping -c 5 hostname             # Send 5 packets
+traceroute hostname            # Trace route to host
+tracepath hostname             # Similar to traceroute
+mtr hostname                   # Real-time trace
+
+# DNS resolution
+nslookup hostname
+dig hostname
+dig @8.8.8.8 hostname          # Query specific server
+
+# Network statistics
+netstat -tuln                  # TCP/UDP connections
+ss -tuln                       # Modern alternative
+ss -plant                      # Listening ports
+netstat -i                     # Interface statistics
+
+# Configure network (temporary)
+sudo ip addr add 192.168.1.100/24 dev eth0
+sudo ip addr del 192.168.1.100/24 dev eth0
+sudo ip link set eth0 up
+sudo ip link set eth0 down
+
+# Configure DNS
+sudo nano /etc/resolv.conf
+# nameserver 8.8.8.8
+# nameserver 8.8.4.4
+```
+
+### Logging and Monitoring
+
+```bash
+# View system logs
+journalctl                     # systemd journal
+journalctl -u service_name     # Specific service
+journalctl -f                  # Follow new entries
+journalctl --since "1 hour ago"
+journalctl -p err              # Error priority
+
+# System logs
+tail -f /var/log/syslog        # System log
+tail -f /var/log/auth.log      # Authentication log
+tail -f /var/log/kern.log      # Kernel log
+
+# System information
+uname -a                       # Kernel info
+lsb_release -a                 # Distribution info
+hostnamectl                    # Hostname and info
+uptime                         # System uptime
+cat /proc/cpuinfo              # CPU information
+free -h                        # Memory usage
+
+# Monitor in real-time
+watch -n 1 free -h             # Watch memory every second
+watch -n 1 'df -h'             # Watch disk usage
+```
+
+---
+
+## Security Best Practices
+
+### File and Directory Security
+
+```bash
+# Secure permissions for files
+chmod 600 ~/.ssh/id_rsa        # SSH private keys
+chmod 644 ~/.ssh/authorized_keys
+chmod 700 ~/.ssh               # SSH directory
+
+# Secure home directory
+chmod 700 ~                    # Owner only
+
+# Secure config files
+chmod 600 /etc/shadow          # Password hashes
+chmod 644 /etc/passwd          # Public user info
+```
+
+### SSH Key Management
+
+```bash
+# Generate SSH key
+ssh-keygen -t rsa -b 4096
+ssh-keygen -t ed25519          # Modern, smaller, faster
+
+# Copy public key to server
+ssh-copy-id -i ~/.ssh/id_rsa.pub user@host
+cat ~/.ssh/id_rsa.pub | ssh user@host 'cat >> .ssh/authorized_keys'
+
+# SSH configuration
+cat ~/.ssh/config
+# Host myserver
+#     HostName 192.168.1.100
+#     User username
+#     IdentityFile ~/.ssh/id_rsa
+#     Port 22
+
+# SSH with specific key
+ssh -i ~/.ssh/key.pem user@host
+```
+
+### Firewall Management
+
+```bash
+# UFW (Uncomplicated Firewall - Ubuntu/Debian)
+sudo ufw enable
+sudo ufw allow 22/tcp          # Allow SSH
+sudo ufw allow 80/tcp          # Allow HTTP
+sudo ufw allow 443/tcp         # Allow HTTPS
+sudo ufw deny 8080/tcp         # Deny port
+sudo ufw status                # Show rules
+sudo ufw reset                 # Reset to defaults
+
+# Firewalld (RedHat/CentOS/Fedora)
+sudo firewall-cmd --state
+sudo firewall-cmd --add-port=22/tcp --permanent
+sudo firewall-cmd --add-service=http --permanent
+sudo firewall-cmd --reload
+```
+
+---
+
+## Scripting and Automation
+
+### Basic Shell Scripting
+
+```bash
+#!/bin/bash
+
+# Variables
+NAME="value"
+NAME=${1:-default}             # Parameter with default
+
+# Conditionals
+if [ -f /path/to/file ]; then
+    echo "File exists"
+elif [ -d /path/to/dir ]; then
+    echo "Directory exists"
+else
+    echo "Not found"
+fi
+
+# Loops
+for i in {1..10}; do
+    echo "Number: $i"
+done
+
+for file in *.txt; do
+    echo "Processing $file"
+done
+
+while [ $count -lt 10 ]; do
+    echo $count
+    ((count++))
+done
+
+# Functions
+function greet() {
+    echo "Hello, $1"
+}
+
+# Execute and capture output
+output=$(command)
+output=`command`                # Older syntax
+
+# Exit codes
+exit 0                         # Success
+exit 1                         # Error
+
+# Check exit code
+if command; then
+    echo "Success"
+fi
+
+# Combine commands
+command1 && command2           # Run if first succeeds
+command1 || command2           # Run if first fails
+```
+
+### Cron Jobs
+
+```bash
+# Edit crontab
+crontab -e
+
+# List cron jobs
+crontab -l
+
+# Cron syntax
+# Minute Hour Day Month DayOfWeek Command
+# 0      0    *   *     *          /path/to/script.sh
+
+# Examples
+0 0 * * * /home/user/backup.sh                # Daily at midnight
+0 */4 * * * /usr/bin/update_cache             # Every 4 hours
+0 9 * * 1-5 /home/user/work_task.sh           # Weekdays at 9 AM
+*/15 * * * * /home/user/frequent_task.sh      # Every 15 minutes
+0 2 1 * * /home/user/monthly_task.sh          # First day of month
+
+# Remove all cron jobs
+crontab -r
+
+# System-wide cron
+sudo nano /etc/crontab
+sudo run-parts /etc/cron.daily                # Run daily jobs manually
+```
+
+---
+
+## Performance Tuning
+
+### CPU and Memory Optimization
+
+```bash
+# Monitor CPU usage
+top
+htop
+watch -n 1 cat /proc/cpuinfo
+
+# CPU information
+nproc                         # Number of processors
+lscpu                         # Detailed CPU info
+cat /proc/cpuinfo
+
+# Memory information
+free -h                       # Memory usage
+cat /proc/meminfo             # Detailed memory
+
+# Find memory hogs
+ps aux --sort=-%mem | head -10
+
+# Process priorities
+nice -n 10 command            # Start with low priority (10-19)
+renice -n 15 PID              # Change priority of running process
+nice -n -5 command            # Start with high priority (-20 to 19)
+
+# I/O monitoring
+iostat -x 1                   # Disk I/O stats
+iotop                         # I/O-intensive processes
+```
+
+### System Limits
+
+```bash
+# View limits
+ulimit -a
+limits                        # zsh alternative
+
+# Set limits (session)
+ulimit -n 4096                # Max open files
+ulimit -u 256                 # Max processes
+
+# Permanent limits
+sudo nano /etc/security/limits.conf
+# username soft nofile 4096
+# username hard nofile 8192
+```
+
+---
+
+## Conclusion
+
+Linux mastery comes from consistent practice with the command line. Start with basic file operations, progress to system administration, and eventually automate complex tasks with shell scripts. Join the vibrant Linux community, read man pages (`man command`), and always prioritize security and system stability.
+
+Key takeaways:
+- Master file permissions and ownership for security
+- Use the package manager appropriate for your distribution
+- Monitor processes and system resources regularly
+- Automate repetitive tasks with scripts and cron jobs
+- Keep systems updated and secure
+- Practice safely in test environments first
