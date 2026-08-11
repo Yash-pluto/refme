@@ -4,68 +4,1551 @@ description: "Asynchronous programming concepts for promises, tasks, event loops
 category: "Concepts"
 ---
 
-## Getting Started
+## Overview
 
-Async programming lets applications perform work without blocking the main flow. It is essential for handling I/O, timers, and concurrent operations.
+Asynchronous programming is central to modern JavaScript and TypeScript applications.
+It enables non-blocking I/O, responsive user interfaces, scalable network services, and efficient background work.
+This guide covers core concepts, runtime behavior, concurrent patterns, browser and Node.js APIs, performance strategies, debugging techniques, and professional best practices.
+
+The goal of async design is not only to make code run in the background, but also to keep control flow predictable, failures manageable, and resource usage efficient.
+Well-written async code is testable, debuggable, and easy to reason about in complex applications.
 
 ---
 
-## Promises
+## Why Async Matters
 
-A promise represents a future value.
+JavaScript runs on a single event loop in most environments.
+That means one path of execution handles UI rendering, event handling, network operations, timers, and other asynchronous work.
+Blocking that loop blocks the app.
+
+Async programming separates the initiation of work from the observation of its completion.
+Instead of waiting synchronously, the runtime can continue processing other tasks while the operation completes.
+This is crucial for:
+
+- browser responsiveness
+- server scalability
+- parallel I/O
+- streaming large payloads
+- background processing
+
+When async work is handled correctly, applications remain responsive, resource usage stays within limits, and user experiences improve even under heavy load.
+
+---
+
+## Promise Fundamentals
+
+A promise is an object representing the eventual completion or failure of an asynchronous operation.
+Every promise has one of three states:
+
+- pending: initial state, not yet resolved or rejected
+- fulfilled: operation succeeded and a value is available
+- rejected: operation failed and a reason is available
+
+Promises are immutable once settled.
+Once a promise is fulfilled or rejected, its outcome does not change.
+This makes promise-based code easier to compose and reason about.
+
+### Basic Promise Creation
 
 ```js
-const fetchData = () =>
-  new Promise((resolve) => {
-    setTimeout(() => resolve("done"), 1000);
+const fetchData = () => {
+  return new Promise((resolve, reject) => {
+    const timeout = Math.random() * 1000;
+    setTimeout(() => {
+      if (timeout < 800) {
+        resolve({ status: 200, data: "ok" });
+      } else {
+        reject(new Error("Request timed out"));
+      }
+    }, timeout);
   });
+};
 
-fetchData().then((result) => console.log(result));
+fetchData().then((result) => console.log(result)).catch((error) => console.error(error));
+```
+
+### Promise Lifecycle
+
+Promises are designed for one-time completion.
+If your operation can emit multiple values over time, use an async iterable, an event emitter, or a streaming primitive instead.
+
+`then`, `catch`, and `finally` register handlers on a promise.
+Handlers execute asynchronously, even when the promise is already settled.
+This keeps execution order consistent and avoids surprising synchronous behavior.
+
+---
+
+## Working with Promise Handlers
+
+Use `then` for success paths and `catch` for failures.
+A promise chain can transform values and recover from errors at specific points.
+
+```js
+fetchData()
+  .then((result) => {
+    return parseResult(result);
+  })
+  .then((parsed) => {
+    console.log("parsed", parsed);
+  })
+  .catch((error) => {
+    console.error("error while fetching or parsing", error);
+  })
+  .finally(() => {
+    console.log("cleanup or final action");
+  });
+```
+
+A handler may return a value or another promise.
+The next `then` receives the settled value of that returned promise.
+
+Use `finally` to run cleanup logic that should execute regardless of success or failure.
+Avoid relying on `finally` for values because it does not receive the original result or rejection reason.
+
+---
+
+## Promise Combinators
+
+Promise combinators are utility methods for handling multiple promises simultaneously.
+They can be used to coordinate parallel operations, handle multiple outcomes, or race tasks.
+
+### Promise.all
+
+`Promise.all` waits for every promise to fulfill.
+If any promise rejects, the combined promise rejects immediately.
+
+```js
+const requests = [fetchUser(), fetchSettings(), fetchNotifications()];
+const results = await Promise.all(requests);
+```
+
+Use `Promise.all` when all tasks are required and you want to fail fast.
+
+### Promise.allSettled
+
+`Promise.allSettled` waits for every promise to settle, regardless of outcome.
+This is useful when you want a complete picture of success and failure.
+
+```js
+const results = await Promise.allSettled(requests);
+results.forEach((result) => {
+  if (result.status === "fulfilled") {
+    console.log(result.value);
+  } else {
+    console.warn(result.reason);
+  }
+});
+```
+
+### Promise.race
+
+`Promise.race` settles as soon as one input settles.
+It is useful for timeouts and first-response semantics.
+
+```js
+const response = await Promise.race([fetchData(), timeout(500)]);
+```
+
+`Promise.race` does not wait for the remaining promises, but they still execute unless explicitly canceled.
+
+### Promise.any
+
+`Promise.any` fulfills when the first promise fulfills.
+If all inputs reject, it rejects with an `AggregateError`.
+
+```js
+const fastestData = await Promise.any([fetchCache(), fetchNetwork()]);
+```
+
+This is helpful when multiple sources can satisfy a request and you only need one good result.
+
+---
+
+## Async/Await Fundamentals
+
+Async functions provide a declarative syntax for consuming promises.
+They make async code look and feel like synchronous control flow, while preserving non-blocking execution.
+
+### Declaring an Async Function
+
+```js
+async function loadUserData(userId) {
+  const profile = await fetchProfile(userId);
+  const posts = await fetchPosts(userId);
+  return { profile, posts };
+}
+```
+
+An `async` function always returns a promise.
+When the function returns a value, the returned promise fulfills with that value.
+When the function throws, the returned promise rejects.
+
+### Await Semantics
+
+The `await` keyword pauses the surrounding async function until the awaited promise settles.
+It does not block the entire thread.
+The runtime can execute other tasks while the function is suspended.
+
+```js
+const data = await fetchData();
+```
+
+If the awaited promise rejects, the rejection propagates as a thrown exception inside the function.
+Use `try` / `catch` to handle those errors.
+
+### Error Handling in Async Functions
+
+```js
+async function loadData() {
+  try {
+    const response = await fetchData();
+    return response.data;
+  } catch (error) {
+    console.error("Failed to load data", error);
+    throw error;
+  }
+}
+```
+
+Handle errors close to the call site when possible, but also avoid swallowing failures silently.
+Allow callers to react when necessary.
+
+---
+
+## Advanced Async/Await Patterns
+
+Async/await is powerful as a composition layer when combined with loops, conditionals, and helper functions.
+
+### Sequential Processing
+
+Use `for...of` with `await` to run operations in sequence.
+This is appropriate when each step depends on the previous one.
+
+```js
+for (const item of items) {
+  await processItem(item);
+}
+```
+
+Avoid `Array.prototype.forEach` with `await`.
+The callback is not `await`-aware, which leads to concurrent execution and unexpected behavior.
+
+### Parallel Processing
+
+For independent tasks, kick them off before awaiting.
+This starts all tasks concurrently and then waits for completion.
+
+```js
+const promises = items.map(processItem);
+const results = await Promise.all(promises);
+```
+
+### Conditional Await
+
+Combine conditional logic with async operations cleanly.
+
+```js
+if (user.isActive) {
+  await refreshSession(user.id);
+} else {
+  await notifyDeactivated(user.id);
+}
+```
+
+### Top-Level Await
+
+Modern module systems support top-level `await` in ESM contexts.
+This is useful for module initialization without wrapping the whole file in an async IIFE.
+
+```js
+const config = await loadConfig();
+export const settings = createSettings(config);
+```
+
+Use top-level await sparingly, as it can delay module loading and startup performance.
+
+---
+
+## Event Loop Internals
+
+The event loop is the runtime mechanism that schedules tasks and resolves promises.
+Understanding its behavior helps avoid common async bugs.
+
+### Call Stack
+
+The call stack stores the chain of function calls currently being executed.
+Synchronous code runs to completion before the event loop processes new tasks.
+
+### Task Queues
+
+The runtime maintains multiple queues, such as:
+
+- microtask queue
+- macrotask queue
+- animation frame queue
+
+Microtasks have higher priority than macrotasks.
+Promise callbacks and `queueMicrotask` handlers run before timers and I/O callbacks once the current stack clears.
+
+### Microtasks and Promise Resolution
+
+`await` and `then` schedule continuation as microtasks.
+That means the code after an `await` executes at the next microtask checkpoint.
+
+```js
+console.log("start");
+Promise.resolve().then(() => console.log("microtask"));
+setTimeout(() => console.log("macrotask"), 0);
+console.log("end");
+```
+
+The output is:
+
+- start
+- end
+- microtask
+- macrotask
+
+### Timer Semantics
+
+`setTimeout` and `setInterval` schedule macrotasks.
+The actual delay may be longer than the requested value, because the timer callback waits until the event loop is free.
+
+### Request Animation Frame
+
+In browsers, `requestAnimationFrame` schedules work before the next repaint.
+It is ideal for smooth animations and UI updates.
+
+---
+
+## Browser Async APIs
+
+Browsers expose a wide range of async APIs for network access, storage, media, and background work.
+These APIs leverage promise-based design or event-driven callbacks.
+
+### Fetch API
+
+`fetch` is the preferred network API for modern browsers.
+It returns a promise that resolves to a `Response` object.
+
+```js
+const response = await fetch("/api/data");
+if (!response.ok) {
+  throw new Error(`HTTP error ${response.status}`);
+}
+const json = await response.json();
+```
+
+Use `AbortController` to cancel requests.
+
+### WebSockets
+
+WebSockets support bidirectional communication.
+They are event-based rather than promise-based.
+
+```js
+const socket = new WebSocket("wss://example.com/socket");
+socket.addEventListener("message", (event) => {
+  console.log(event.data);
+});
+```
+
+### IndexedDB
+
+IndexedDB is an asynchronous storage system in the browser.
+Use modern wrapper libraries or explicit promise wrappers to reduce callback complexity.
+
+### Service Workers
+
+Service workers run in a separate worker thread and are inherently asynchronous.
+They enable offline caching, background sync, and push notifications.
+
+### Web Workers
+
+Web Workers move CPU-bound work off the main thread.
+They communicate using messages and transferable objects.
+
+```js
+const worker = new Worker("worker.js");
+worker.postMessage({ task: "compress", data: chunk });
+worker.onmessage = (event) => {
+  console.log("worker result", event.data);
+};
+```
+
+### Streams API
+
+The Streams API supports processing data incrementally.
+Readable and writable streams enable lazy parsing, request streaming, and efficient uploads.
+
+---
+
+## Node.js Async APIs
+
+Node.js provides a rich async ecosystem for server applications.
+It includes promise-based APIs, callback-style functions, and event emitters.
+
+### fs/promises
+
+Node.js offers a promise-based filesystem API under `fs/promises`.
+
+```js
+import { readFile } from "fs/promises";
+const contents = await readFile("./data.json", "utf-8");
+```
+
+### Timers
+
+Node.js has timers similar to browsers, plus utility functions like `setImmediate` and `process.nextTick`.
+`process.nextTick` and `queueMicrotask` both schedule microtasks, but they are not interchangeable in all cases.
+
+### Networking
+
+HTTP servers, sockets, and streams are all event-driven.
+Promises are often used to wrap these primitives for cleaner composition.
+
+### Worker Threads
+
+Worker threads in Node.js provide parallelism for CPU-heavy work.
+They are heavier than browser web workers, but they allow shared memory with `SharedArrayBuffer`.
+
+### Child Processes
+
+Child processes are another way to keep CPU-bound work off the main event loop.
+They communicate over stdin/stdout and can be managed with promise-friendly wrappers.
+
+---
+
+## Concurrency vs. Parallelism
+
+Concurrency refers to handling multiple tasks logically at the same time.
+Parallelism refers to executing multiple tasks simultaneously on different CPU cores.
+
+JavaScript in the browser and Node.js is concurrent by default.
+Async I/O and event-driven callbacks allow multiple operations to be in-flight without blocking the thread.
+
+### When Concurrency Is Enough
+
+Many applications primarily need concurrency.
+I/O-bound workloads like network requests, database calls, and file reads benefit from async concurrency.
+
+### When Parallelism Is Required
+
+Use workers or child processes for CPU-bound work.
+Tasks such as image processing, encryption, compression, and large array transformations may saturate the event loop if executed directly.
+
+### Cooperative Concurrency
+
+Avoid long-running synchronous loops in async code.
+Break large batches into smaller chunks or use timer-based yielding to keep the loop responsive.
+
+```js
+function processBatch(items) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      items.forEach(handleItem);
+      resolve();
+    }, 0);
+  });
+}
 ```
 
 ---
 
-## Async/Await
+## Streaming and Iteration
 
-Cleaner async control flow using `async` and `await`.
+Streaming allows processing data gradually instead of waiting for the entire payload.
+It is essential for scaling large uploads, downloads, and real-time feeds.
+
+### Async Iterators
+
+Async iterators expose data as a sequence of promises.
+They are well-suited to streams and paginated APIs.
 
 ```js
-async function load() {
-  const result = await fetchData();
-  console.log(result);
+for await (const chunk of asyncStream) {
+  processChunk(chunk);
+}
+```
+
+### Readable Streams
+
+Readable streams emit data in chunks.
+You can consume them with event listeners or by using async iteration.
+
+```js
+const reader = response.body.getReader();
+while (true) {
+  const { value, done } = await reader.read();
+  if (done) break;
+  handleChunk(value);
+}
+```
+
+### Writable Streams
+
+Writable streams accept chunks and manage backpressure.
+Use `writer.ready` and `writer.write` to keep the producer from overwhelming the consumer.
+
+### Pipeline
+
+The `pipeline` utility in Node.js connects streams and handles errors automatically.
+Use it instead of manual event wiring for more reliable stream composition.
+
+### Backpressure
+
+Backpressure is the mechanism that keeps fast producers from overwhelming slower consumers.
+Well-behaved stream code respects backpressure signals and avoids buffering unbounded data.
+
+---
+
+## Cancellation Patterns
+
+Canceling async work is an important capability for responsive applications.
+It lets you stop unnecessary work when a user navigates away or when a result is no longer needed.
+
+### AbortController
+
+`AbortController` is the standard cancellation primitive in browsers and many modern APIs.
+
+```js
+const controller = new AbortController();
+const signal = controller.signal;
+
+const request = fetch("/api/data", { signal });
+controller.abort();
+```
+
+### Custom Cancellation
+
+For custom operations, accept an `AbortSignal` and wire it to your cancellation logic.
+
+```js
+function makeCancelableTask(signal) {
+  return new Promise((resolve, reject) => {
+    if (signal.aborted) {
+      reject(new Error("Operation aborted"));
+      return;
+    }
+
+    const handleAbort = () => {
+      clearTimeout(timer);
+      reject(new Error("Operation aborted"));
+    };
+
+    signal.addEventListener("abort", handleAbort, { once: true });
+
+    const timer = setTimeout(() => {
+      signal.removeEventListener("abort", handleAbort);
+      resolve("done");
+    }, 2000);
+  });
+}
+```
+
+### Timeout Helpers
+
+Create reusable timeout helpers to fail after a maximum duration.
+
+```js
+function timeout(ms) {
+  return new Promise((_, reject) => {
+    setTimeout(() => reject(new Error("Timeout")), ms);
+  });
+}
+```
+
+### Cancellation Best Practices
+
+- cancel tasks when the result is no longer needed
+- avoid leaving resources open after cancellation
+- make cancellation cooperative rather than forced
+- notify callers of cancellation explicitly
+
+---
+
+## Error Handling Strategies
+
+Errors are an integral part of asynchronous programming.
+A robust async system treats errors as first-class events.
+
+### Handling Promise Rejections
+
+Always attach a rejection handler to promises.
+Uncaught promise rejections may become fatal in some runtimes.
+
+```js
+fetchData().catch((error) => {
+  console.error("fetch failed", error);
+});
+```
+
+### try/catch in Async Functions
+
+Use `try` / `catch` around awaited operations.
+This keeps error handling close to the operation and avoids leaking implementation details.
+
+```js
+try {
+  const user = await fetchUser();
+  const settings = await fetchSettings(user.id);
+} catch (error) {
+  handleFailure(error);
+}
+```
+
+### Selective Recovery
+
+Recover only when it makes sense.
+For example, a missing optional resource may be recovered from a default value, while a network failure may need to propagate.
+
+### Multiple Error Sources
+
+When working with composite operations, identify which part failed.
+Use tagged errors or structured result objects.
+
+```js
+const results = await Promise.allSettled([loadCache(), loadNetwork()]);
+```
+
+### Resource Cleanup
+
+Use `finally` or explicit cleanup blocks for resources that must be released.
+This includes file handles, sockets, timers, and event listeners.
+
+```js
+let resource;
+try {
+  resource = await acquireResource();
+  await useResource(resource);
+} finally {
+  if (resource) {
+    await resource.release();
+  }
+}
+```
+
+---
+
+## Composition Techniques
+
+Compose async behaviors with reusable helpers and higher-order functions.
+This improves readability and keeps code DRY.
+
+### Higher-Order Async Functions
+
+A higher-order async function accepts one or more async functions and returns a new async function.
+
+```js
+const withRetry = (operation, attempts = 3) => async (...args) => {
+  let lastError;
+  for (let i = 0; i < attempts; i += 1) {
+    try {
+      return await operation(...args);
+    } catch (error) {
+      lastError = error;
+      if (i === attempts - 1) {
+        throw lastError;
+      }
+    }
+  }
+};
+```
+
+### Retry and Backoff
+
+Retry transient failures with exponential backoff.
+Do not retry permanent failures.
+
+```js
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const withExponentialBackoff = (operation, attempts = 5) => async (...args) => {
+  for (let i = 0; i < attempts; i += 1) {
+    try {
+      return await operation(...args);
+    } catch (error) {
+      if (!isTransient(error) || i === attempts - 1) {
+        throw error;
+      }
+      await delay(2 ** i * 100);
+    }
+  }
+};
+```
+
+### Rate Limiting
+
+Limit concurrent operations to avoid overwhelming external systems.
+
+```js
+const limitConcurrency = (tasks, limit) => {
+  const results = [];
+  const executing = [];
+
+  for (const task of tasks) {
+    const promise = task().then((result) => {
+      executing.splice(executing.indexOf(promise), 1);
+      return result;
+    });
+
+    results.push(promise);
+    executing.push(promise);
+
+    if (executing.length >= limit) {
+      await Promise.race(executing);
+    }
+  }
+
+  return Promise.all(results);
+};
+```
+
+### Memoization and Caching
+
+Cache the results of expensive async operations to avoid duplicate work.
+Respect invalidation and eviction boundaries so stale values do not cause incorrect behavior.
+
+---
+
+## Reactive and Declarative Patterns
+
+Reactive programming models are a natural fit for async flows.
+They represent values over time and allow declarative transformation of event streams.
+
+### Async Generators
+
+Async generators produce values over time using `yield` and `await`.
+They are useful for paginated APIs, streams, and iterative protocols.
+
+```js
+async function* paginate(url) {
+  let nextUrl = url;
+  while (nextUrl) {
+    const response = await fetch(nextUrl);
+    const data = await response.json();
+    yield data.items;
+    nextUrl = data.nextPage;
+  }
+}
+```
+
+### Observables
+
+Observables are not part of the language, but libraries like RxJS provide powerful async composition.
+They can represent events, streams, timers, and state changes.
+
+### Event Streams
+
+Treat async sources as streams to compose them with operators.
+Filtering, mapping, debouncing, buffering, and combining are common stream operations.
+
+### Declarative Flow
+
+Declarative async code focuses on the shape of the data pipeline instead of the low-level control flow.
+This makes complex interactions easier to reason about.
+
+---
+
+## Data Fetching Strategies
+
+Fetching data efficiently is a common async concern.
+The right strategy depends on latency tolerance, cache freshness, and failure handling.
+
+### Cache-First
+
+Serve cached data immediately and refresh in the background when possible.
+Useful for improving perceived performance.
+
+```js
+const data = await cache.get(key);
+if (data) {
+  refreshDataInBackground();
+  return data;
+}
+return await fetchAndCache(key);
+```
+
+### Network-First
+
+Request fresh data first and fall back to the cache if the network fails.
+This is common for critical real-time information.
+
+### Stale-While-Revalidate
+
+Return stale data immediately, then update the cache with fresh data asynchronously.
+This hybrid strategy balances latency and freshness.
+
+### Parallel Data Fetching
+
+Fetch independent resources concurrently when possible.
+
+```js
+const [user, settings] = await Promise.all([fetchUser(), fetchSettings()]);
+```
+
+### Dependent Data Fetching
+
+Fetch dependent data sequentially when the later request depends on the earlier response.
+
+```js
+const user = await fetchUser(userId);
+const posts = await fetchPosts(user.id);
+```
+
+---
+
+## Control Flow Patterns
+
+Control flow patterns help structure async logic in readable and maintainable ways.
+
+### Fan-Out / Fan-In
+
+Fan-out launches many async operations; fan-in collects their results.
+Use `Promise.all`, `allSettled`, or custom collectors to aggregate results.
+
+### Waterfall
+
+Waterfall executes a sequence of operations where each step depends on the previous one.
+Use `await` and clear variable naming to keep these flows easy to follow.
+
+### Pipeline
+
+Pipeline composition passes the output of one async operation to the next.
+
+```js
+const cleanData = await fetchData().then(normalize).then(validate).catch(handleError);
+```
+
+### Event Sourcing
+
+Event sourcing captures state changes as a sequence of immutable events.
+This approach can simplify async state synchronization and replay.
+
+### Hybrid Patterns
+
+Combine eager and lazy execution depending on the operation’s urgency and cost.
+For example, batch user actions locally and flush them periodically.
+
+---
+
+## Performance Considerations
+
+Async code can improve throughput, but if misused it can also create performance problems.
+
+### Avoid Blocking the Event Loop
+
+Long-running synchronous code defeats the purpose of async architecture.
+Keep event loop work short and move expensive computations to workers.
+
+### Manage Concurrency
+
+Too much concurrency can overwhelm downstream services.
+Use concurrency limits, queuing, and backpressure to keep operations predictable.
+
+### Use Streaming When Appropriate
+
+Streaming large payloads reduces memory pressure and improves responsiveness.
+
+### Avoid Excessive Promise Allocation
+
+Creating tens of thousands of promises unnecessarily can tax memory and GC.
+Reuse, throttle, or switch to streaming patterns when possible.
+
+### Batch Small Work
+
+Combine many small operations into larger ones when the underlying system benefits from batching.
+For example, group database updates or network requests.
+
+---
+
+## Testing Async Code
+
+Testing asynchronous behavior requires control over timing, side effects, and completion conditions.
+
+### Unit Testing
+
+Use async test functions and explicit assertions on promises.
+
+```js
+test("fetches user data", async () => {
+  const user = await fetchUser("123");
+  expect(user.id).toBe("123");
+});
+```
+
+### Mocking Async APIs
+
+Replace network calls, timers, and other external dependencies with mocks.
+This isolates logic and makes tests deterministic.
+
+### Fake Timers
+
+Fake timers let you control timer-based async behavior.
+Use them for retry logic, debouncing, polling, and delayed operations.
+
+### Integration Testing
+
+Integration tests validate that multiple async components work together.
+Pay attention to setup and teardown order to avoid flaky behavior.
+
+### Error Cases
+
+Test rejection paths explicitly.
+Ensure failures are caught and reported correctly.
+
+---
+
+## Debugging Async Code
+
+Debugging async code can be challenging because execution order is non-linear.
+Modern tools and patterns can make the process manageable.
+
+### Async Stack Traces
+
+Some runtimes preserve async stack traces across awaited calls.
+This makes it easier to trace the origin of an error.
+
+### Logging
+
+Log entering and exiting async functions, along with key values.
+Use consistent correlation IDs for related operations.
+
+### Breakpoints
+
+Set breakpoints inside async callbacks and continue after promise resolution.
+Inspect variables before and after `await` points.
+
+### Timeline and Performance Tools
+
+Use browser DevTools or Node.js profilers to identify event loop stalls, long frames, and blocked timers.
+
+### Race Condition Detection
+
+Race conditions often manifest as inconsistent state, duplicate work, or intermittent failures.
+Search for shared mutable state accessed by multiple async branches.
+
+---
+
+## Security and Async
+
+Async behavior interacts with security in ways that deserve explicit attention.
+
+### Injection Risks
+
+Do not build queries, URLs, HTML, or command strings directly from async input.
+Validate and sanitize before use.
+
+### Access Control
+
+Async operations may continue after the original request context is gone.
+Verify permissions at the time of execution, not just at the time of initiation.
+
+### Timing Attacks
+
+Be careful when async operations reveal timing differences.
+Attackers can infer sensitive information from response latency.
+
+### Resource Exhaustion
+
+Abusive clients can trigger many async operations concurrently.
+Use rate limiting, quotas, and circuit breakers to guard resources.
+
+---
+
+## Design Patterns
+
+There are established patterns for structuring async systems.
+Understanding them improves consistency and maintainability.
+
+### Command Pattern
+
+Encapsulate work as command objects and execute them asynchronously.
+This separates intent from execution and simplifies retry logic.
+
+### Saga Pattern
+
+A saga coordinates a sequence of distributed transactions with compensation steps.
+It is useful for long-running workflows that span multiple services.
+
+### Circuit Breaker
+
+A circuit breaker detects repeated failures and stops issuing requests for a time.
+This protects downstream systems and prevents cascading failure.
+
+### Producer-Consumer
+
+Separate producers of work from consumers.
+Use queues, channels, or streams to decouple rate mismatches.
+
+### Observer Pattern
+
+Subscribe to async events and react in a decoupled way.
+This can reduce tight coupling between components that share state.
+
+---
+
+## Best Practices
+
+Follow these principles for professional async code.
+
+- prefer `async`/`await` over nested callbacks when possible
+- handle every rejection path explicitly
+- keep async functions small and focused
+- document the behavior of cancellation and retries
+- avoid side effects inside helper functions
+- use descriptive names for async operations
+- keep concurrency limits explicit
+- separate I/O from business logic
+- test both success and failure scenarios
+
+### Naming Async Functions
+
+Use verbs that describe the operation and indicate async behavior when helpful.
+Examples:
+
+- `loadUserProfile`
+- `fetchSettings`
+- `saveDraft`
+- `initializeCache`
+
+Avoid names that obscure the async nature of the function.
+
+### Contract Clarity
+
+Document whether a function returns a promise that resolves to a value, an array, an iterator, or a stream.
+State whether it supports cancellation and what happens on abort.
+
+---
+
+## API Patterns
+
+API design should reflect common async usage patterns clearly.
+
+### Public Async Methods
+
+Expose async methods with predictable behavior.
+For example, `get`, `set`, `delete`, `subscribe`, `refresh`.
+
+### Streaming Endpoints
+
+Use streaming APIs when the payload is large or indefinite.
+They reduce latency and memory overhead compared to buffering everything.
+
+### Chunked Responses
+
+Send partial results as soon as they are available.
+This is useful for search, analytics, logs, and large data exports.
+
+### Polling and Long Polling
+
+Use polling only when push is not available.
+Respect server limits and use exponential backoff.
+
+### WebSockets and Realtime
+
+Choose persistent connections for low-latency bidirectional updates.
+Use fallback strategies for unsupported or unreliable transport.
+
+---
+
+## Legacy Compatibility
+
+Legacy environments may not support modern async features.
+Design code that degrades gracefully or transpiles as needed.
+
+### Callback Conversion
+
+Wrap callback-based APIs in promises.
+
+```js
+function promisify(fn) {
+  return (...args) =>
+    new Promise((resolve, reject) => {
+      fn(...args, (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      });
+    });
+};
+```
+
+### Polyfills
+
+Provide polyfills for `Promise`, `fetch`, `AbortController`, or `async`/`await` when supporting older browsers.
+Only include them when necessary to avoid bundle bloat.
+
+### Transpilation
+
+Use a build step for environments that do not support ESM, top-level await, or modern syntax.
+Target the lowest runtime you need while preserving async semantics.
+
+---
+
+## Readability and Maintainability
+
+Large async workflows become hard to maintain quickly.
+Keep the codebase approachable with strong structure and small steps.
+
+### Smaller Functions
+
+Break async work into smaller functions with a single responsibility.
+This makes testing easier and reduces complexity.
+
+### Explicit Control Flow
+
+Avoid deeply nested conditional async logic.
+Refactor complex flows into helper functions and descriptive names.
+
+### Avoid Shared Mutable State
+
+Shared mutable state is a frequent source of async bugs.
+Prefer immutable values, local variables, and pure data transformations where possible.
+
+### Logging and Metrics
+
+Record progress, failure modes, and latency for async operations.
+This helps diagnose issues in production environments.
+
+### Documentation
+
+Document the async lifecycle, cancellation semantics, retry conditions, and expected invariants.
+This is especially useful for public or library APIs.
+
+---
+
+## Common Pitfalls
+
+Recognize and avoid common async mistakes.
+
+### Forgetting to Return
+
+When using `then`, make sure to return values from callbacks.
+Otherwise the next link in the chain sees `undefined`.
+
+### Unhandled Rejections
+
+The runtime may terminate process or log noisy warnings for unhandled promise rejections.
+Install a global rejection handler and fix the source of the rejection.
+
+### Blocking the Event Loop
+
+Synchronous loops, CPU-heavy work, and expensive serialization can stall the event loop.
+Offload work to workers or split it into smaller chunks.
+
+### Excessive Concurrency
+
+Launching too many parallel requests can overwhelm the browser, server, or network.
+Use concurrency limits.
+
+### Misusing Promise.race
+
+`Promise.race` resolves or rejects with the first settled promise.
+If you need the first fulfilled result, use `Promise.any` or explicit filtering.
+
+### Ignoring Cancellation
+
+If you don’t cancel abandoned requests, they may continue consuming bandwidth, CPU, or memory.
+Design operations to support abort signals when possible.
+
+---
+
+## Real-World Scenarios
+
+Concrete examples demonstrate how async patterns apply in practice.
+
+### Loading User Data
+
+Fetch user information, settings, and preferences concurrently when they are independent.
+If a piece of data is optional, let it fail gracefully without breaking the entire page.
+
+### Background Sync
+
+Synchronize changes in the background while keeping the UI responsive.
+Use local persistence and retry logic when connectivity is intermittent.
+
+### File Uploads
+
+Upload large files in chunks while reporting progress and handling retries.
+Use streams and backpressure for memory efficiency.
+
+### Search Autocomplete
+
+Debounce user input and cancel stale requests to keep results relevant.
+Use the latest response and discard earlier ones.
+
+### Real-Time Collaboration
+
+Combine websockets, optimistic updates, and conflict resolution for collaborative editing.
+Async code must be robust to message ordering and temporary disconnects.
+
+---
+
+## Design Patterns and Anti-Patterns
+
+A professional async codebase embraces good patterns and avoids harmful ones.
+
+### Good Patterns
+
+- `async` helper functions with clear contracts
+- explicit cancellation support
+- isolated side effects
+- composable pipelines
+- graceful degradation for network failure
+
+### Anti-Patterns
+
+- callback nesting or ``callback hell``
+- mixing synchronous and asynchronous semantics unpredictably
+- using `await` inside `Array.prototype.forEach`
+- ignoring rejection paths
+- leaving long-running work on the main event loop
+
+### Saga and Orchestration
+
+Implement sagas for distributed workflows and compensate for partial failure.
+Keep orchestration logic separate from individual task logic.
+
+### Producer-Consumer Queues
+
+Model work as producers that enqueue tasks and consumers that process them.
+This is useful for batching, retrying, and controlling throughput.
+
+---
+
+## API Reference Summary
+
+This section summarizes the most important async APIs.
+
+### Promise API
+
+- `new Promise((resolve, reject) => {})`
+- `.then(onFulfilled, onRejected)`
+- `.catch(onRejected)`
+- `.finally(onFinally)`
+- `Promise.all(iterable)`
+- `Promise.allSettled(iterable)`
+- `Promise.race(iterable)`
+- `Promise.any(iterable)`
+
+### Async/Await
+
+- `async function example() {}`
+- `await promise`
+- top-level `await` in ESM
+
+### Fetch and Request APIs
+
+- `fetch(url, options)`
+- `Response.json()`
+- `Response.text()`
+- `AbortController`
+- `AbortSignal`
+
+### Stream APIs
+
+- `ReadableStream`
+- `WritableStream`
+- `TransformStream`
+- `ReadableStreamDefaultReader`
+- `WritableStreamDefaultWriter`
+
+### Browser Timer APIs
+
+- `setTimeout`
+- `setInterval`
+- `clearTimeout`
+- `clearInterval`
+- `requestAnimationFrame`
+- `cancelAnimationFrame`
+
+---
+
+## Glossary
+
+- async function: a function declared with `async` that returns a promise.
+- await: a keyword that pauses an async function until a promise settles.
+- promise: a placeholder for a future value or failure.
+- microtask: a high-priority task queue used for promise callbacks.
+- macrotask: a lower-priority task queue used for timers, I/O, and events.
+- event loop: the runtime mechanism that schedules tasks and executes callbacks.
+- concurrency: multiple tasks progressing without blocking each other.
+- parallelism: multiple tasks executing simultaneously on different cores.
+- backpressure: a mechanism that slows a producer to match a consumer’s speed.
+- cancellation: the ability to stop work before completion.
+- AbortController: a standard API for cooperative cancellation.
+- stream: a source or destination of data that can be processed incrementally.
+
+---
+
+## Further Reading
+
+- ECMAScript Language Specification: Promises and async functions.
+- MDN Web Docs: Asynchronous JavaScript and Fetch API.
+- Node.js Documentation: Async Hooks, streams, worker threads.
+- Browser Developer Tools: Network and performance profiling.
+- Community articles on async patterns, reactive programming, and scalable event-driven architectures.
+
+---
+
+## Practical Checklist
+
+Use this checklist when designing or reviewing async code.
+
+- Is the async contract clear and documented?
+- Are all promise rejections handled or intentionally propagated?
+- Are independent operations run in parallel when appropriate?
+- Are dependent operations executed sequentially only when needed?
+- Is cancellation supported for long-lived or abortable work?
+- Are concurrency limits applied when calling external services?
+- Is the event loop kept free of long synchronous work?
+- Are streams used instead of buffering large payloads?
+- Are retry and backoff strategies applied to transient failures?
+- Are timing and metrics recorded for production monitoring?
+- Is the code easy to read and maintain?
+- Is cleanup performed for resources and event listeners?
+- Is the implementation consistent with platform conventions?
+- Are API boundaries stable and clearly separated?
+- Are tests covering the major success and failure paths?
+
+---
+
+## Advanced Techniques
+
+This section covers advanced async techniques for high-quality systems.
+
+### Lazy Initialization
+
+Delay expensive setup until it is actually required.
+Use memoization to avoid repeated initialization.
+
+```js
+let cache;
+async function getCache() {
+  if (!cache) {
+    cache = await initializeCache();
+  }
+  return cache;
+}
+```
+
+### Rate-Limited Work Queues
+
+When a service limits requests, queue tasks and release them at a controlled rate.
+
+```js
+const queue = [];
+let activeCount = 0;
+const limit = 5;
+
+async function enqueue(task) {
+  queue.push(task);
+  schedule();
 }
 
-load();
+async function schedule() {
+  if (activeCount >= limit || queue.length === 0) return;
+  activeCount += 1;
+  const task = queue.shift();
+  try {
+    await task();
+  } finally {
+    activeCount -= 1;
+    schedule();
+  }
+}
 ```
 
----
+### Cooperative Polling
 
-## Event Loop
-
-The event loop schedules callbacks and microtasks.
-
-- Call stack: executes code
-- Task queue: user events, timers, I/O
-- Microtask queue: promises, `queueMicrotask`
-
-`await` pauses the async function and resumes it after the promise resolves.
-
----
-
-## Concurrency Patterns
-
-Common approaches for running multiple async tasks.
+Poll resources on a schedule while still allowing other work to progress.
 
 ```js
-const [data1, data2] = await Promise.all([
-  fetchData(),
-  fetchData(),
-]);
-
-const first = await Promise.race([
-  fetchData(),
-  fetchData(),
-]);
+async function poll(fn, interval, signal) {
+  while (!signal.aborted) {
+    await fn();
+    await new Promise((resolve) => setTimeout(resolve, interval));
+  }
+}
 ```
 
-Use `Promise.allSettled` for independent tasks where failures should not cancel all operations.
+### Heartbeats and Timeouts
+
+Use heartbeat checks to detect failed or stalled operations.
+Pair them with timeouts and fallback behavior.
+
+---
+
+## Async Patterns in Frameworks
+
+Many frameworks and libraries provide conventions for async code.
+Understanding these conventions helps integrate async logic consistently.
+
+### React and Async
+
+React components can use async data fetching outside of render.
+Use hooks like `useEffect` or data-fetching libraries that manage cache and suspense.
+
+### Server-Side Rendering
+
+SSR pipelines typically await data before rendering.
+Handle errors and timeouts gracefully to avoid long page loads.
+
+### API Routes
+
+Serverless and API route handlers are async by default.
+Return a promise and let the platform manage the response lifecycle.
+
+### State Management
+
+Async state transitions should be explicit and debuggable.
+Use reducers, actions, or stores with clear loading and error states.
+
+---
+
+## Practical Examples
+
+The following examples illustrate common asynchronous operations.
+
+### Parallel Data Fetch
+
+```js
+async function loadDashboard(userId) {
+  const [profile, notifications, metrics] = await Promise.all([
+    fetchProfile(userId),
+    fetchNotifications(userId),
+    fetchMetrics(userId),
+  ]);
+  return { profile, notifications, metrics };
+}
+```
+
+### Sequential Authentication Flow
+
+```js
+async function authenticate(credentials) {
+  const token = await requestToken(credentials);
+  const user = await fetchUser(token);
+  await recordLogin(user.id);
+  return user;
+}
+```
+
+### Safe Background Refresh
+
+```js
+async function refreshCache(signal) {
+  try {
+    const data = await fetchLatestData({ signal });
+    await cache.store(data);
+  } catch (error) {
+    if (signal.aborted) {
+      console.warn("refresh aborted");
+    } else {
+      console.error("refresh failed", error);
+    }
+  }
+}
+```
+
+---
+
+## Conclusion
+
+Asynchronous programming is both powerful and nuanced.
+Good async code delivers responsive experiences, scalable services, and robust failure handling.
+
+Mastering promises, async/await, event loop behavior, cancellation, streaming, and composition is essential for professional JavaScript and TypeScript developers.
+
+Use the patterns in this guide to build async systems that are reliable, maintainable, and performant.
+
+---
+
+## Exercises
+
+Apply the concepts from this guide with practical exercises.
+
+1. Rewrite a callback-based utility into a promise-based version.
+2. Implement an `AbortController`-aware fetch wrapper.
+3. Build a limited concurrency runner that processes tasks in batches.
+4. Create an async generator that paginates through a cursor-based API.
+5. Write a retry helper with exponential backoff and jitter.
+
+---
+
+## Notes
+
+This guide aims to be a comprehensive reference for asynchronous programming patterns.
+It is not exhaustive, but it covers the foundational ideas required for building professional async applications.
+
+Keep evolving your async design as platforms, APIs, and requirements change.
+
+---
+
+## Appendix
+
+### Async Checklist
+
+- prefer non-blocking design
+- respect cancellation and cleanup
+- keep async functions pure where possible
+- test both success and failure modes
+- use streaming for large or unbounded data
+- document async contracts clearly
+- avoid coupling unrelated async domains
+- monitor latency, errors, and resource usage
+
+### Common Runtime Primitives
+
+- `Promise`
+- `async` / `await`
+- `fetch`
+- `AbortController`
+- `ReadableStream`
+- `WritableStream`
+- `WebSocket`
+- `setTimeout` / `setInterval`
+- `requestAnimationFrame`
+- `Worker`
+- `WorkerThread`
+
+### Recommended Patterns
+
+- `Promise.all` for required parallel work
+- `Promise.allSettled` for best-effort aggregation
+- `Promise.any` for first successful result
+- `try`/`catch` for local error handling
+- `finally` for cleanup
+- `AbortController` for cancellation
+- async iterators for streaming
+- helper functions for retries and throttling
+
+---
+
+## Resources
+
+- MDN: Asynchronous JavaScript
+- MDN: Promises
+- MDN: async function
+- MDN: fetch
+- Node.js: Async Hooks
+- Node.js: Streams
+- RxJS: Observables and reactive patterns
+- The Pragmatic Programmer: asynchronous design principles
+
+---
+
+## Versioning
+
+When maintaining async code, document the runtime version expectations.
+This includes browser support, Node.js LTS versions, and library compatibility.
+
+---
+
+## Professional Practice
+
+A professional async codebase treats async execution as a first-class concern.
+The best systems are resilient to failure, explicit about side effects, and easy for collaborators to understand.
+
+Async code is not just about making things faster.
+It is about keeping the application responsive, maintaining correctness across time, and managing resources intentionally.
