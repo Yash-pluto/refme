@@ -1,11 +1,19 @@
 "use client";
+
+/**
+ * @fileoverview Layout wrapper for individual documentation topics.
+ * Handles layout composition, dynamic TOC generation, scroll-spy navigation,
+ * and integrates the global Command Palette search.
+ *
+ * @author Yash Vardhan
+ */
+
 import { useEffect, useMemo, useState, useRef, useCallback } from "react";
-import { useTheme } from "../../src/context/ThemeContext";
+import {useTheme} from "../../src/context/ThemeContext";
 import { useRouter } from "next/navigation";
 import { FaGithub } from "react-icons/fa";
 import toast, { Toaster } from "react-hot-toast";
-import Fuse from "fuse.js"; 
-import { Command } from "cmdk";
+import SearchPalette, { useSearchOSKey, SearchItem } from "../components/SearchPalette";
 import {
   ArrowLeft,
   ArrowUp,
@@ -24,6 +32,9 @@ import {
   Link as LinkIcon,
 } from "lucide-react";
 
+/**
+ * Primary layout renderer for documentation topics.
+ */
 export default function TopicLayout({
   children,
   frontmatter,
@@ -43,30 +54,27 @@ export default function TopicLayout({
 }) {
   const { darkMode, toggleTheme } = useTheme();
   const router = useRouter();
-  const [docSearch, setDocSearch] = useState("");
+
   const [domHeadings, setDomHeadings] = useState<
     Array<{ id: string; title: string; depth: number }>
   >([]);
 
-  // Global Command Palette State
   const [cmdOpen, setCmdOpen] = useState(false);
-
-  // Mobile navigation state
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileTocOpen, setIsMobileTocOpen] = useState(false);
-
-  // User Engagement State
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
 
-  // UX Enhancements: OS detection for the shortcut hint
-  const [isMounted, setIsMounted] = useState(false);
-  const [modifierKey, setModifierKey] = useState("⌘");
+  const { modifierKey, isMounted } = useSearchOSKey();
 
-  // Track active headings
   const [expandedOutline, setExpandedOutline] = useState<Record<string, boolean>>({});
   const [activeOutlineId, setActiveOutlineId] = useState<string | null>(null);
-  
-  // High-performance refs to bypass React state re-renders on scroll
+
+  /**
+   * High-performance DOM refs.
+   * I opted to manipulate the DOM directly during scroll events rather than utilizing
+   * React state to prevent layout thrashing and maintain 60fps.
+   * - Yash Vardhan
+   */
   const progressBarRef = useRef<HTMLDivElement>(null);
   const scrollTopBtnRef = useRef<HTMLButtonElement>(null);
   const isClickScrolling = useRef(false);
@@ -74,19 +82,7 @@ export default function TopicLayout({
   const headingElementsRef = useRef<{ id: string; el: HTMLElement }[]>([]);
 
   useEffect(() => {
-    setIsMounted(true);
-    if (typeof window !== "undefined") {
-      const isMac = /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform);
-      setModifierKey(isMac ? "⌘" : "Ctrl ");
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isMobileMenuOpen || cmdOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = isMobileMenuOpen || cmdOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
@@ -109,45 +105,38 @@ export default function TopicLayout({
   }, [children, topicKey]);
 
   const activeHeadings = headings.length > 0 ? headings : domHeadings;
-  const hasSearchQuery = docSearch.trim().length > 0;
 
-  // --- FUZZY SEARCH IMPLEMENTATION ---
-  const searchableData = useMemo(() => {
-    const sectionDocs = activeHeadings.map((heading) => ({
-      id: heading.id,
-      title: heading.title,
-      type: "section" as const,
-      depth: heading.depth,
-    }));
-
-    const topicDocs = topics.map((item) => ({
+  /**
+   * Transforms raw heading and topic data into the standard SearchItem contract
+   * required by the global SearchPalette component.
+   * - Yash Vardhan
+   */
+  const searchData = useMemo<SearchItem[]>(() => {
+    const topicDocs: SearchItem[] = topics.map((item) => ({
       id: item.id,
       title: item.title || item.id,
       description: item.description || "",
-      type: "topic" as const,
-      depth: 1,
+      type: "topic",
+      href: `/${item.id}`,
+    }));
+
+    const sectionDocs: SearchItem[] = activeHeadings.map((heading) => ({
+      id: heading.id,
+      title: heading.title,
+      type: "section",
+      depth: heading.depth,
     }));
 
     return [...topicDocs, ...sectionDocs];
   }, [activeHeadings, topics]);
 
-  const fuse = useMemo(() => {
-    return new Fuse(searchableData, {
-      keys: ["title", "description"],
-      includeMatches: true,
-      threshold: 0.3,
-      ignoreLocation: true,
-    });
-  }, [searchableData]);
-
-  const searchResults = useMemo(() => {
-    if (!hasSearchQuery) return [];
-    return fuse.search(docSearch.trim()).slice(0, 12);
-  }, [docSearch, hasSearchQuery, fuse]);
-
-  // Smart check for Home/Directory
-  const searchLower = docSearch.trim().toLowerCase();
-  const showHomeAction = searchLower.length > 0 && ("home".includes(searchLower) || "directory".includes(searchLower) || "index".includes(searchLower));
+  const handleSearchSelect = (item: SearchItem) => {
+    if (item.type === "topic" && item.href) {
+      router.push(item.href);
+    } else if (item.type === "section") {
+      scrollToSection(item.id);
+    }
+  };
 
   const outlineGroups = useMemo(() => {
     const groups: Array<{
@@ -176,13 +165,17 @@ export default function TopicLayout({
     return groups;
   }, [activeHeadings]);
 
-  // Cache heading DOM nodes to avoid querying on every frame
+  /**
+   * Caching heading elements on mount. Executing document.getElementById inside
+   * the scroll event listener creates excessive CPU load.
+   * - Yash Vardhan
+   */
   useEffect(() => {
     const ids = outlineGroups.flatMap((group) => [
       group.id,
       ...group.items.map((item) => item.id),
     ]);
-    
+
     headingElementsRef.current = ids
       .map((id) => {
         const el = document.getElementById(id);
@@ -191,7 +184,12 @@ export default function TopicLayout({
       .filter(Boolean) as { id: string; el: HTMLElement }[];
   }, [outlineGroups]);
 
-  // --- UNIFIED HIGH-PERFORMANCE SCROLL LOOP ---
+  /**
+   * Unified requestAnimationFrame scroll loop.
+   * Batches progress bar sizing, visibility toggles, and scroll-spy calculations
+   * into a single repaint cycle to eliminate jittering.
+   * - Yash Vardhan
+   */
   useEffect(() => {
     let ticking = false;
 
@@ -199,8 +197,7 @@ export default function TopicLayout({
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const currentScrollY = window.scrollY;
-          
-          // 1. Scroll-to-Top Button (Direct DOM update)
+
           if (scrollTopBtnRef.current) {
             if (currentScrollY > 400) {
               scrollTopBtnRef.current.classList.remove("translate-y-8", "opacity-0", "pointer-events-none");
@@ -211,7 +208,6 @@ export default function TopicLayout({
             }
           }
 
-          // 2. Reading Progress (Direct DOM update, bypassing React state)
           if (progressBarRef.current) {
             const totalHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
             if (totalHeight > 0) {
@@ -222,28 +218,23 @@ export default function TopicLayout({
             }
           }
 
-          // 3. Scroll Spy (Active Heading Tracking)
-          // Bypass calculation if user just clicked a TOC link (prevents flicker)
           if (!isClickScrolling.current && headingElementsRef.current.length > 0) {
             let currentActiveId = null;
 
             for (const { id, el } of headingElementsRef.current) {
               const rect = el.getBoundingClientRect();
-              // 120px offset to account for sticky header and trigger breathing room
               if (rect.top <= 120) {
                 currentActiveId = id;
               } else {
-                break; // Elements are in DOM order; stop iterating once we find one below threshold
+                break;
               }
             }
 
-            // Fallback: If scrolled to absolute top, highlight the first item
             if (!currentActiveId && currentScrollY < 50) {
               currentActiveId = headingElementsRef.current[0].id;
             }
 
             if (currentActiveId) {
-              // React state is fine here because we only update when the ID actually changes
               setActiveOutlineId((prev) => (prev !== currentActiveId ? currentActiveId : prev));
             }
           }
@@ -255,20 +246,18 @@ export default function TopicLayout({
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); // Init immediately on mount
+    handleScroll();
 
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []); // Empty dependency array ensures scroll listener is only bound once
-  // ---------------------------------------------
+  }, []);
 
-  // Global Command Palette Shortcut and Escape handling
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setCmdOpen(false);
         return;
       }
-      
+
       const isModifier = event.metaKey || event.ctrlKey;
       if (!isModifier || event.key.toLowerCase() !== "k") return;
 
@@ -290,7 +279,7 @@ export default function TopicLayout({
     });
   }, [outlineGroups]);
 
-  const theme = {
+  const themeClasses = {
     page: darkMode ? "bg-[#050505] text-[#F5F5F5]" : "bg-[#F5F3EE] text-[#111111]",
     header: darkMode ? "bg-[#050505]/85" : "bg-[#fcfbf9]/85",
     panel: darkMode ? "bg-[#050505]" : "bg-white",
@@ -318,19 +307,16 @@ export default function TopicLayout({
     if (!id) return;
     const target = document.getElementById(id);
     if (!target) return;
-    
-    // Lock scroll spy to prevent flickering
+
     isClickScrolling.current = true;
     setActiveOutlineId(id);
 
-    // Clear existing timeout if multiple clicks happen quickly
     if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
 
     const headerOffset = 88;
     const top = target.getBoundingClientRect().top + window.scrollY - headerOffset;
     window.scrollTo({ top, behavior: "smooth" });
 
-    // Unlock scroll spy after smooth scroll finishes
     scrollTimeout.current = setTimeout(() => {
       isClickScrolling.current = false;
     }, 800);
@@ -354,16 +340,14 @@ export default function TopicLayout({
   const currentTopicTitle = topics.find((t) => t.id === topicKey)?.title || frontmatter?.title || topicKey;
 
   return (
-    <div className={`${theme.page} min-h-screen font-sans selection:bg-[#C699FF]/25 transition-colors duration-200`}>
+    <div className={`${themeClasses.page} min-h-screen font-sans selection:bg-[#C699FF]/25 transition-colors duration-200`}>
       
-      {/* READING PROGRESS BAR - Updated for high performance rendering */}
       <div 
         ref={progressBarRef}
         className="fixed left-0 top-0 z-[100] h-1 bg-[#C699FF] will-change-[width]" 
         style={{ width: "0%" }} 
       />
 
-      {/* TOAST CONTAINER */}
       <Toaster 
         position="bottom-center"
         toastOptions={{
@@ -377,145 +361,14 @@ export default function TopicLayout({
         }}
       />
 
-      {/* CMDK GLOBAL COMMAND PALETTE OVERLAY */}
-      {cmdOpen && (
-        <div 
-          className="fixed inset-0 z-[100] flex items-start justify-center bg-black/40 pt-[15vh] backdrop-blur-sm sm:pt-[20vh]" 
-          onClick={() => setCmdOpen(false)}
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()} 
-            className={`w-full max-w-2xl overflow-hidden rounded-xl border shadow-2xl mx-4 ${theme.panel} ${theme.border}`}
-          >
-            <Command shouldFilter={false} className="flex h-full w-full flex-col overflow-hidden bg-transparent">
-              <div className={`flex items-center border-b px-4 ${theme.border}`}>
-                <Search className={`mr-3 h-5 w-5 opacity-50 ${theme.muted}`} />
-                <Command.Input
-                  autoFocus
-                  value={docSearch}
-                  onValueChange={setDocSearch}
-                  onKeyDown={(e) => {
-                    if (e.key === "Escape") {
-                      e.preventDefault();
-                      setCmdOpen(false);
-                    }
-                  }}
-                  placeholder="Search documentation or type a command..."
-                  className={`flex h-14 w-full bg-transparent text-sm outline-none placeholder:text-current placeholder:opacity-50 ${theme.navItem}`}
-                />
-                <button 
-                  onClick={() => setCmdOpen(false)} 
-                  className={`rounded p-1 opacity-50 transition-opacity hover:opacity-100 ${theme.hoverAccent}`}
-                >
-                  <X size={16} />
-                </button>
-              </div>
+      <SearchPalette 
+        isOpen={cmdOpen} 
+        onClose={() => setCmdOpen(false)} 
+        searchData={searchData} 
+        onSelect={handleSearchSelect} 
+        placeholder="Search documentation or type a command..."
+      />
 
-              <Command.List className="max-h-[60vh] overflow-y-auto p-2 sm:max-h-[400px]">
-                {hasSearchQuery && searchResults.length === 0 && !showHomeAction && (
-                  <Command.Empty className={`py-6 text-center text-sm ${theme.muted}`}>
-                    No results found for "{docSearch}".
-                  </Command.Empty>
-                )}
-
-                {!hasSearchQuery && (
-                  <Command.Group heading={<div className={`px-2 py-2 text-xs font-semibold uppercase tracking-wider ${theme.muted}`}>Quick Actions</div>}>
-                    <Command.Item
-                      onSelect={() => {
-                        router.push("/");
-                        setCmdOpen(false);
-                      }}
-                      className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-3 text-sm transition-colors hover:bg-current/10 aria-selected:bg-current/10 ${theme.navItem}`}
-                    >
-                      <Globe size={16} className="opacity-70" />
-                      <span>Go to Directory (Home)</span>
-                    </Command.Item>
-                    <Command.Item
-                      onSelect={() => { toggleTheme(); setCmdOpen(false); }}
-                      className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-3 text-sm transition-colors hover:bg-current/10 aria-selected:bg-current/10 ${theme.navItem}`}
-                    >
-                      <Monitor size={16} className="opacity-70" />
-                      <span>Switch to {darkMode ? "Light" : "Dark"} Mode</span>
-                    </Command.Item>
-                    <Command.Item
-                      onSelect={() => {
-                        navigator.clipboard.writeText(window.location.href);
-                        toast.success("URL copied to clipboard!");
-                        setCmdOpen(false);
-                      }}
-                      className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-3 text-sm transition-colors hover:bg-current/10 aria-selected:bg-current/10 ${theme.navItem}`}
-                    >
-                      <LinkIcon size={16} className="opacity-70" />
-                      <span>Copy Current URL</span>
-                    </Command.Item>
-                    <Command.Item
-                      onSelect={() => {
-                        window.open("https://github.com/yash-pluto/refme", "_blank");
-                        setCmdOpen(false);
-                      }}
-                      className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-3 text-sm transition-colors hover:bg-current/10 aria-selected:bg-current/10 ${theme.navItem}`}
-                    >
-                      <FaGithub size={16} className="opacity-70" />
-                      <span>Go to GitHub Repo</span>
-                    </Command.Item>
-                  </Command.Group>
-                )}
-
-                {/* Specific match for "Home" or "Directory" */}
-                {showHomeAction && (
-                  <Command.Group heading={<div className={`px-2 py-2 text-xs font-semibold uppercase tracking-wider ${theme.muted}`}>Navigation</div>}>
-                    <Command.Item
-                      onSelect={() => {
-                        router.push("/");
-                        setDocSearch("");
-                        setCmdOpen(false);
-                      }}
-                      className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-3 text-sm transition-colors hover:bg-current/10 aria-selected:bg-current/10 ${theme.navItem}`}
-                    >
-                      <Globe size={16} className="opacity-70" />
-                      <span>Go to Directory (Home)</span>
-                    </Command.Item>
-                  </Command.Group>
-                )}
-
-                {hasSearchQuery && searchResults.length > 0 && (
-                  <Command.Group heading={<div className={`px-2 py-2 text-xs font-semibold uppercase tracking-wider ${theme.muted}`}>Documentation</div>}>
-                    {searchResults.map(({ item, matches }) => {
-                      const titleMatches = matches?.find(m => m.key === "title")?.indices;
-                      return (
-                        <Command.Item
-                          key={`${item.type}-${item.id}`}
-                          onSelect={() => {
-                            if (item.type === "topic") {
-                              router.push(`/${item.id}`);
-                            } else {
-                              scrollToSection(item.id);
-                            }
-                            setDocSearch("");
-                            setCmdOpen(false);
-                          }}
-                          className={`flex cursor-pointer items-center justify-between gap-3 rounded-lg px-3 py-3 text-sm transition-colors hover:bg-current/10 aria-selected:bg-current/10 ${theme.navItem}`}
-                        >
-                          <div className="min-w-0">
-                            <div className="truncate font-medium">
-                              <HighlightText text={item.title} matches={titleMatches} />
-                            </div>
-                          </div>
-                          <div className={`shrink-0 text-[10px] uppercase tracking-[0.18em] opacity-60`}>
-                            {item.type === "topic" ? "Topic" : item.depth === 2 ? "Section" : "Subsection"}
-                          </div>
-                        </Command.Item>
-                      );
-                    })}
-                  </Command.Group>
-                )}
-              </Command.List>
-            </Command>
-          </div>
-        </div>
-      )}
-
-      {/* MOBILE DRAWER OVERLAY */}
       {isMobileMenuOpen && (
         <div
           className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm lg:hidden"
@@ -523,20 +376,19 @@ export default function TopicLayout({
         />
       )}
 
-      {/* MOBILE DRAWER SIDEBAR */}
       <div
-        className={`fixed bottom-0 left-0 top-0 z-50 w-[280px] transform border-r transition-transform duration-300 ease-in-out lg:hidden ${theme.panel} ${theme.border} ${
+        className={`fixed bottom-0 left-0 top-0 z-50 w-[280px] transform border-r transition-transform duration-300 ease-in-out lg:hidden ${themeClasses.panel} ${themeClasses.border} ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className={`flex h-16 items-center justify-between border-b px-4 ${theme.border}`}>
+        <div className={`flex h-16 items-center justify-between border-b px-4 ${themeClasses.border}`}>
           <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em]">
-            <span className={`${theme.accent}`}>RefMe</span>
-            <span className={`${theme.muted}`}>docs</span>
+            <span className={`${themeClasses.accent}`}>RefMe</span>
+            <span className={`${themeClasses.muted}`}>docs</span>
           </div>
           <button
             onClick={() => setIsMobileMenuOpen(false)}
-            className={`p-2 transition-colors ${theme.muted} ${theme.hoverAccent}`}
+            className={`p-2 transition-colors ${themeClasses.muted} ${themeClasses.hoverAccent}`}
           >
             <X size={18} />
           </button>
@@ -549,7 +401,7 @@ export default function TopicLayout({
                 router.push("/");
                 setIsMobileMenuOpen(false);
               }}
-              className={`flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] transition-colors ${theme.muted} ${theme.hoverAccent}`}
+              className={`flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] transition-colors ${themeClasses.muted} ${themeClasses.hoverAccent}`}
             >
               <ArrowLeft size={14} className="opacity-80" />
               <span>Directory</span>
@@ -588,13 +440,12 @@ export default function TopicLayout({
         </div>
       </div>
 
-      {/* HEADER */}
-      <header className={`sticky top-0 z-40 h-16 border-b ${theme.border} ${theme.header} backdrop-blur-md`}>
+      <header className={`sticky top-0 z-40 h-16 border-b ${themeClasses.border} ${themeClasses.header} backdrop-blur-md`}>
         <div className="mx-auto flex h-full max-w-[1700px] items-center justify-between gap-3 px-4 md:gap-4 md:px-6">
           <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className={`lg:hidden -ml-1 p-2 transition-colors ${theme.muted} ${theme.hoverAccent}`}
+              className={`lg:hidden -ml-1 p-2 transition-colors ${themeClasses.muted} ${themeClasses.hoverAccent}`}
               aria-label="Open navigation menu"
             >
               <Menu size={20} />
@@ -606,8 +457,8 @@ export default function TopicLayout({
               </span>
             </div>
             <div className="hidden md:flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em]">
-              <span className={`${theme.accent}`}>RefMe</span>
-              <span className={`${theme.muted}`}>docs</span>
+              <span className={`${themeClasses.accent}`}>RefMe</span>
+              <span className={`${themeClasses.muted}`}>docs</span>
             </div>
           </div>
 
@@ -615,7 +466,7 @@ export default function TopicLayout({
             <button
               type="button"
               onClick={() => setCmdOpen(true)}
-              className={`flex w-full max-w-xl items-center justify-between rounded-full border px-4 py-2 transition-all duration-200 hover:border-[#C699FF]/60 ${theme.border} ${theme.input}`}
+              className={`flex w-full max-w-xl items-center justify-between rounded-full border px-4 py-2 transition-all duration-200 hover:border-[#C699FF]/60 ${themeClasses.border} ${themeClasses.input}`}
             >
               <div className="flex items-center gap-3 text-sm opacity-50">
                 <Search className="h-4 w-4" />
@@ -630,7 +481,7 @@ export default function TopicLayout({
           <button
             type="button"
             onClick={toggleTheme}
-            className={`shrink-0 rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] transition-colors ${theme.border} ${theme.soft} ${theme.hoverAccent}`}
+            className={`shrink-0 rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] transition-colors ${themeClasses.border} ${themeClasses.soft} ${themeClasses.hoverAccent}`}
           >
             {darkMode ? "Light" : "Dark"}
           </button>
@@ -639,13 +490,12 @@ export default function TopicLayout({
 
       <div className="mx-auto flex max-w-[1700px]">
         
-        {/* DESKTOP LEFT SIDEBAR */}
-        <aside className={`sticky top-16 hidden h-[calc(100vh-4rem)] w-[260px] shrink-0 border-r lg:flex lg:flex-col ${theme.border}`}>
+        <aside className={`sticky top-16 hidden h-[calc(100vh-4rem)] w-[260px] shrink-0 border-r lg:flex lg:flex-col ${themeClasses.border}`}>
           <div className="flex flex-1 flex-col overflow-y-auto px-4 py-8">
             <div className="mb-6 px-2">
               <button
                 onClick={() => router.push("/")}
-                className={`flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] transition-colors ${theme.muted} ${theme.hoverAccent}`}
+                className={`flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] transition-colors ${themeClasses.muted} ${themeClasses.hoverAccent}`}
               >
                 <ArrowLeft size={14} className="opacity-80" />
                 <span>Directory</span>
@@ -683,20 +533,18 @@ export default function TopicLayout({
           </div>
         </aside>
 
-        {/* MAIN CONTENT AREA */}
         <main className="flex-1 px-4 py-6 md:px-8 lg:px-10 lg:py-8">
           <div className="mx-auto max-w-[780px] min-w-0">
             
-            {/* MOBILE IN-PAGE TOC */}
             {outlineGroups.length > 0 && (
-              <div className={`mb-8 rounded-xl border xl:hidden ${theme.border} ${theme.panel}`}>
+              <div className={`mb-8 rounded-xl border xl:hidden ${themeClasses.border} ${themeClasses.panel}`}>
                 <button
                   type="button"
                   onClick={() => setIsMobileTocOpen(!isMobileTocOpen)}
                   className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium"
                 >
                   <span className="flex items-center gap-2">
-                    <BookOpenText size={16} className={`opacity-70 ${theme.muted}`} />
+                    <BookOpenText size={16} className={`opacity-70 ${themeClasses.muted}`} />
                     On this page
                   </span>
                   <ChevronDown
@@ -711,7 +559,7 @@ export default function TopicLayout({
                   }`}
                 >
                   <div className="overflow-hidden">
-                    <div className={`border-t px-4 py-4 space-y-4 ${theme.border}`}>
+                    <div className={`border-t px-4 py-4 space-y-4 ${themeClasses.border}`}>
                       {outlineGroups.map((group) => {
                         const isActiveGroup = activeOutlineId === group.id;
 
@@ -729,14 +577,14 @@ export default function TopicLayout({
                                   ? darkMode
                                     ? "text-[#C699FF]"
                                     : "text-[#6f45d6]"
-                                  : `${theme.muted} hover:text-current`
+                                  : `${themeClasses.muted} hover:text-current`
                               }`}
                             >
                               {group.title}
                             </a>
                             
                             {group.items.length > 0 && (
-                              <div className={`ml-1 space-y-2 border-l pl-3 ${theme.border}`}>
+                              <div className={`ml-1 space-y-2 border-l pl-3 ${themeClasses.border}`}>
                                 {group.items.map((item) => {
                                   const isActiveItem = activeOutlineId === item.id;
                                   return (
@@ -753,7 +601,7 @@ export default function TopicLayout({
                                           ? darkMode
                                             ? "text-[#C699FF]"
                                             : "text-[#6f45d6]"
-                                          : `${theme.muted} hover:text-current`
+                                          : `${themeClasses.muted} hover:text-current`
                                       }`}
                                     >
                                       {item.title}
@@ -771,9 +619,8 @@ export default function TopicLayout({
               </div>
             )}
 
-            {/* BREADCRUMBS */}
-            <nav className={`mb-6 flex items-center gap-2 text-[13px] font-medium ${theme.muted}`}>
-              <button onClick={() => router.push("/")} className={`transition-colors ${theme.hoverAccent}`}>
+            <nav className={`mb-6 flex items-center gap-2 text-[13px] font-medium ${themeClasses.muted}`}>
+              <button onClick={() => router.push("/")} className={`transition-colors ${themeClasses.hoverAccent}`}>
                 Directory
               </button>
               <ChevronRight size={14} className="opacity-50" />
@@ -783,23 +630,20 @@ export default function TopicLayout({
             </nav>
 
             <article className="prose prose-sm max-w-none min-w-0 overflow-x-auto dark:prose-invert">
-              {/* AUTOMATIC DOCUMENT TITLE INJECTION */}
               <div className="mb-10">
                 <h1 className="mb-2 text-3xl font-extrabold tracking-tight sm:text-4xl capitalize">
                   {currentTopicTitle}
                 </h1>
                 {frontmatter?.description && (
-                  <p className={`text-lg ${theme.muted} mt-2 leading-relaxed`}>
+                  <p className={`text-lg ${themeClasses.muted} mt-2 leading-relaxed`}>
                     {frontmatter.description}
                   </p>
                 )}
               </div>
-              {/* MDX CONTENT */}
               {children}
             </article>
 
-            {/* USER ENGAGEMENT & GITHUB EDIT */}
-            <div className={`mt-16 flex flex-col items-center justify-between gap-6 border-t pt-8 sm:flex-row sm:gap-4 ${theme.border}`}>
+            <div className={`mt-16 flex flex-col items-center justify-between gap-6 border-t pt-8 sm:flex-row sm:gap-4 ${themeClasses.border}`}>
               <div className="flex items-center gap-4">
                 {feedbackSubmitted ? (
                   <span className={`text-[13px] font-medium text-[#C699FF]`}>
@@ -807,17 +651,17 @@ export default function TopicLayout({
                   </span>
                 ) : (
                   <>
-                    <span className={`text-[13px] font-medium ${theme.muted}`}>Was this page helpful?</span>
+                    <span className={`text-[13px] font-medium ${themeClasses.muted}`}>Was this page helpful?</span>
                     <div className="flex gap-2">
                       <button 
                         onClick={() => handleFeedback(true)}
-                        className={`flex h-8 w-8 items-center justify-center rounded-lg border bg-transparent transition-all hover:bg-current/5 ${theme.border} ${theme.hoverAccent}`}
+                        className={`flex h-8 w-8 items-center justify-center rounded-lg border bg-transparent transition-all hover:bg-current/5 ${themeClasses.border} ${themeClasses.hoverAccent}`}
                       >
                         <span className="text-sm">👍</span>
                       </button>
                       <button 
                         onClick={() => handleFeedback(false)}
-                        className={`flex h-8 w-8 items-center justify-center rounded-lg border bg-transparent transition-all hover:bg-current/5 ${theme.border} ${theme.hoverAccent}`}
+                        className={`flex h-8 w-8 items-center justify-center rounded-lg border bg-transparent transition-all hover:bg-current/5 ${themeClasses.border} ${themeClasses.hoverAccent}`}
                       >
                         <span className="text-sm">👎</span>
                       </button>
@@ -829,7 +673,7 @@ export default function TopicLayout({
                 href={`https://github.com/yash-pluto/refme/edit/main/frontend/content/${topicKey}.mdx`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`flex items-center gap-2 text-[13px] font-medium transition-colors ${theme.muted} ${theme.hoverAccent}`}
+                className={`flex items-center gap-2 text-[13px] font-medium transition-colors ${themeClasses.muted} ${themeClasses.hoverAccent}`}
               >
                 <FaGithub size={14} />
                 <span>Edit this page on GitHub</span>
@@ -838,14 +682,13 @@ export default function TopicLayout({
 
           </div>
 
-          {/* BOTTOM PAGINATION */}
-          <div className={`mx-auto mt-16 max-w-[820px] border-t pt-8 ${theme.border}`}>
+          <div className={`mx-auto mt-16 max-w-[820px] border-t pt-8 ${themeClasses.border}`}>
             <div className="flex items-center justify-between gap-4">
               {prevTopic ? (
                 <button
                   type="button"
                   onClick={() => router.push(`/${prevTopic.id}`)}
-                  className={`flex items-center gap-2 rounded-lg border px-4 py-3 text-left transition-colors hover:border-current/30 ${theme.border} ${theme.soft}`}
+                  className={`flex items-center gap-2 rounded-lg border px-4 py-3 text-left transition-colors hover:border-current/30 ${themeClasses.border} ${themeClasses.soft}`}
                 >
                   <span className="text-[10px] uppercase tracking-[0.2em] opacity-60">Previous</span>
                   <span className="text-sm font-semibold">{prevTopic.title || prevTopic.id}</span>
@@ -858,7 +701,7 @@ export default function TopicLayout({
                 <button
                   type="button"
                   onClick={() => router.push(`/${nextTopic.id}`)}
-                  className={`ml-auto flex items-center gap-2 rounded-lg border px-4 py-3 text-right transition-colors hover:border-current/30 ${theme.border} ${theme.soft}`}
+                  className={`ml-auto flex items-center gap-2 rounded-lg border px-4 py-3 text-right transition-colors hover:border-current/30 ${themeClasses.border} ${themeClasses.soft}`}
                 >
                   <span className="text-[10px] uppercase tracking-[0.2em] opacity-60">Next</span>
                   <span className="text-sm font-semibold">{nextTopic.title || nextTopic.id}</span>
@@ -870,10 +713,9 @@ export default function TopicLayout({
           </div>
         </main>
 
-        {/* DESKTOP RIGHT SIDEBAR */}
         <aside className={`sticky top-16 hidden h-[calc(100vh-4rem)] w-[240px] shrink-0 xl:block`}>
           <div className="h-full overflow-y-auto px-5 py-8">
-            <p className={`mb-4 px-2 text-[10px] font-semibold uppercase tracking-[0.2em] ${theme.muted}`}>
+            <p className={`mb-4 px-2 text-[10px] font-semibold uppercase tracking-[0.2em] ${themeClasses.muted}`}>
               On this page
             </p>
 
@@ -899,7 +741,7 @@ export default function TopicLayout({
                             ? darkMode
                               ? "text-[#C699FF]"
                               : "text-[#6f45d6]"
-                            : `${theme.muted} ${theme.hoverAccent}`
+                            : `${themeClasses.muted} ${themeClasses.hoverAccent}`
                         }`}
                       >
                         <span className="truncate">{group.title}</span>
@@ -918,7 +760,7 @@ export default function TopicLayout({
                       >
                         <div className="overflow-hidden">
                           {group.items.length > 0 && (
-                            <div className={`mt-0.5 space-y-0.5 border-l px-1 ml-3 ${theme.border}`}>
+                            <div className={`mt-0.5 space-y-0.5 border-l px-1 ml-3 ${themeClasses.border}`}>
                               {group.items.map((item) => {
                                 const isActiveItem = activeOutlineId === item.id;
 
@@ -935,7 +777,7 @@ export default function TopicLayout({
                                         ? darkMode
                                           ? "text-[#C699FF]"
                                           : "text-[#6f45d6]"
-                                        : `${theme.muted} ${theme.hoverAccent}`
+                                        : `${themeClasses.muted} ${themeClasses.hoverAccent}`
                                     }`}
                                   >
                                     {item.title}
@@ -950,7 +792,7 @@ export default function TopicLayout({
                   );
                 })
               ) : (
-                <div className={`px-2 text-[13px] ${theme.muted}`}>
+                <div className={`px-2 text-[13px] ${themeClasses.muted}`}>
                   No sections yet
                 </div>
               )}
@@ -959,45 +801,15 @@ export default function TopicLayout({
         </aside>
       </div>
 
-      {/* SCROLL TO TOP FAB - Updated to completely avoid state triggers */}
       <button
         ref={scrollTopBtnRef}
         type="button"
         onClick={scrollToTop}
-        className={`fixed bottom-6 right-6 z-50 flex h-10 w-10 items-center justify-center rounded-full border shadow-sm transition-all duration-300 md:bottom-10 md:right-10 pointer-events-none translate-y-8 opacity-0 ${theme.panel} ${theme.border} ${theme.hoverAccent}`}
+        className={`fixed bottom-6 right-6 z-50 flex h-10 w-10 items-center justify-center rounded-full border shadow-sm transition-all duration-300 md:bottom-10 md:right-10 pointer-events-none translate-y-8 opacity-0 ${themeClasses.panel} ${themeClasses.border} ${themeClasses.hoverAccent}`}
         aria-label="Scroll to top"
       >
         <ArrowUp size={18} />
       </button>
     </div>
   );
-}
-
-// --- HELPER COMPONENT FOR FUZZY MATCH HIGHLIGHTING ---
-function HighlightText({ text, matches }: { text: string; matches?: readonly [number, number][] }) {
-  if (!matches || matches.length === 0) return <span>{text}</span>;
-
-  const elements: React.ReactNode[] = [];
-  let lastIndex = 0;
-
-  matches.forEach(([start, end], i) => {
-    // Text before the match
-    if (start > lastIndex) {
-      elements.push(<span key={`unmatch-${i}`}>{text.substring(lastIndex, start)}</span>);
-    }
-    // The exact matched characters
-    elements.push(
-      <span key={`match-${i}`} className="font-bold text-[#C699FF] bg-[#C699FF]/10 rounded-sm">
-        {text.substring(start, end + 1)}
-      </span>
-    );
-    lastIndex = end + 1;
-  });
-
-  // Text after the final match
-  if (lastIndex < text.length) {
-    elements.push(<span key="unmatch-end">{text.substring(lastIndex)}</span>);
-  }
-
-  return <>{elements}</>;
 }

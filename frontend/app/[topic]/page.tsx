@@ -1,4 +1,3 @@
-// app/[topic]/page.tsx
 import { getAllTopics, getTopicBySlug } from "../../src/lib/mdx";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import SkeletonTopic from "../components/SkeletonTopic";
@@ -11,7 +10,6 @@ const mdxComponents = {
   h3: MdxH3,
   p: MdxP,
   ul: MdxUl,
-  // Intercept standard <pre> tags and route them to our interactive Client Component
   pre: (props: any) => {
     const codeChunk = props.children?.props?.children || "";
     const language =

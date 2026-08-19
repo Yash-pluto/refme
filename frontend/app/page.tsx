@@ -130,7 +130,6 @@ export const REFERENCE_DATA = [
   },
 ];
 
-// --- FUZZY SEARCH HIGHLIGHT HELPER ---
 function HighlightText({
   text,
   matches,
@@ -138,7 +137,6 @@ function HighlightText({
   highlightStyle,
 }: {
   text: string;
-  // FIX: Added 'readonly' to match Fuse.js's return type
   matches?: readonly any[]; 
   fieldKey: string;
   highlightStyle: string;
@@ -172,11 +170,9 @@ export default function LandingPage() {
   const { darkMode, toggleTheme } = useTheme();
   const router = useRouter();
   
-  // Command Palette states
   const [cmdOpen, setCmdOpen] = useState(false);
   const [docSearch, setDocSearch] = useState("");
   
-  // UX Enhancements
   const [isMounted, setIsMounted] = useState(false);
   const [modifierKey, setModifierKey] = useState("⌘");
 
@@ -205,7 +201,6 @@ export default function LandingPage() {
     }
   }, []);
 
-  // Keyboard shortcut for Cmd/Ctrl + K and Escape
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -223,7 +218,6 @@ export default function LandingPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Prevent scrolling when Command Palette is open
   useEffect(() => {
     if (cmdOpen) {
       document.body.style.overflow = "hidden";
@@ -235,7 +229,6 @@ export default function LandingPage() {
     };
   }, [cmdOpen]);
 
-  // --- FUZZY SEARCH SETUP FOR CMDK ---
   const flattenedItems = useMemo(() => {
     return REFERENCE_DATA.flatMap(cat =>
       cat.items.map(item => ({ 
@@ -258,7 +251,6 @@ export default function LandingPage() {
     return fuse.search(docSearch.trim()).slice(0, 12);
   }, [docSearch, fuse]);
 
-  // Smart check to see if the user is looking for the home/directory page
   const searchLower = docSearch.trim().toLowerCase();
   const showHomeAction = searchLower.length > 0 && ("home".includes(searchLower) || "directory".includes(searchLower) || "index".includes(searchLower));
 
