@@ -17,9 +17,6 @@ import toast from "react-hot-toast";
 import { FaGithub } from "react-icons/fa";
 import { Globe, Monitor, Search, X, Link as LinkIcon } from "lucide-react";
 
-/**
- * Defines the contract for items ingested by the Search Palette.
- */
 export type SearchItemType = "topic" | "section" | "action";
 
 export interface SearchItem {
@@ -44,7 +41,7 @@ interface SearchPaletteProps {
 
 /**
  * Evaluates the client OS to render the appropriate keyboard modifier hint (Cmd vs Ctrl).
- * Safe for SSR hydration.
+ * Implementation is wrapped in an initialization effect to remain SSR-safe.
  */
 export function useSearchOSKey() {
   const [modifierKey, setModifierKey] = useState("⌘");
@@ -62,8 +59,9 @@ export function useSearchOSKey() {
 }
 
 /**
- * Utility component to render fuzzy match highlights.
- * Splits strings based on fuse.js indices to prevent expensive DOM manipulation.
+ * Utility component to safely render fuzzy match highlights.
+ * Splits strings based on fuse.js indices to prevent expensive DOM manipulation
+ * and bypass dangerouslySetInnerHTML.
  */
 function HighlightText({
   text,
@@ -125,6 +123,7 @@ export default function SearchPalette({
 
   /**
    * Static global actions bound to the palette default state.
+   * Memoized to prevent unnecessary re-evaluations during typing.
    */
   const quickActions: SearchItem[] = useMemo(
     () => [
@@ -166,7 +165,11 @@ export default function SearchPalette({
   const allSearchableData = useMemo(() => [...quickActions, ...searchData], [quickActions, searchData]);
 
   /**
-   * Primary strict search instance. Tuned for exact or near-exact matches.
+   * Primary strict search instance. 
+   * Tuned for exact or near-exact matches across all provided data fields.
+   * ignoreFieldNorm is enabled to prevent long descriptions from tanking the score of short titles.
+   * 
+   * - Yash Vardhan
    */
   const fuseStrict = useMemo(
     () =>
@@ -175,28 +178,30 @@ export default function SearchPalette({
         includeMatches: true,
         threshold: 0.3,
         ignoreLocation: true,
+        ignoreFieldNorm: true, 
       }),
     [allSearchableData]
   );
 
   /**
-   * Secondary relaxed search instance. Provides typo tolerance to power the
-   * "Did you mean?" suggestion feature when strict matching fails.
+   * Secondary relaxed search instance handling Typo Tolerance ("Did you mean X?").
+   * Restricted strictly to the 'title' field. Including 'description' causes
+   * Fuse.js to severely penalize the match score on pages with heavy description text.
+   * 
+   * - Yash Vardhan
    */
   const fuseLoose = useMemo(
     () =>
       new Fuse(searchData, {
-        keys: ["title", "description"],
+        keys: ["title"], 
         includeMatches: true,
-        threshold: 0.6,
+        threshold: 0.65, 
         ignoreLocation: true,
+        ignoreFieldNorm: true,
       }),
     [searchData]
   );
 
-  /**
-   * Global event bindings to orchestrate keyboard interaction.
-   */
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -212,9 +217,6 @@ export default function SearchPalette({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  /**
-   * Body scroll lock management.
-   */
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
     if (!isOpen) setDocSearch("");
@@ -227,19 +229,20 @@ export default function SearchPalette({
 
   const hasSearchQuery = docSearch.trim().length > 0;
   
-  // Base results off strict matching
   const rawResults = hasSearchQuery
     ? fuseStrict.search(docSearch.trim()).slice(0, 12)
     : quickActions.map((item) => ({ item, matches: [] }));
 
-  // Fallback heuristic: If strict fails, run relaxed threshold search for a suggestion
+  /**
+   * Fallback heuristic: If the primary strict search fails to yield results,
+   * we execute the relaxed threshold search to generate a suggestion.
+   */
   let suggestion: SearchItem | null = null;
   if (hasSearchQuery && rawResults.length === 0) {
     const looseResults = fuseLoose.search(docSearch.trim());
     if (looseResults.length > 0) suggestion = looseResults[0].item;
   }
 
-  // Result routing logic
   const actionResults = rawResults.filter((r) => r.item.type === "action");
   const topicResults = rawResults.filter((r) => r.item.type === "topic");
   const sectionResults = rawResults.filter((r) => r.item.type === "section");
@@ -287,7 +290,6 @@ export default function SearchPalette({
 
           <Command.List className="max-h-[60vh] overflow-y-auto p-2 sm:max-h-[400px]">
             
-            {/* Typo Suggestion Handling */}
             {hasSearchQuery && rawResults.length === 0 && (
               <Command.Empty className={`py-6 text-center text-sm ${themeClasses.muted}`}>
                 {suggestion ? (
