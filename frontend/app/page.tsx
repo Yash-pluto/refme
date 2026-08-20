@@ -2,8 +2,7 @@
 
 /**
  * @fileoverview Primary entry point and directory index for the application.
- * Composes the category grid and injects the global SearchPalette for 
- * instant top-level navigation.
+ * Composes the category grid and features the unified, responsive global footer.
  *
  * @author Yash Vardhan
  */
@@ -13,8 +12,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme } from "../src/context/ThemeContext";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
-
-// Import the unified search architecture
 import SearchPalette, { useSearchOSKey, SearchItem } from "../app/components/SearchPalette";
 
 import {
@@ -146,32 +143,30 @@ export default function LandingPage() {
   const { modifierKey, isMounted } = useSearchOSKey();
 
   const themeClasses = {
-    page: darkMode ? "bg-[#050505] text-[#f5f5f5]" : "bg-[#F5F3EE] text-[#111111]",
-    header: darkMode ? "bg-[#050505]/85" : "bg-[#fcfbf9]/85",
-    panel: darkMode ? "bg-[#0d0d0d]" : "bg-white",
-    border: darkMode ? "border-white/10" : "border-black/10",
+    page: darkMode ? "bg-[#050505] text-[#f5f5f5]" : "bg-[#FFFFFF] text-[#111111]",
+    header: darkMode ? "bg-[#050505]/90" : "bg-[#FFFFFF]/90",
+    panel: darkMode ? "bg-[#101010]" : "bg-[#F7F7F7]",
+    border: darkMode ? "border-[#222222]" : "border-[#E5E5E5]",
     muted: darkMode ? "text-zinc-400" : "text-zinc-500",
     accent: darkMode ? "text-zinc-100" : "text-zinc-900",
     cardHover: darkMode
       ? "hover:border-[#C699FF]/40 hover:bg-[#C699FF]/[0.03]"
       : "hover:border-[#6f45d6]/40 hover:bg-[#6f45d6]/[0.03]",
-    iconBox: darkMode ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10",
+    iconBox: darkMode ? "bg-white/5 border-[#222222]" : "bg-black/5 border-[#E5E5E5]",
     iconBoxHover: darkMode 
       ? "group-hover:border-[#C699FF]/40 group-hover:text-[#C699FF] group-hover:bg-[#C699FF]/10" 
       : "group-hover:border-[#6f45d6]/40 group-hover:text-[#6f45d6] group-hover:bg-[#6f45d6]/10",
   };
 
-  /**
-   * Captures global keyboard shortcuts to toggle the Command Palette.
-   * Separated from the palette itself to ensure the trigger works globally.
-   * 
-   * - Yash Vardhan
-   */
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setCmdOpen(false);
+        return;
+      }
       const isModifier = event.metaKey || event.ctrlKey;
       if (!isModifier || event.key.toLowerCase() !== "k") return;
-
+      
       event.preventDefault();
       setCmdOpen((open) => !open);
     };
@@ -180,12 +175,6 @@ export default function LandingPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  /**
-   * Transforms the static REFERENCE_DATA into the strict SearchItem contract
-   * required by the global SearchPalette implementation.
-   * 
-   * - Yash Vardhan
-   */
   const searchData = useMemo<SearchItem[]>(() => {
     return REFERENCE_DATA.flatMap((cat) =>
       cat.items.map((item) => ({
@@ -201,45 +190,26 @@ export default function LandingPage() {
   }, []);
 
   const handleSearchSelect = (item: SearchItem) => {
-    if (item.type === "topic" && item.href) {
-      router.push(item.href);
-    }
+    if (item.type === "topic" && item.href) router.push(item.href);
   };
 
   return (
     <div className={`${themeClasses.page} min-h-screen flex flex-col transition-colors duration-200`}>
       
-      {/* 
-        CENTRALIZED SEARCH INJECTION 
-        Replaces the old inline fuse.js/cmdk logic to ensure feature parity
-        and typo-tolerance across the entire application.
-      */}
-      <SearchPalette 
-        isOpen={cmdOpen} 
-        onClose={() => setCmdOpen(false)} 
-        searchData={searchData} 
-        onSelect={handleSearchSelect} 
-        placeholder="Search algorithms, frameworks, or concepts..."
-      />
+      <SearchPalette isOpen={cmdOpen} onClose={() => setCmdOpen(false)} searchData={searchData} onSelect={handleSearchSelect} placeholder="Search algorithms, frameworks, or concepts..." />
 
       <header className={`sticky top-0 z-40 h-16 border-b ${themeClasses.border} ${themeClasses.header} backdrop-blur-md`}>
-        <div className="mx-auto flex h-full max-w-[1400px] items-center justify-between px-4 md:px-6 lg:px-8">
+        <div className="mx-auto flex h-full max-w-[1700px] items-center justify-between px-4 lg:px-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[#0F1115] text-white shadow-sm ring-1 ring-white/10">
-              <span className="text-lg font-black leading-none tracking-[-0.14em]">
-                R<span className="text-zinc-500">_</span>
-              </span>
+            <div className="flex items-center justify-center">
+              <img src="/refme-logo.svg" alt="RefMe Logo" className="h-7 w-7" />
             </div>
-            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em]">
+            <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest">
               <span className={`${themeClasses.accent}`}>RefMe</span>
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className={`rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] transition-colors ${themeClasses.border} hover:opacity-70`}
-          >
+          <button onClick={toggleTheme} className={`rounded-full border px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] transition-colors ${themeClasses.border} ${themeClasses.panel} hover:opacity-70`}>
             {darkMode ? "Light" : "Dark"}
           </button>
         </div>
@@ -256,18 +226,13 @@ export default function LandingPage() {
           </p>
 
           <div className="mx-auto mt-12 max-w-2xl">
-            <button
-              type="button"
-              onClick={() => setCmdOpen(true)}
-              className={`relative flex w-full items-center justify-between rounded-2xl border bg-transparent py-4 pl-4 pr-4 shadow-sm transition-all duration-200 ${themeClasses.border} ${themeClasses.panel} hover:border-[#C699FF]/60 hover:ring-4 hover:ring-[#C699FF]/10 text-left group`}
-            >
+            <button onClick={() => setCmdOpen(true)} className={`relative flex w-full items-center justify-between rounded-full border bg-transparent py-4 pl-5 pr-5 shadow-sm transition-all duration-200 ${themeClasses.border} ${themeClasses.panel} hover:border-[#C699FF]/60 hover:ring-4 hover:ring-[#C699FF]/10 text-left group`}>
               <div className="flex items-center gap-3 w-full min-w-0">
                 <Search className={`h-5 w-5 shrink-0 transition-colors group-hover:text-[#C699FF] ${themeClasses.muted}`} />
-                <span className={`text-base opacity-50 w-full truncate ${themeClasses.accent}`}>Search algorithms, frameworks, or concepts...</span>
+                <span className={`text-base font-medium opacity-60 w-full truncate ${themeClasses.accent}`}>Search algorithms, frameworks, or concepts...</span>
               </div>
-              
               <div className="shrink-0 ml-3">
-                <span className={`hidden md:flex items-center justify-center rounded-full border border-current/15 px-2.5 py-1 text-[11px] font-medium uppercase opacity-60 transition-opacity duration-200 ${isMounted ? "opacity-60" : "opacity-0"}`}>
+                <span className={`hidden md:flex items-center justify-center rounded-full border border-current/20 px-2.5 py-1 text-[11px] font-bold uppercase opacity-50 transition-opacity duration-200 ${isMounted ? "opacity-60" : "opacity-0"}`}>
                   {modifierKey}K
                 </span>
               </div>
@@ -280,33 +245,27 @@ export default function LandingPage() {
         <div className="space-y-20">
           {REFERENCE_DATA.map((category) => (
             <section key={category.category} className="scroll-mt-24">
-              <div className="mb-8 flex items-center gap-3 border-b pb-4 opacity-90">
+              <div className={`mb-8 flex items-center gap-3 border-b pb-4 ${themeClasses.border} opacity-90`}>
                 <span className={`flex h-8 w-8 items-center justify-center rounded-lg border ${themeClasses.iconBox}`}>
                   {category.icon}
                 </span>
-                <h2 className="text-xl font-semibold tracking-tight">
+                <h2 className="text-xl font-bold tracking-tight">
                   {category.category}
                 </h2>
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {category.items.map((item: any) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`group relative flex h-full flex-col rounded-2xl border p-5 transition-all duration-300 ${themeClasses.border} ${themeClasses.cardHover}`}
-                  >
+                  <Link key={item.name} href={item.href} className={`group relative flex h-full flex-col rounded-2xl border p-5 transition-all duration-300 ${themeClasses.border} ${themeClasses.cardHover}`}>
                     <div className="mb-4 flex items-center gap-3">
-                      <div
-                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 ${themeClasses.iconBox} ${themeClasses.iconBoxHover}`}
-                      >
+                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 ${themeClasses.iconBox} ${themeClasses.iconBoxHover}`}>
                         {item.icon}
                       </div>
                       <h3 className="font-semibold tracking-tight transition-colors duration-300 group-hover:text-current">
                         {item.name}
                       </h3>
                     </div>
-                    <p className={`text-sm leading-relaxed transition-colors duration-300 ${themeClasses.muted} group-hover:opacity-90`}>
+                    <p className={`text-sm font-medium leading-relaxed transition-colors duration-300 ${themeClasses.muted} group-hover:opacity-90`}>
                       {item.desc}
                     </p>
                   </Link>
@@ -317,7 +276,8 @@ export default function LandingPage() {
         </div>
       </main>
 
-      <footer className={`mt-auto border-t py-8 text-center ${themeClasses.border}`}>
+      {/* Restored Sleek Minimal Footer */}
+      <footer className={`mt-auto border-t py-8 text-center ${themeClasses.border} bg-transparent`}>
         <div className="mx-auto flex max-w-[1400px] flex-col items-center justify-between gap-4 px-4 md:flex-row md:px-6 lg:px-8">
           <p className={`text-sm ${themeClasses.muted}`}>
             Built by{" "}
@@ -325,7 +285,7 @@ export default function LandingPage() {
               href="https://yash-pluto.vercel.app" 
               target="_blank" 
               rel="noopener noreferrer" 
-              className={`font-medium transition-colors hover:text-[#C699FF] ${themeClasses.accent}`}
+              className={`font-medium transition-colors hover:text-[#C699FF] ${darkMode ? "text-white" : "text-black"}`}
             >
               Yash
             </a>
