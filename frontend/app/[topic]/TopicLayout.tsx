@@ -32,6 +32,8 @@ import {
   Globe,
 } from "lucide-react";
 
+import Footer from "../components/Footer";
+
 export default function TopicLayout({
   children,
   frontmatter,
@@ -579,50 +581,7 @@ export default function TopicLayout({
         </aside>
       </div>
 
-      <footer className={`border-t py-8 text-center ${themeClasses.border} bg-transparent`}>
-        <div className="mx-auto flex max-w-[1400px] flex-col items-center justify-between gap-4 px-4 md:flex-row md:px-6 lg:px-8">
-          <p className={`text-sm ${themeClasses.muted}`}>
-            Built by{" "}
-            <a 
-              href="https://yash-pluto.vercel.app" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className={`font-medium transition-colors hover:text-[#C699FF] ${darkMode ? "text-white" : "text-black"}`}
-            >
-              Yash
-            </a>
-          </p>
-          <div className="flex items-center gap-5">
-            <a 
-              href="https://github.com/yash-pluto" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className={`transition-colors ${themeClasses.muted} hover:text-current`} 
-              aria-label="GitHub"
-            >
-              <FaGithub size={20} />
-            </a>
-            <a 
-              href="https://linkedin.com/in/vardhan-yash3105" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className={`transition-colors ${themeClasses.muted} hover:text-current`} 
-              aria-label="LinkedIn"
-            >
-              <FaLinkedin size={20} />
-            </a>
-            <a 
-              href="https://yash-pluto.vercel.app" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className={`transition-colors ${themeClasses.muted} hover:text-current`} 
-              aria-label="Portfolio"
-            >
-              <Globe size={20} />
-            </a>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       <button
         ref={scrollTopBtnRef}

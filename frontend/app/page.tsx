@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme } from "../src/context/ThemeContext";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import SearchPalette, { useSearchOSKey, SearchItem } from "../app/components/SearchPalette";
+import { motion, AnimatePresence } from "framer-motion";
+import Footer from "./components/Footer";
 
 import {
   BadgeCheck,
@@ -33,6 +35,7 @@ export const REFERENCE_DATA = [
   {
     category: "Core Languages",
     icon: <Code2 size={16} />,
+    desc: "Master foundational programming languages and concepts.",
     items: [
       { name: "C++", href: "/cpp", icon: <Code2 size={18} />, desc: "Low-level systems, memory management, and STL patterns." },
       { name: "JavaScript", href: "/javascript", icon: <Braces size={18} />, desc: "Modern syntax, async flows, and browser fundamentals." },
@@ -47,6 +50,7 @@ export const REFERENCE_DATA = [
   {
     category: "Frontend & Web",
     icon: <Globe size={16} />,
+    desc: "Build responsive, accessible, and dynamic user interfaces.",
     items: [
       { name: "React", href: "/react", icon: <Globe size={18} />, desc: "Component lifecycles, state management, and effects." },
       { name: "Next.js", href: "/nextjs", icon: <Globe size={18} />, desc: "App router, SSR, static generation, and API routes." },
@@ -59,6 +63,7 @@ export const REFERENCE_DATA = [
   {
     category: "Backend & Systems",
     icon: <TerminalSquare size={16} />,
+    desc: "Design robust server architectures, databases, and APIs.",
     items: [
       { name: "Bash", href: "/bash", icon: <TerminalSquare size={18} />, desc: "Shell scripting, pipelines, and server automation." },
       { name: "Node.js", href: "/nodejs", icon: <Binary size={18} />, desc: "V8 runtime, event loop, and server-side TS/JS." },
@@ -71,6 +76,7 @@ export const REFERENCE_DATA = [
   {
     category: "Concepts & Patterns",
     icon: <Sparkles size={16} />,
+    desc: "Essential principles for scalable software design and security.",
     items: [
       { name: "Async", href: "/async", icon: <Braces size={18} />, desc: "Promises, event loops, and asynchronous scheduling." },
       { name: "Testing", href: "/testing", icon: <TestTube size={18} />, desc: "Unit assertions, integration flows, and mocking." },
@@ -90,6 +96,7 @@ export const REFERENCE_DATA = [
   {
     category: "Architecture & DevOps",
     icon: <Globe size={16} />,
+    desc: "Deploy, monitor, scale, and manage cloud infrastructure.",
     items: [
       { name: "Microservices", href: "/microservices", icon: <Globe size={18} />, desc: "Service decoupling, bounded contexts, and API gateways." },
       { name: "Event-Driven", href: "/event-driven", icon: <Binary size={18} />, desc: "Message brokers, pub/sub, and eventual consistency." },
@@ -105,6 +112,7 @@ export const REFERENCE_DATA = [
   {
     category: "Data & AI",
     icon: <Database size={16} />,
+    desc: "Explore machine learning, LLMs, and vector data pipelines.",
     items: [
       { name: "Data Science", href: "/data-science", icon: <Database size={18} />, desc: "Statistical models, Jupyter notebooks, and pandas processing." },
       { name: "Machine Learning", href: "/ml", icon: <Binary size={18} />, desc: "Supervised training, neural networks, and model deployment." },
@@ -120,6 +128,7 @@ export const REFERENCE_DATA = [
   {
     category: "Developer Tools",
     icon: <TerminalSquare size={16} />,
+    desc: "Optimize your workflow with modern development and CI/CD tools.",
     items: [
       { name: "VS Code", href: "/vscode", icon: <TerminalSquare size={18} />, desc: "Workspace configuration, snippets, and integrated debugging." },
       { name: "Linux", href: "/linux", icon: <TerminalSquare size={18} />, desc: "Kernel architecture, system permissions, and POSIX standards." },
@@ -170,6 +179,10 @@ export default function LandingPage() {
   });
 
   const [cycle, setCycle] = useState(0);
+  const [activeTab, setActiveTab] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const themeClasses = {
     page: darkMode ? "bg-[#0a0a0a] text-[#ededed]" : "bg-[#FFFFFF] text-[#111111]",
@@ -247,6 +260,40 @@ export default function LandingPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  useEffect(() => {
+    if (!isAutoPlaying) return;
+    const interval = setInterval(() => {
+      setActiveTab((prev) => (prev + 1) % REFERENCE_DATA.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [isAutoPlaying]);
+
+  const checkScroll = () => {
+    if (scrollContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+      setShowScrollIndicator(
+        Math.ceil(scrollHeight) > Math.ceil(clientHeight) + 5 && 
+        Math.ceil(scrollTop + clientHeight) < Math.ceil(scrollHeight) - 20
+      );
+    }
+  };
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    checkScroll();
+    const timer = setTimeout(checkScroll, 600); 
+
+    const resizeObserver = new ResizeObserver(() => checkScroll());
+    resizeObserver.observe(container);
+
+    return () => {
+      clearTimeout(timer);
+      resizeObserver.disconnect();
+    };
+  }, [activeTab]);
+
   const searchData = useMemo<SearchItem[]>(() => {
     return REFERENCE_DATA.flatMap((cat) =>
       cat.items.map((item) => ({
@@ -282,12 +329,55 @@ export default function LandingPage() {
   const currentBuild = dynamicBuildStats[cycle];
   const currentActivity = dynamicActivityFeeds[cycle];
 
+  const tabContentVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.08,
+        delayChildren: 0.1,
+      },
+    },
+    exit: {
+      opacity: 0,
+      transition: { duration: 0.15 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 30
+      }
+    },
+  };
+
   return (
     <div className={`${themeClasses.page} min-h-screen flex flex-col transition-colors duration-200 overflow-x-hidden`}>
+      <style dangerouslySetInnerHTML={{__html: `
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(150, 150, 150, 0.3);
+          border-radius: 10px;
+        }
+        .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+          background: rgba(150, 150, 150, 0.5);
+        }
+      `}} />
       
       <SearchPalette isOpen={cmdOpen} onClose={() => setCmdOpen(false)} searchData={searchData} onSelect={handleSearchSelect} placeholder="Search algorithms, frameworks, or concepts..." />
 
-      <header className={`sticky top-0 z-40 h-16 border-b ${themeClasses.border} ${themeClasses.header} backdrop-blur-md`}>
+      <header className={`fixed top-0 left-0 w-full z-50 h-16 border-b ${themeClasses.border} ${themeClasses.header} backdrop-blur-md`}>
         <div className="mx-auto flex h-full max-w-[1700px] items-center justify-between px-4 lg:px-6">
           <div className="flex items-center gap-4">
             <button onClick={() => router.push("/")} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
@@ -311,8 +401,7 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className={`relative border-b w-full ${themeClasses.border} px-4 py-12 sm:py-16 md:px-6 lg:px-8 lg:py-32`}>
+      <section className={`relative border-b w-full ${themeClasses.border} mt-16 px-4 py-12 sm:py-16 md:px-6 lg:px-8 lg:py-32`}>
         <div className="mx-auto w-full max-w-[1400px]">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-12 items-center">
             
@@ -328,7 +417,7 @@ export default function LandingPage() {
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 <div className="relative group inline-flex">
                   <button 
-                    onClick={() => router.push('/javascript')} 
+                    onClick={() => document.getElementById('ecosystem')?.scrollIntoView({ behavior: 'smooth' })} 
                     className={`rounded-full px-8 py-3.5 text-sm font-bold transition-transform hover:scale-[0.98] ${darkMode ? "bg-white text-black" : "bg-black text-white"}`}
                   >
                     Start reading
@@ -359,10 +448,8 @@ export default function LandingPage() {
                     <Code2 size={16} /> Community Driven
                   </div>
                 </div>
-                                <Link href="/docs" className={`inline-flex items-center gap-2 text-[13px] font-bold tracking-wide uppercase transition-colors w-fit ${darkMode ? "text-[#C699FF] hover:text-white" : "text-[#6f45d6] hover:text-black"}`}>
-
+                <Link href="/docs" className={`inline-flex items-center gap-2 text-[13px] font-bold tracking-wide uppercase transition-colors w-fit ${darkMode ? "text-[#C699FF] hover:text-white" : "text-[#6f45d6] hover:text-black"}`}>
                   Read the RefMe Philosophy <ArrowRight size={14} />
-
                 </Link>
               </div>
             </div>
@@ -511,7 +598,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Ultra-Premium 3-Step Architecture Flow */}
       <section className={`py-24 md:py-32 border-b ${themeClasses.border} ${darkMode ? "bg-[#050505]" : "bg-zinc-50/50"}`}>
         <div className="mx-auto max-w-[1200px] px-4 md:px-6 lg:px-8 text-center flex flex-col items-center">
           
@@ -524,7 +610,6 @@ export default function LandingPage() {
 
           <div className="w-full relative">
             
-            {/* Horizontal Timeline Track (Desktop & Mobile aligned) */}
             <div className="max-w-4xl mx-auto w-full px-2 sm:px-4">
               <div className="flex justify-between items-center px-4 sm:px-12 md:px-24 mb-6">
                 <div className={`px-4 py-1.5 rounded-lg border text-xs font-bold shadow-sm ${darkMode ? "bg-[#111] border-zinc-600 text-zinc-200" : "bg-white border-[#E5E5E5] text-zinc-700"}`}>Students</div>
@@ -540,7 +625,6 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Vertical Stacked Cards Array */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left max-w-5xl mx-auto px-4">
               
               <div className={`flex flex-col rounded-3xl border p-8 shadow-sm ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"}`}>
@@ -594,93 +678,127 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Enterprise Architecture Vercel/Next.js Documentation Grid Layout */}
-      <main className="mx-auto w-full max-w-[1400px] px-4 py-20 md:px-6 lg:px-8">
-        <div className="space-y-24">
-          {REFERENCE_DATA.map((category) => (
-            <section key={category.category} className="scroll-mt-24">
-              
-              <div className="mb-8 flex items-center gap-4">
-                <div className={`flex h-12 w-12 items-center justify-center rounded-xl border shadow-sm ${darkMode ? "bg-[#111] border-[#333]" : "bg-white border-[#E5E5E5]"}`}>
-                  {category.icon}
-                </div>
-                <div>
-                  <h2 className={`text-2xl font-extrabold tracking-tight ${darkMode ? "text-white" : "text-zinc-900"}`}>
-                    {category.category}
-                  </h2>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {category.items.map((item: any) => (
-                  <Link 
-                    key={item.name} 
-                    href={item.href} 
-                    className={`group flex flex-col gap-4 rounded-xl border p-5 transition-all duration-300 ${darkMode ? "bg-[#0a0a0a] border-[#333] hover:border-[#555] hover:bg-[#111]" : "bg-white border-[#E5E5E5] hover:border-[#ccc] hover:bg-zinc-50 hover:shadow-sm"}`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border transition-colors duration-300 ${darkMode ? "bg-[#141414] border-[#333] text-zinc-400 group-hover:text-white group-hover:bg-[#222]" : "bg-zinc-50 border-[#E5E5E5] text-zinc-500 group-hover:text-black group-hover:bg-white"}`}>
-                        {item.icon}
-                      </div>
-                      <h3 className={`text-[15px] font-bold tracking-tight transition-colors duration-300 ${darkMode ? "text-zinc-100 group-hover:text-white" : "text-zinc-900 group-hover:text-black"}`}>
-                        {item.name}
-                      </h3>
-                    </div>
-                    <p className={`text-[13px] leading-relaxed transition-colors duration-300 ${darkMode ? "text-zinc-400 group-hover:text-zinc-300" : "text-zinc-500 group-hover:text-zinc-700"}`}>
-                      {item.desc}
-                    </p>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-      </main>
-
-      <footer className={`mt-auto border-t py-8 text-center ${themeClasses.border} bg-transparent`}>
-        <div className="mx-auto flex max-w-[1400px] flex-col items-center justify-between gap-4 px-4 md:flex-row md:px-6 lg:px-8">
-          <p className={`text-sm font-medium ${themeClasses.muted}`}>
-            Built by{" "}
-            <a 
-              href="https://yash-pluto.vercel.app" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className={`font-bold transition-colors hover:text-[#C699FF] ${darkMode ? "text-white" : "text-black"}`}
-            >
-              Yash
-            </a>
+      <section id="ecosystem" className={`py-24 md:py-32 w-full mx-auto px-4 md:px-6 lg:px-8 max-w-[1500px]`}>
+        <div className="mb-16 text-center flex flex-col items-center">
+          <h2 className={`text-4xl md:text-5xl font-extrabold tracking-tight mb-4 ${darkMode ? "text-white" : "text-zinc-900"}`}>
+            Explore the Ecosystem
+          </h2>
+          <p className={`text-lg font-medium max-w-2xl ${themeClasses.muted}`}>
+            Everything you need to master modern tech stacks and build exceptional products.
           </p>
-          <div className="flex items-center gap-5">
-            <a 
-              href="https://github.com/yash-pluto" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className={`transition-colors ${themeClasses.muted} hover:text-current`} 
-              aria-label="GitHub"
-            >
-              <FaGithub size={20} />
-            </a>
-            <a 
-              href="https://linkedin.com/in/vardhan-yash3105" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className={`transition-colors ${themeClasses.muted} hover:text-current`} 
-              aria-label="LinkedIn"
-            >
-              <FaLinkedin size={20} />
-            </a>
-            <a 
-              href="https://yash-pluto.vercel.app" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className={`transition-colors ${themeClasses.muted} hover:text-current`} 
-              aria-label="Portfolio"
-            >
-              <Globe size={20} />
-            </a>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-stretch max-w-[1400px] mx-auto lg:h-[720px]">
+          <div className="w-full lg:w-[35%] flex flex-col gap-3 h-full">
+            {REFERENCE_DATA.map((cat, idx) => {
+              const isActive = activeTab === idx;
+              return (
+                <button
+                  key={cat.category}
+                  onClick={() => {
+                    setActiveTab(idx);
+                    setIsAutoPlaying(false);
+                  }}
+                  className={`flex items-start gap-4 p-5 rounded-2xl border text-left transition-all duration-300 ${
+                    isActive 
+                      ? (darkMode ? "bg-[#1a1a1a] border-[#444] shadow-md" : "bg-white border-[#ccc] shadow-md")
+                      : (darkMode ? "bg-[#0a0a0a] border-[#222] hover:bg-[#111] hover:border-[#333]" : "bg-zinc-50 border-transparent hover:bg-zinc-100 hover:border-[#E5E5E5]")
+                  }`}
+                >
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-colors ${
+                    isActive 
+                      ? (darkMode ? "bg-[#333] border-[#555] text-white" : "bg-zinc-100 border-[#ddd] text-black")
+                      : (darkMode ? "bg-[#111] border-[#333] text-zinc-400" : "bg-white border-[#E5E5E5] text-zinc-500")
+                  }`}>
+                    {cat.icon}
+                  </div>
+                  <div>
+                    <h3 className={`text-base font-bold mb-1 transition-colors ${isActive ? (darkMode ? "text-white" : "text-black") : (darkMode ? "text-zinc-300" : "text-zinc-700")}`}>
+                      {cat.category}
+                    </h3>
+                    <p className={`text-[13px] leading-relaxed ${themeClasses.muted}`}>
+                      {cat.desc}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className={`w-full lg:w-[65%] rounded-3xl border p-6 sm:p-10 flex flex-col relative h-[600px] lg:h-full overflow-hidden ${darkMode ? "bg-[#111] border-[#333]" : "bg-white border-[#E5E5E5] shadow-sm"}`}>
+            
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                variants={tabContentVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="flex flex-col h-full overflow-hidden"
+              >
+                <motion.div variants={itemVariants} className="mb-6 shrink-0">
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl border mb-5 shadow-sm ${darkMode ? "bg-[#1a1a1a] border-[#444] text-white" : "bg-zinc-50 border-[#ccc] text-black"}`}>
+                      {REFERENCE_DATA[activeTab].icon}
+                  </div>
+                  <h2 className={`text-3xl font-extrabold tracking-tight mb-2 ${darkMode ? "text-white" : "text-black"}`}>
+                    {REFERENCE_DATA[activeTab].category}
+                  </h2>
+                  <p className={`text-base ${themeClasses.muted}`}>
+                    {REFERENCE_DATA[activeTab].desc}
+                  </p>
+                </motion.div>
+
+                <div 
+                  ref={scrollContainerRef}
+                  onScroll={checkScroll}
+                  className="flex flex-col gap-3 flex-1 overflow-y-auto pr-2 custom-scrollbar pb-12"
+                >
+                  {REFERENCE_DATA[activeTab].items.map((item: any) => (
+                    <motion.div key={item.name} variants={itemVariants}>
+                      <Link
+                        href={item.href}
+                        className={`group flex items-center gap-4 p-4 rounded-xl border transition-all ${darkMode ? "bg-[#1a1a1a] border-[#333] hover:border-[#555] hover:bg-[#222]" : "bg-zinc-50 border-[#E5E5E5] hover:border-[#ccc] hover:bg-zinc-100"}`}
+                      >
+                        <div className="shrink-0 flex items-center justify-center relative">
+                          <CheckCircle2 size={20} className={`${darkMode ? "text-zinc-500 group-hover:text-zinc-300" : "text-zinc-400 group-hover:text-zinc-600"} transition-colors`} />
+                        </div>
+                        <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                          <span className={`text-[15px] font-bold ${darkMode ? "text-zinc-200 group-hover:text-white" : "text-zinc-800 group-hover:text-black"}`}>
+                            {item.name}
+                          </span>
+                          <span className={`hidden sm:block text-zinc-500 text-sm opacity-50`}>-</span>
+                          <span className={`text-[13px] ${themeClasses.muted} group-hover:text-current`}>
+                            {item.desc}
+                          </span>
+                        </div>
+                      </Link>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+
+            <AnimatePresence>
+              {showScrollIndicator && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className={`absolute bottom-0 left-0 right-0 h-32 pointer-events-none flex items-end justify-center pb-6 ${darkMode ? "bg-gradient-to-t from-[#111] to-transparent" : "bg-gradient-to-t from-white to-transparent"}`}
+                >
+                  <div
+                    className={`flex items-center gap-2 text-[11px] font-bold tracking-widest uppercase px-4 py-2 rounded-full border shadow-sm backdrop-blur-sm ${darkMode ? "bg-black/50 border-[#333] text-zinc-300" : "bg-white/70 border-[#E5E5E5] text-zinc-600"}`}
+                  >
+                    Scroll for more
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
-      </footer>
+      </section>
+
+     <Footer />
     </div>
   );
 }
