@@ -1,101 +1,116 @@
 "use client";
+
+/**
+ * @fileoverview Reusable Client-side Code Block component with syntax highlighting.
+ * Safely handles server-side rendering (SSR) hydration mismatches, applies a custom 
+ * "Pitch Black" textmate theme mapping, and enforces strict flex boundaries to 
+ * prevent mobile viewport overflow.
+ *
+ * @author Yash Vardhan
+ */
+
 import { useTheme } from "../../src/context/ThemeContext";
 import { useState, useEffect } from "react";
 import { Copy, Check, FileCode2 } from "lucide-react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+
+export interface ClientCodeBlockProps {
+  /** The raw code string to be highlighted */
+  code: string;
+  /** The programming language for syntax tokenization (e.g., 'typescript', 'cpp') */
+  language: string;
+  /** Optional file name displayed in the header */
+  filename?: string;
+  /** Array of 1-indexed line numbers to apply a highlight overlay to */
+  highlightLines?: number[];
+}
 
 export default function ClientCodeBlock({
   code,
   language,
   filename,
   highlightLines = [],
-}: {
-  code: string;
-  language: string;
-  filename?: string;
-  highlightLines?: number[];
-}) {
+}: ClientCodeBlockProps) {
   const { darkMode } = useTheme();
+  
+  // Track mount state to defer rendering of browser-specific APIs (clipboard, highlighter)
   const [mounted, setMounted] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Safely mount on the client to avoid Hydration Mismatches
+  /**
+   * Initializes the component safely on the client.
+   * Prevents React Hydration Mismatch errors caused by rendering 
+   * theme-dependent or layout-heavy nodes on the server.
+   */
   useEffect(() => setMounted(true), []);
 
+  /**
+   * Writes the active code block to the system clipboard.
+   * Temporarily toggles the copied state for visual feedback.
+   */
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(code);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error("Copy failed", err);
+      console.error("Failed to copy code to clipboard", err);
     }
   };
 
+  /**
+   * Pitch Black Theme Mapping
+   * Mapped directly from the custom VSCode textmate token JSON.
+   */
   const pitchBlackModernStyle = {
     'code[class*="language-"]': {
-      background: '#050505',
-      color: '#FFFFFF',
+      background: '#101010',
+      color: '#FFF',
       fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
     },
     'pre[class*="language-"]': {
-      background: '#050505',
-      color: '#FFFFFF',
+      background: '#101010',
+      color: '#FFF',
       fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
     },
-    comment: { color: '#8B8B8B', fontStyle: 'italic' },
-    keyword: { color: '#A0A0A0', fontWeight: 600 },
-    selector: { color: '#FFFFFF' },
+    comment: { color: '#8b8b8b94', fontStyle: 'italic' },
+    keyword: { color: '#A0A0A0' },
+    selector: { color: '#C699FF' },
     punctuation: { color: '#A0A0A0' },
     string: { color: '#99FFE4' },
-    number: { color: '#99FFE4' },
-    function: { color: '#FFFFFF' },
-    className: { color: '#FFFFFF' },
-    tag: { color: '#FFFFFF' },
-    attrName: { color: '#99FFE4' },
+    number: { color: '#C699FF' },
+    function: { color: '#C699FF' },
+    className: { color: '#C699FF' },
+    tag: { color: '#C699FF' },
+    attrName: { color: '#C699FF' },
     attrValue: { color: '#99FFE4' },
     operator: { color: '#A0A0A0' },
-    boolean: { color: '#E580FF' },
-    builtin: { color: '#99FFE4' },
-    parameter: { color: '#FFFFFF' },
-    property: { color: '#FFFFFF' },
-    variable: { color: '#FFFFFF' },
-    regex: { color: '#99FFE4' },
+    boolean: { color: '#C699FF' },
+    builtin: { color: '#C699FF' },
+    parameter: { color: '#FFF' },
+    property: { color: '#FFF' },
+    variable: { color: '#FFF' },
+    regex: { color: '#A0A0A0' },
     deleted: { color: '#E580FF' },
     inserted: { color: '#99FFE4' },
-    important: { color: '#E580FF' },
-    maybeClassName: { color: '#C699FF' },
-    plain: { color: '#FFFFFF' },
-    default: { color: '#FFFFFF' },
-    symbol: { color: '#99FFE4' },
+    important: { color: '#FFF', fontWeight: 'bold' },
+    plain: { color: '#FFF' },
+    default: { color: '#FFF' },
     class: { color: '#C699FF' },
-    title: { color: '#C699FF' },
     constant: { color: '#C699FF' },
     type: { color: '#C699FF' },
-    namespace: { color: '#C699FF' },
-    char: { color: '#99FFE4' },
-    url: { color: '#99FFE4' },
-    atrule: { color: '#C699FF' },
-    selectorClass: { color: '#C699FF' },
-    selectorId: { color: '#C699FF' },
-    attribute: { color: '#C699FF' },
-    literal: { color: '#99FFE4' },
-    hexcode: { color: '#99FFE4' },
     'template-string': { color: '#99FFE4' },
     'attr-value': { color: '#99FFE4' },
-    'attr-name': { color: '#99FFE4' },
+    'attr-name': { color: '#C699FF' },
     'class-name': { color: '#C699FF' },
-    'function-name': { color: '#FFFFFF' },
+    'function-name': { color: '#C699FF' },
     'tag-name': { color: '#C699FF' },
-    'pseudo-class': { color: '#C699FF' },
-    'pseudo-element': { color: '#C699FF' },
-    'html-tag': { color: '#C699FF' },
-    'json-key': { color: '#99FFE4' },
-    'error': { color: '#E580FF' },
+    'pseudo-class': { color: '#99FFE4' },
+    'pseudo-element': { color: '#99FFE4' },
+    'json-key': { color: '#C699FF' },
     invalid: { color: '#E580FF' },
-    deletedCode: { color: '#E580FF' },
-    insert: { background: '#050505' },
-    delete: { background: '#050505' },
+    insert: { background: '#99FFE415' },
+    delete: { background: '#E580FF15' }, 
   };
 
   const softLightModernStyle = {
@@ -164,34 +179,38 @@ export default function ClientCodeBlock({
     delete: { background: '#F4F4F0' },
   };
 
+  /**
+   * Theme-aware structural classes.
+   * Matches the newly provided VSCode palette for borders and active tabs.
+   */
   const theme = {
-    border: darkMode ? "border-[#222222]" : "border-[#D1D1D1]",
-    headerBg: darkMode ? "bg-[#050505]" : "bg-[#EAEAEA]",
-    codeBg: darkMode ? "bg-[#050505]" : "bg-[#F4F4F0]",
-    text: darkMode ? "text-zinc-200" : "text-zinc-700",
-    iconHover: darkMode ? "hover:text-zinc-100" : "hover:text-indigo-600",
+    border: darkMode ? "border-[#232323]" : "border-[#D1D1D1]",
+    headerBg: darkMode ? "bg-[#101010]" : "bg-[#EAEAEA]",
+    codeBg: darkMode ? "bg-[#101010]" : "bg-[#F4F4F0]",
+    text: darkMode ? "text-[#FFF]" : "text-zinc-700",
+    iconHover: darkMode ? "hover:text-[#C699FF]" : "hover:text-indigo-600",
   };
 
+  // Render a structural skeleton while waiting for client hydration
   if (!mounted) {
     return (
       <div
-        className={`h-48 w-full animate-pulse rounded-md mb-8 mt-4 border ${darkMode ? "bg-[#111111] border-[#222222]" : "bg-[#EAEAEA] border-[#D1D1D1]"}`}
+        className={`w-full h-48 animate-pulse rounded-md mb-8 mt-4 border ${darkMode ? "bg-[#101010] border-[#232323]" : "bg-[#EAEAEA] border-[#D1D1D1]"}`}
       ></div>
     );
   }
 
   return (
     <div
-      className={`border ${theme.border} flex flex-col mb-8 mt-4 rounded-md overflow-hidden transition-colors duration-200`}
+      className={`w-full min-w-0 border ${theme.border} flex flex-col mb-8 mt-4 rounded-md overflow-hidden transition-colors duration-200`}
     >
-      {/* Code Header Bar */}
       <div
-        className={`flex items-center justify-between px-4 py-2.5 border-b ${theme.border} ${theme.headerBg} transition-colors duration-200`}
+        className={`w-full flex items-center justify-between px-4 py-2.5 border-b ${theme.border} ${theme.headerBg} transition-colors duration-200`}
       >
         <div className="flex items-center gap-2">
           {filename ? (
             <>
-              <FileCode2 size={14} className="opacity-60" />
+              <FileCode2 size={14} className="opacity-60 text-[#A0A0A0]" />
               <span className={`font-mono text-xs font-medium ${theme.text}`}>
                 {filename}
               </span>
@@ -204,6 +223,7 @@ export default function ClientCodeBlock({
             </span>
           )}
         </div>
+        
         <button
           onClick={copyToClipboard}
           className={`opacity-50 ${theme.iconHover} transition-colors`}
@@ -212,7 +232,7 @@ export default function ClientCodeBlock({
           {copied ? (
             <Check
               size={15}
-              className={darkMode ? "text-emerald-500" : "text-emerald-600"}
+              className={darkMode ? "text-[#99FFE4]" : "text-emerald-600"}
             />
           ) : (
             <Copy size={15} />
@@ -220,9 +240,8 @@ export default function ClientCodeBlock({
         </button>
       </div>
 
-      {/* Code Area */}
       <div
-        className={`py-4 overflow-x-auto ${theme.codeBg} transition-colors duration-200`}
+        className={`w-full py-4 overflow-x-auto ${theme.codeBg} transition-colors duration-200`}
       >
         <SyntaxHighlighter
           language={language}
@@ -233,13 +252,14 @@ export default function ClientCodeBlock({
             return {
               style: {
                 display: "block",
+                minWidth: "fit-content", // Ensures highlights stretch across scrollable container
                 backgroundColor: isHighlighted 
                   ? (darkMode ? "rgba(198, 153, 255, 0.1)" : "rgba(111, 69, 214, 0.1)") 
                   : "transparent",
                 borderLeft: isHighlighted 
                   ? (darkMode ? "3px solid #C699FF" : "3px solid #6f45d6") 
                   : "3px solid transparent",
-                paddingLeft: "13px", // 16px total minus the 3px border
+                paddingLeft: "13px",
                 paddingRight: "16px",
               }
             };
@@ -250,6 +270,7 @@ export default function ClientCodeBlock({
             margin: 0,
             fontSize: "0.9rem",
             lineHeight: "1.7",
+            overflowX: "auto", 
           }}
         >
           {code}
