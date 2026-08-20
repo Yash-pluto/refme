@@ -26,16 +26,13 @@ import {
   CircleDot,
   Star,
   CheckCircle2,
-  ArrowRight,
-  Play,
-  Copy,
-  Map
+  ArrowRight
 } from "lucide-react";
 
 export const REFERENCE_DATA = [
   {
     category: "Core Languages",
-    icon: <Code2 size={20} />,
+    icon: <Code2 size={16} />,
     items: [
       { name: "C++", href: "/cpp", icon: <Code2 size={18} />, desc: "Low-level systems, memory management, and STL patterns." },
       { name: "JavaScript", href: "/javascript", icon: <Braces size={18} />, desc: "Modern syntax, async flows, and browser fundamentals." },
@@ -49,7 +46,7 @@ export const REFERENCE_DATA = [
   },
   {
     category: "Frontend & Web",
-    icon: <Globe size={20} />,
+    icon: <Globe size={16} />,
     items: [
       { name: "React", href: "/react", icon: <Globe size={18} />, desc: "Component lifecycles, state management, and effects." },
       { name: "Next.js", href: "/nextjs", icon: <Globe size={18} />, desc: "App router, SSR, static generation, and API routes." },
@@ -61,7 +58,7 @@ export const REFERENCE_DATA = [
   },
   {
     category: "Backend & Systems",
-    icon: <TerminalSquare size={20} />,
+    icon: <TerminalSquare size={16} />,
     items: [
       { name: "Bash", href: "/bash", icon: <TerminalSquare size={18} />, desc: "Shell scripting, pipelines, and server automation." },
       { name: "Node.js", href: "/nodejs", icon: <Binary size={18} />, desc: "V8 runtime, event loop, and server-side TS/JS." },
@@ -73,7 +70,7 @@ export const REFERENCE_DATA = [
   },
   {
     category: "Concepts & Patterns",
-    icon: <Sparkles size={20} />,
+    icon: <Sparkles size={16} />,
     items: [
       { name: "Async", href: "/async", icon: <Braces size={18} />, desc: "Promises, event loops, and asynchronous scheduling." },
       { name: "Testing", href: "/testing", icon: <TestTube size={18} />, desc: "Unit assertions, integration flows, and mocking." },
@@ -92,14 +89,14 @@ export const REFERENCE_DATA = [
   },
   {
     category: "Architecture & DevOps",
-    icon: <Globe size={20} />,
+    icon: <Globe size={16} />,
     items: [
       { name: "Microservices", href: "/microservices", icon: <Globe size={18} />, desc: "Service decoupling, bounded contexts, and API gateways." },
       { name: "Event-Driven", href: "/event-driven", icon: <Binary size={18} />, desc: "Message brokers, pub/sub, and eventual consistency." },
       { name: "Load Balancing", href: "/load-balancing", icon: <TerminalSquare size={18} />, desc: "Traffic distribution, health checks, and reverse proxies." },
       { name: "Kubernetes", href: "/kubernetes", icon: <TerminalSquare size={18} />, desc: "Pod orchestration, cluster scaling, and deployment manifests." },
       { name: "Deployment", href: "/deployment", icon: <ShieldCheck size={18} />, desc: "Blue-green releases, canary rollouts, and CI pipelines." },
-      { name: "Monitoring", href: "/monitoring", icon: <Sparkles size={18} />, desc: "Telemetry, distributed tracing, and incident alerting." },
+      { name: "Monitoring", href: "/monitoring", icon: <Sparkles size={18} />, desc: "Metrics, logs, and runtime health visibility." },
       { name: "Cloud Architecture", href: "/cloud-architecture", icon: <Globe size={18} />, desc: "AWS/GCP infrastructure, VPCs, and serverless compute." },
       { name: "Databases", href: "/databases", icon: <Database size={18} />, desc: "NoSQL vs SQL, replication, and sharding strategies." },
       { name: "Reliability", href: "/reliability", icon: <ShieldCheck size={18} />, desc: "Fault tolerance, circuit breakers, and SLA targeting." },
@@ -107,7 +104,7 @@ export const REFERENCE_DATA = [
   },
   {
     category: "Data & AI",
-    icon: <Database size={20} />,
+    icon: <Database size={16} />,
     items: [
       { name: "Data Science", href: "/data-science", icon: <Database size={18} />, desc: "Statistical models, Jupyter notebooks, and pandas processing." },
       { name: "Machine Learning", href: "/ml", icon: <Binary size={18} />, desc: "Supervised training, neural networks, and model deployment." },
@@ -122,7 +119,7 @@ export const REFERENCE_DATA = [
   },
   {
     category: "Developer Tools",
-    icon: <TerminalSquare size={20} />,
+    icon: <TerminalSquare size={16} />,
     items: [
       { name: "VS Code", href: "/vscode", icon: <TerminalSquare size={18} />, desc: "Workspace configuration, snippets, and integrated debugging." },
       { name: "Linux", href: "/linux", icon: <TerminalSquare size={18} />, desc: "Kernel architecture, system permissions, and POSIX standards." },
@@ -132,11 +129,28 @@ export const REFERENCE_DATA = [
       { name: "Terraform", href: "/terraform", icon: <ShieldCheck size={18} />, desc: "Infrastructure as code, state management, and provider blocks." },
       { name: "GitHub Actions", href: "/github-actions", icon: <Code2 size={18} />, desc: "Workflow YAMLs, runner environments, and matrix builds." },
       { name: "Webpack", href: "/webpack", icon: <Sparkles size={18} />, desc: "Asset bundling, code splitting, and tree shaking." },
-      { name: "Vercel", href: "/vercel", icon: <Globe size={18} />, desc: "Edge functions, middleware routing, and preview environments." },
+      { name: "Vercel", href: "/vercel", icon: <Globe size={18} />, desc: "Edge deployment, preview environments, and modern delivery." },
       { name: "Debugging", href: "/debugging", icon: <TestTube size={18} />, desc: "Memory profiling, network waterfalls, and root cause analysis." },
     ],
   },
 ];
+
+function timeSince(dateString: string) {
+  if (!dateString) return "Just now";
+  const date = new Date(dateString);
+  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+  let interval = seconds / 31536000;
+  if (interval > 1) return Math.floor(interval) + "y ago";
+  interval = seconds / 2592000;
+  if (interval > 1) return Math.floor(interval) + "mo ago";
+  interval = seconds / 86400;
+  if (interval > 1) return Math.floor(interval) + "d ago";
+  interval = seconds / 3600;
+  if (interval > 1) return Math.floor(interval) + "h ago";
+  interval = seconds / 60;
+  if (interval > 1) return Math.floor(interval) + "m ago";
+  return "Just now";
+}
 
 export default function LandingPage() {
   const { darkMode, toggleTheme } = useTheme();
@@ -150,6 +164,7 @@ export default function LandingPage() {
     openIssues: "-",
     openPrs: "-",
     mergedPrs: "-",
+    lastPush: "",
     contributors: [] as any[],
     loading: true
   });
@@ -166,7 +181,7 @@ export default function LandingPage() {
     inputBg: darkMode ? "bg-[#1a1a1a]" : "bg-[#F4F4F4]",
     hoverAccent: darkMode ? "hover:text-[#C699FF]" : "hover:text-[#6f45d6]",
     cardHover: darkMode
-      ? "hover:border-[#555] hover:bg-[#111]"
+      ? "hover:border-[#555] hover:bg-[#141414]"
       : "hover:border-[#ccc] hover:bg-[#fafafa]",
     iconBox: darkMode ? "bg-[#1a1a1a] border-[#333] text-zinc-400" : "bg-[#f4f4f4] border-[#E5E5E5] text-zinc-500",
     iconBoxHover: darkMode 
@@ -196,6 +211,7 @@ export default function LandingPage() {
           openIssues: issuesData.total_count !== undefined ? issuesData.total_count.toString() : "-",
           openPrs: openPrsData.total_count !== undefined ? openPrsData.total_count.toString() : "-",
           mergedPrs: mergedPrsData.total_count !== undefined ? mergedPrsData.total_count.toString() : "-",
+          lastPush: repoData.pushed_at || repoData.updated_at || "",
           contributors: Array.isArray(contributorsData) ? contributorsData : [],
           loading: false
         });
@@ -249,16 +265,18 @@ export default function LandingPage() {
     if (item.type === "topic" && item.href) router.push(item.href);
   };
 
+  const timeSinceStr = timeSince(githubStats.lastPush);
+  
   const dynamicBuildStats = [
-    { title: "Active Community", desc: `${githubStats.contributors.length} devs building RefMe`, icon: <CheckCircle2 size={16} />, bg: darkMode ? "bg-white text-black" : "bg-black text-white" },
-    { title: "Repository Reach", desc: `${githubStats.stars} developers starred`, icon: <Star size={16} />, bg: darkMode ? "bg-[#222] text-white" : "bg-zinc-100 text-black" },
-    { title: "Code Reviews", desc: `${githubStats.openPrs} pull requests pending`, icon: <GitPullRequest size={16} />, bg: darkMode ? "bg-[#222] text-white" : "bg-zinc-100 text-black" }
+    { title: "Repository Synced", desc: `Last push: ${timeSinceStr}`, icon: <CheckCircle2 size={16} />, bg: darkMode ? "bg-white text-black" : "bg-black text-white" },
+    { title: "Active Contributors", desc: `${githubStats.contributors.length} devs building RefMe`, icon: <Code2 size={16} />, bg: darkMode ? "bg-[#222] text-white" : "bg-zinc-100 text-black" },
+    { title: "Code Reviews", desc: `${githubStats.openPrs} open PRs pending`, icon: <GitPullRequest size={16} />, bg: darkMode ? "bg-[#222] text-white" : "bg-zinc-100 text-black" }
   ];
 
   const dynamicActivityFeeds = [
-    { title: "Codebase Integrity", desc: `${githubStats.mergedPrs} PRs successfully merged`, icon: <GitMerge size={16} />, bg: darkMode ? "bg-[#222] text-white" : "bg-zinc-100 text-black" },
-    { title: "Issue Tracking", desc: `${githubStats.openIssues} active issues logged`, icon: <CircleDot size={16} />, bg: darkMode ? "bg-[#222] text-white" : "bg-zinc-100 text-black" },
-    { title: "Community Driven", desc: "Open-source architecture", icon: <Globe size={16} />, bg: darkMode ? "bg-[#222] text-white" : "bg-zinc-100 text-black" }
+    { title: "Successful Merges", desc: `${githubStats.mergedPrs} PRs merged to main`, icon: <GitMerge size={16} />, bg: darkMode ? "bg-[#222] text-white" : "bg-zinc-100 text-black" },
+    { title: "Community Health", desc: `${githubStats.openIssues} open issues tracked`, icon: <CircleDot size={16} />, bg: darkMode ? "bg-[#222] text-white" : "bg-zinc-100 text-black" },
+    { title: "Global Reach", desc: `${githubStats.stars} repository stars`, icon: <Star size={16} />, bg: darkMode ? "bg-[#222] text-white" : "bg-zinc-100 text-black" }
   ];
 
   const currentBuild = dynamicBuildStats[cycle];
@@ -293,14 +311,13 @@ export default function LandingPage() {
         </div>
       </header>
 
-     <section className={`relative border-b w-full ${themeClasses.border} px-4 py-12 sm:py-16 md:px-6 lg:px-8 lg:py-32`}>
+      {/* Hero Section */}
+      <section className={`relative border-b w-full ${themeClasses.border} px-4 py-12 sm:py-16 md:px-6 lg:px-8 lg:py-32`}>
         <div className="mx-auto w-full max-w-[1400px]">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-12 items-center">
             
             <div className="lg:col-span-6 space-y-8">
-              <div className={`text-[11px] font-bold uppercase tracking-[0.2em] ${themeClasses.muted}`}>
-                Syntax • Patterns • Architecture
-              </div>
+             
               <h1 className="text-5xl font-extrabold tracking-tight sm:text-6xl lg:text-[72px] lg:leading-[1.1] text-balance">
                 Reference that keeps pace with your code.
               </h1>
@@ -319,7 +336,9 @@ export default function LandingPage() {
                   <div className={`absolute top-full left-1/2 mt-3 -translate-x-1/2 px-4 py-2 rounded-lg text-[13px] font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 border shadow-2xl ${darkMode ? "bg-[#222222] text-white border-[#333333]" : "bg-white text-black border-[#E5E5E5]"}`}>
                     Explore JS, React, System Design & more
                   </div>
+                  
                 </div>
+                
 
                 <a 
                   href="https://github.com/yash-pluto/refme" 
@@ -340,9 +359,10 @@ export default function LandingPage() {
                     <Code2 size={16} /> Community Driven
                   </div>
                 </div>
-                
-                <Link href="/docs" className={`inline-flex items-center gap-2 text-[13px] font-bold tracking-wide uppercase transition-colors w-fit ${darkMode ? "text-[#C699FF] hover:text-white" : "text-[#6f45d6] hover:text-black"}`}>
+                                <Link href="/docs" className={`inline-flex items-center gap-2 text-[13px] font-bold tracking-wide uppercase transition-colors w-fit ${darkMode ? "text-[#C699FF] hover:text-white" : "text-[#6f45d6] hover:text-black"}`}>
+
                   Read the RefMe Philosophy <ArrowRight size={14} />
+
                 </Link>
               </div>
             </div>
@@ -361,7 +381,7 @@ export default function LandingPage() {
                       />
                       <div>
                         <div className="flex items-center gap-2 mb-1">
-                          <a href="https://yash-pluto.vercel.app/" target="_blank" rel="noopener noreferrer" className={`text-2xl font-extrabold tracking-tight hover:underline ${darkMode ? "text-white" : "text-black"}`}>
+                          <a href="https://yash-pluto.vercel.app/" target="_blank" rel="noopener noreferrer" className={`text-2xl sm:text-3xl font-extrabold tracking-tight hover:underline ${darkMode ? "text-white" : "text-black"}`}>
                             Yash-Pluto
                           </a>
                           <BadgeCheck size={24} className="text-[#C699FF]" />
@@ -396,7 +416,7 @@ export default function LandingPage() {
                     <div className={`flex flex-col justify-between p-4 rounded-xl border ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"} shadow-sm`}>
                       <div className="flex items-center gap-2 mb-3">
                         <GitPullRequest size={16} className="text-emerald-500" />
-                        <span className={`text-xs font-bold uppercase tracking-wider ${themeClasses.muted}`}>Open PRs</span>
+                        <span className={`text-[11px] font-bold uppercase tracking-wider ${themeClasses.muted}`}>Open PRs</span>
                       </div>
                       <span className={`text-3xl font-extrabold tracking-tight ${darkMode ? "text-white" : "text-black"}`}>{githubStats.openPrs}</span>
                     </div>
@@ -404,7 +424,7 @@ export default function LandingPage() {
                     <div className={`flex flex-col justify-between p-4 rounded-xl border ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"} shadow-sm`}>
                       <div className="flex items-center gap-2 mb-3">
                         <GitMerge size={16} className="text-purple-500" />
-                        <span className={`text-xs font-bold uppercase tracking-wider ${themeClasses.muted}`}>Merged</span>
+                        <span className={`text-[11px] font-bold uppercase tracking-wider ${themeClasses.muted}`}>Merged</span>
                       </div>
                       <span className={`text-3xl font-extrabold tracking-tight ${darkMode ? "text-white" : "text-black"}`}>{githubStats.mergedPrs}</span>
                     </div>
@@ -412,7 +432,7 @@ export default function LandingPage() {
                     <div className={`flex flex-col justify-between p-4 rounded-xl border ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"} shadow-sm`}>
                       <div className="flex items-center gap-2 mb-3">
                         <CircleDot size={16} className="text-emerald-500" />
-                        <span className={`text-xs font-bold uppercase tracking-wider ${themeClasses.muted}`}>Issues</span>
+                        <span className={`text-[11px] font-bold uppercase tracking-wider ${themeClasses.muted}`}>Issues</span>
                       </div>
                       <span className={`text-3xl font-extrabold tracking-tight ${darkMode ? "text-white" : "text-black"}`}>{githubStats.openIssues}</span>
                     </div>
@@ -420,7 +440,7 @@ export default function LandingPage() {
                     <div className={`flex flex-col justify-between p-4 rounded-xl border ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"} shadow-sm`}>
                       <div className="flex items-center gap-2 mb-3">
                         <Star size={16} className="text-amber-500" />
-                        <span className={`text-xs font-bold uppercase tracking-wider ${themeClasses.muted}`}>Stars</span>
+                        <span className={`text-[11px] font-bold uppercase tracking-wider ${themeClasses.muted}`}>Stars</span>
                       </div>
                       <span className={`text-3xl font-extrabold tracking-tight ${darkMode ? "text-white" : "text-black"}`}>{githubStats.stars}</span>
                     </div>
@@ -490,111 +510,84 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-      {/* Refined 3-Step Process - Learning Centric */}
-      <section className={`py-24 border-b ${themeClasses.border} ${darkMode ? "bg-[#050505]" : "bg-zinc-50/50"}`}>
-        <div className="mx-auto max-w-[1400px] px-4 md:px-6 lg:px-8 text-center">
+
+      {/* Ultra-Premium 3-Step Architecture Flow */}
+      <section className={`py-24 md:py-32 border-b ${themeClasses.border} ${darkMode ? "bg-[#050505]" : "bg-zinc-50/50"}`}>
+        <div className="mx-auto max-w-[1200px] px-4 md:px-6 lg:px-8 text-center flex flex-col items-center">
           
-          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">
-            Three steps to master any tech stack.
-          </h2>
-          <p className={`max-w-2xl mx-auto text-base md:text-lg mb-20 ${themeClasses.muted}`}>
-            Stop getting stuck in tutorial hell. Follow curated roadmaps, learn from high-quality videos, and reference syntax on the fly.
+          <p className={`text-sm font-bold tracking-wide uppercase mb-4 ${themeClasses.muted}`}>
+            Built for everyone who wants to learn
           </p>
+          <h2 className={`text-4xl md:text-5xl font-extrabold tracking-tight mb-6 text-balance ${darkMode ? "text-white" : "text-zinc-900"}`}>
+            For students, professors, teachers, and developers.
+          </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-10 text-left">
+          <div className="w-full relative">
             
-            {/* Step 1: Roadmaps */}
-            <div className="flex flex-col relative">
-              <Link href="/roadmaps" className={`group h-56 mb-8 rounded-2xl border flex flex-col relative overflow-hidden transition-colors ${darkMode ? "bg-[#0a0a0a] border-[#333] hover:border-[#555]" : "bg-white border-[#E5E5E5] hover:border-[#ccc]"}`}>
-                <div className={`px-5 py-4 border-b flex items-center justify-between ${darkMode ? "bg-[#111] border-[#333]" : "bg-zinc-50 border-[#E5E5E5]"}`}>
-                  <div className="flex items-center gap-2">
-                    <Map size={14} className={themeClasses.muted} />
-                    <span className="text-xs font-bold uppercase tracking-wider">Frontend Path</span>
-                  </div>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${darkMode ? "bg-[#222] text-zinc-300" : "bg-zinc-200 text-zinc-700"}`}>Module 2</span>
-                </div>
-                <div className="flex-1 p-5 relative pl-8 border-l-2 border-dashed ml-6 mt-4 mb-4 space-y-5 border-zinc-200 dark:border-zinc-800">
-                  <div className="relative">
-                    <div className="absolute -left-[27px] top-1 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20" />
-                    <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">HTML & CSS</span>
-                  </div>
-                  <div className="relative">
-                    <div className="absolute -left-[27px] top-1 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20" />
-                    <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">JavaScript Basics</span>
-                  </div>
-                  <div className="relative">
-                    <div className="absolute -left-[27px] top-1 w-2.5 h-2.5 rounded-full transition-all duration-300 shadow-[0_0_10px_rgba(198,153,255,0)] bg-zinc-300 dark:bg-zinc-700 group-hover:bg-[#C699FF] group-hover:shadow-[0_0_10px_rgba(198,153,255,0.8)]" />
-                    <span className="text-xs font-bold transition-colors text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100">React Components</span>
-                  </div>
-                </div>
-              </Link>
-              <div className="flex items-center mb-6 w-full">
-                <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-[13px] font-bold border shadow-sm relative z-10 ${darkMode ? "bg-white text-black border-white" : "bg-black text-white border-black"}`}>
-                  1
-                </div>
-                <div className={`hidden md:block flex-1 h-[1px] w-[calc(100%+2.5rem)] ${darkMode ? 'bg-[#333]' : 'bg-[#E5E5E5]'}`} />
+            {/* Horizontal Timeline Track (Desktop & Mobile aligned) */}
+            <div className="max-w-4xl mx-auto w-full px-2 sm:px-4">
+              <div className="flex justify-between items-center px-4 sm:px-12 md:px-24 mb-6">
+                <div className={`px-4 py-1.5 rounded-lg border text-xs font-bold shadow-sm ${darkMode ? "bg-[#111] border-zinc-600 text-zinc-200" : "bg-white border-[#E5E5E5] text-zinc-700"}`}>Students</div>
+                <div className={`px-4 py-1.5 rounded-lg border text-xs font-bold shadow-sm ${darkMode ? "bg-[#111] border-zinc-600 text-zinc-200" : "bg-white border-[#E5E5E5] text-zinc-700"}`}>Educators</div>
+                <div className={`px-4 py-1.5 rounded-lg border text-xs font-bold shadow-sm ${darkMode ? "bg-[#111] border-zinc-600 text-zinc-200" : "bg-white border-[#E5E5E5] text-zinc-700"}`}>Developers</div>
               </div>
-              <h3 className="text-xl font-bold tracking-tight mb-2">Pick your roadmap</h3>
-              <p className={`text-sm leading-relaxed ${themeClasses.muted}`}>
-                Whether you're a student or a senior dev, find the exact step-by-step path to learn Frontend, Backend, or DevOps.
-              </p>
+
+              <div className="relative flex justify-between items-center px-8 sm:px-16 md:px-28 mb-10 sm:mb-16">
+                <div className={`absolute top-1/2 left-8 right-8 sm:left-16 sm:right-16 md:left-28 md:right-28 h-[2px] -translate-y-1/2 z-0 ${darkMode ? "bg-zinc-600" : "bg-zinc-200"}`} />
+                <div className={`w-3.5 h-3.5 rounded-full border-[3px] z-10 ${darkMode ? "border-zinc-400 bg-zinc-900" : "border-zinc-300 bg-zinc-50"}`} />
+                <div className={`w-3.5 h-3.5 rounded-full border-[3px] z-10 ${darkMode ? "border-zinc-400 bg-zinc-900" : "border-zinc-300 bg-zinc-50"}`} />
+                <div className={`w-3.5 h-3.5 rounded-full border-[3px] z-10 ${darkMode ? "border-zinc-400 bg-zinc-900" : "border-zinc-300 bg-zinc-50"}`} />
+              </div>
             </div>
 
-            {/* Step 2: Tutorials */}
-            <div className="flex flex-col relative">
-              <Link href="/tutorials" className={`group h-56 mb-8 rounded-2xl border flex flex-col relative overflow-hidden transition-colors ${darkMode ? "bg-[#0a0a0a] border-[#333] hover:border-[#555]" : "bg-white border-[#E5E5E5] hover:border-[#ccc]"}`}>
-                <div className="absolute inset-0 bg-black/5 dark:bg-white/5 group-hover:bg-transparent transition-colors z-10" />
-                <div className={`flex-1 relative flex items-center justify-center ${darkMode ? "bg-[#111]" : "bg-zinc-100"}`}>
-                  <div className={`w-12 h-12 rounded-full border shadow-lg flex items-center justify-center z-20 transition-all duration-300 group-hover:scale-110 group-hover:text-[#C699FF] ${darkMode ? "bg-[#222] border-[#444]" : "bg-white border-[#E5E5E5]"}`}>
-                    <Play className="ml-1" size={18} />
+            {/* Vertical Stacked Cards Array */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left max-w-5xl mx-auto px-4">
+              
+              <div className={`flex flex-col rounded-3xl border p-8 shadow-sm ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"}`}>
+                <h3 className={`text-xl font-bold tracking-tight mb-6 ${darkMode ? "text-white" : "text-black"}`}>Structured Roadmaps.</h3>
+                <div className="space-y-4">
+                  <div className={`flex items-start gap-3 text-sm font-medium ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>
+                    <span className={themeClasses.muted}>✓</span> Step-by-step learning paths
+                  </div>
+                  <div className={`flex items-start gap-3 text-sm font-medium ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>
+                    <span className={themeClasses.muted}>✓</span> Master the topics listed below
+                  </div>
+                  <div className={`flex items-start gap-3 text-sm font-medium ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>
+                    <span className={themeClasses.muted}>✓</span> Clear progression for all levels
                   </div>
                 </div>
-                <div className={`h-[68px] px-5 py-3 border-t relative z-20 flex flex-col justify-center ${darkMode ? "bg-[#0a0a0a] border-[#333]" : "bg-white border-[#E5E5E5]"}`}>
-                  <p className="text-xs font-bold truncate">Understanding Server Components</p>
-                  <p className={`text-[10px] mt-0.5 ${themeClasses.muted}`}>12:45 • Next.js Advanced</p>
-                  <div className="absolute bottom-0 left-0 h-1 bg-[#C699FF] w-[15%] group-hover:w-full transition-all duration-700 ease-out" />
-                </div>
-              </Link>
-              <div className="flex items-center mb-6 w-full">
-                <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-[13px] font-bold border shadow-sm relative z-10 ${darkMode ? "bg-white text-black border-white" : "bg-black text-white border-black"}`}>
-                  2
-                </div>
-                <div className={`hidden md:block flex-1 h-[1px] w-[calc(100%+2.5rem)] ${darkMode ? 'bg-[#333]' : 'bg-[#E5E5E5]'}`} />
               </div>
-              <h3 className="text-xl font-bold tracking-tight mb-2">Watch & Learn</h3>
-              <p className={`text-sm leading-relaxed ${themeClasses.muted}`}>
-                Access hand-picked video tutorials and instantly reference the core syntax whenever you need it to bridge the gap.
-              </p>
-            </div>
 
-            {/* Step 3: Reference/Execute */}
-            <div className="flex flex-col relative">
-              <Link href="/javascript" className={`group h-56 mb-8 rounded-2xl border flex flex-col relative overflow-hidden transition-colors ${darkMode ? "bg-[#0a0a0a] border-[#333] hover:border-[#555]" : "bg-white border-[#E5E5E5] hover:border-[#ccc]"}`}>
-                <div className={`px-5 py-3 border-b flex items-center justify-between ${darkMode ? "bg-[#111] border-[#333]" : "bg-zinc-50 border-[#E5E5E5]"}`}>
-                  <div className="flex items-center gap-2">
-                    <FileCode2 size={14} className="text-blue-500" />
-                    <span className="text-xs font-bold">fetchData.ts</span>
+              <div className={`flex flex-col rounded-3xl border p-8 shadow-sm ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"}`}>
+                <h3 className={`text-xl font-bold tracking-tight mb-6 ${darkMode ? "text-white" : "text-black"}`}>Video Tutorials.</h3>
+                <div className="space-y-4">
+                  <div className={`flex items-start gap-3 text-sm font-medium ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>
+                    <span className={themeClasses.muted}>✓</span> Dedicated videos for every concept
                   </div>
-                  <div className={`p-1.5 rounded-md border transition-colors ${darkMode ? "bg-[#222] border-[#444] text-zinc-400 group-hover:text-emerald-500" : "bg-white border-[#ccc] text-zinc-500 group-hover:text-emerald-600"}`}>
-                    <Copy size={12} />
+                  <div className={`flex items-start gap-3 text-sm font-medium ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>
+                    <span className={themeClasses.muted}>✓</span> Visual explanations that stick
                   </div>
-                </div>
-                <div className={`flex-1 p-5 font-mono text-[11px] leading-[1.8] ${darkMode ? "bg-[#0a0a0a] text-zinc-300" : "bg-white text-zinc-600"}`}>
-                  <span className="text-purple-500">const</span> fetchUser = <span className="text-purple-500">async</span> () ={'>'} {'{\n'}
-                  {'  '}<span className="text-purple-500">const</span> res = <span className="text-purple-500">await</span> <span className="text-blue-500">fetch</span>(<span className="text-emerald-500">'/api/user'</span>);<br/>
-                  {'  '}<span className="text-purple-500">return</span> res.<span className="text-blue-500">json</span>();\n
-                  {'}'}
-                </div>
-              </Link>
-              <div className="flex items-center mb-6 w-full">
-                <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-[13px] font-bold border shadow-sm relative z-10 ${darkMode ? "bg-white text-black border-white" : "bg-black text-white border-black"}`}>
-                  3
+                  <div className={`flex items-start gap-3 text-sm font-medium ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>
+                    <span className={themeClasses.muted}>✓</span> Learn at your own pace
+                  </div>
                 </div>
               </div>
-              <h3 className="text-xl font-bold tracking-tight mb-2">Copy & Build</h3>
-              <p className={`text-sm leading-relaxed ${themeClasses.muted}`}>
-                Put your knowledge into practice. Copy strictly-typed code examples and ship your projects without the boilerplate.
-              </p>
+
+              <div className={`flex flex-col rounded-3xl border p-8 shadow-sm ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"}`}>
+                <h3 className={`text-xl font-bold tracking-tight mb-6 ${darkMode ? "text-white" : "text-black"}`}>For Everyone.</h3>
+                <div className="space-y-4">
+                  <div className={`flex items-start gap-3 text-sm font-medium ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>
+                    <span className={themeClasses.muted}>✓</span> Perfect for students & learners
+                  </div>
+                  <div className={`flex items-start gap-3 text-sm font-medium ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>
+                    <span className={themeClasses.muted}>✓</span> Resources for teachers & professors
+                  </div>
+                  <div className={`flex items-start gap-3 text-sm font-medium ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>
+                    <span className={themeClasses.muted}>✓</span> Quick reference for developers
+                  </div>
+                </div>
+              </div>
+
             </div>
 
           </div>
