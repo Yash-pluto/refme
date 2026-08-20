@@ -350,7 +350,7 @@ export default function LandingPage() {
       opacity: 1,
       y: 0,
       transition: {
-        type: "spring",
+        type: "spring" as const,
         stiffness: 400,
         damping: 30
       }

@@ -30,6 +30,10 @@ import {
   X,
   Home,
   Globe,
+  GitPullRequest,
+  GitMerge,
+  CircleDot,
+  Star
 } from "lucide-react";
 
 import Footer from "../components/Footer";
@@ -64,6 +68,18 @@ export default function TopicLayout({
   const [expandedOutline, setExpandedOutline] = useState<Record<string, boolean>>({});
   const [activeOutlineId, setActiveOutlineId] = useState<string | null>(null);
 
+
+  const [githubStats, setGithubStats] = useState({
+    stars: "-",
+    openIssues: "-",
+    openPrs: "-",
+    mergedPrs: "-",
+    lastPush: "",
+    contributors: [] as any[],
+    loading: true
+  });
+
+
   const progressBarRef = useRef<HTMLDivElement>(null);
   const scrollTopBtnRef = useRef<HTMLButtonElement>(null);
   const isClickScrolling = useRef(false);
@@ -93,6 +109,40 @@ export default function TopicLayout({
       document.body.style.overflow = "";
     };
   }, [isMobileMenuOpen, cmdOpen]);
+
+  useEffect(() => {
+    const fetchGitHubStats = async () => {
+      try {
+        const [repoRes, openPrsRes, mergedPrsRes, issuesRes, contributorsRes] = await Promise.all([
+          fetch('https://api.github.com/repos/yash-pluto/refme').catch(() => null),
+          fetch('https://api.github.com/search/issues?q=repo:yash-pluto/refme+is:pr+is:open').catch(() => null),
+          fetch('https://api.github.com/search/issues?q=repo:yash-pluto/refme+is:pr+is:merged').catch(() => null),
+          fetch('https://api.github.com/search/issues?q=repo:yash-pluto/refme+is:issue+is:open').catch(() => null),
+          fetch('https://api.github.com/repos/yash-pluto/refme/contributors').catch(() => null)
+        ]);
+
+        const repoData = repoRes && repoRes.ok ? await repoRes.json() : {};
+        const openPrsData = openPrsRes && openPrsRes.ok ? await openPrsRes.json() : {};
+        const mergedPrsData = mergedPrsRes && mergedPrsRes.ok ? await mergedPrsRes.json() : {};
+        const issuesData = issuesRes && issuesRes.ok ? await issuesRes.json() : {};
+        const contributorsData = contributorsRes && contributorsRes.ok ? await contributorsRes.json() : [];
+
+        setGithubStats({
+          stars: repoData.stargazers_count !== undefined ? repoData.stargazers_count.toString() : "-",
+          openIssues: issuesData.total_count !== undefined ? issuesData.total_count.toString() : "-",
+          openPrs: openPrsData.total_count !== undefined ? openPrsData.total_count.toString() : "-",
+          mergedPrs: mergedPrsData.total_count !== undefined ? mergedPrsData.total_count.toString() : "-",
+          lastPush: repoData.pushed_at || repoData.updated_at || "",
+          contributors: Array.isArray(contributorsData) ? contributorsData : [],
+          loading: false
+        });
+      } catch (error) {
+        setGithubStats(prev => ({ ...prev, loading: false }));
+      }
+    };
+
+    fetchGitHubStats();
+  }, []);
 
   useEffect(() => {
     const article = document.querySelector("article");
@@ -487,41 +537,124 @@ export default function TopicLayout({
                 </div>
               </div>
 
-              {/* Embedded Always-Active Contribute Section */}
-              <div className={`flex flex-col sm:flex-row items-center justify-between gap-6 rounded-xl border p-6 w-full ${darkMode ? "bg-[#161b22] border-[#30363d]" : "bg-zinc-50 border-[#d0d7de]"}`}>
-                <div className="flex-1 space-y-4">
-                  <div className="flex items-start gap-3">
-                    <BadgeCheck size={20} className="mt-0.5 shrink-0 text-[#C699FF]" />
-                    <p className={`text-[13px] font-medium leading-relaxed ${darkMode ? "text-[#e6edf3]" : "text-[#24292f]"}`}>
-                      Join <span className="text-[#C699FF] font-semibold"><a href="https://yash-pluto.vercel.app/">Yash Vardhan</a></span> and the community in keeping this documentation open and accessible.
-                    </p>
+              {/* Updated Dynamic GitHub Widget */}
+              <div className={`relative z-10 flex flex-col rounded-3xl border w-full max-w-2xl mx-auto shadow-sm overflow-hidden ${darkMode ? "bg-[#0a0a0a] border-[#333]" : "bg-white border-[#E5E5E5]"}`}>
+                <div className={`p-6 sm:p-8 border-b ${darkMode ? "bg-[#111] border-[#333]" : "bg-zinc-50 border-[#E5E5E5]"}`}>
+                  <div className="flex items-start justify-between mb-8">
+                    <div className="flex items-center gap-5">
+                      <img 
+                        src="https://github.com/yash-pluto.png" 
+                        alt="Yash Vardhan" 
+                        className={`h-20 w-20 rounded-full border-4 shadow-sm ${darkMode ? "border-[#222]" : "border-white"}`} 
+                      />
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <a href="https://yash-pluto.vercel.app/" target="_blank" rel="noopener noreferrer" className={`text-2xl font-extrabold tracking-tight hover:underline ${darkMode ? "text-white" : "text-black"}`}>
+                            Yash-Pluto
+                          </a>
+                          <BadgeCheck size={20} className="text-[#C699FF]" />
+                        </div>
+                        <p className={`text-sm font-medium ${themeClasses.muted}`}>Lead Maintainer</p>
+                      </div>
+                    </div>
+                    <a href="https://github.com/yash-pluto/refme" target="_blank" rel="noopener noreferrer" className="pt-1 hidden sm:block">
+                      <FaGithub size={32} className={`${darkMode ? "text-white" : "text-zinc-900"} hover:opacity-70 transition-opacity`} />
+                    </a>
                   </div>
-                  <div className="flex items-center gap-4 pl-8">
-                    <img 
-                      src="https://github.com/yash-pluto.png" 
-                      alt="Yash-pluto" 
-                      className="h-10 w-10 rounded-full border border-current/10 shadow-sm shrink-0 bg-[#C699FF]/20" 
-                    />
-                    <div>
-                      <p className={`text-[14px] font-bold ${darkMode ? "text-[#e6edf3]" : "text-[#24292f]"}`}><a href="https://github.com/yash-pluto">Yash-pluto</a></p>
-                      <p className={`text-[12px] ${themeClasses.muted}`}>Lead Maintainer</p>
+                  
+                  <p className={`text-[15px] leading-relaxed mb-6 ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>
+                    Join the community building the ultimate quick-reference. Contributions are welcome for all categories and languages.
+                  </p>
+
+                  <div className="flex flex-col sm:flex-row flex-wrap gap-3">
+                    <div className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border ${darkMode ? "bg-[#1a1a1a] border-[#333] shadow-inner" : "bg-white border-[#E5E5E5] shadow-sm"}`}>
+                      <span className="text-[#C699FF] text-base font-black">✓</span>
+                      <span className={`text-xs font-bold uppercase tracking-wide ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>Open Source Architecture</span>
+                    </div>
+                    <div className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border ${darkMode ? "bg-[#1a1a1a] border-[#333] shadow-inner" : "bg-white border-[#E5E5E5] shadow-sm"}`}>
+                      <span className="text-[#C699FF] text-base font-black">✓</span>
+                      <span className={`text-xs font-bold uppercase tracking-wide ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>Community Driven Updates</span>
                     </div>
                   </div>
                 </div>
 
-                <div className={`flex flex-col gap-4 sm:border-l sm:pl-6 w-full sm:w-auto ${darkMode ? "border-[#30363d]" : "border-[#d0d7de]"}`}>
-                  <div className="space-y-1.5">
-                    <p className={`text-[13px] font-medium ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>✓ Open Source Architecture</p>
-                    <p className={`text-[13px] font-medium ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>✓ Community Driven Updates</p>
+                <div className="p-6 sm:p-8">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+                    <div className={`flex flex-col justify-between p-4 rounded-xl border ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"} shadow-sm`}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <GitPullRequest size={16} className="text-emerald-500" />
+                        <span className={`text-[11px] font-bold uppercase tracking-wider ${themeClasses.muted}`}>Open PRs</span>
+                      </div>
+                      <span className={`text-2xl font-extrabold tracking-tight ${darkMode ? "text-white" : "text-black"}`}>{githubStats.openPrs}</span>
+                    </div>
+                    
+                    <div className={`flex flex-col justify-between p-4 rounded-xl border ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"} shadow-sm`}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <GitMerge size={16} className="text-purple-500" />
+                        <span className={`text-[11px] font-bold uppercase tracking-wider ${themeClasses.muted}`}>Merged</span>
+                      </div>
+                      <span className={`text-2xl font-extrabold tracking-tight ${darkMode ? "text-white" : "text-black"}`}>{githubStats.mergedPrs}</span>
+                    </div>
+
+                    <div className={`flex flex-col justify-between p-4 rounded-xl border ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"} shadow-sm`}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <CircleDot size={16} className="text-emerald-500" />
+                        <span className={`text-[11px] font-bold uppercase tracking-wider ${themeClasses.muted}`}>Issues</span>
+                      </div>
+                      <span className={`text-2xl font-extrabold tracking-tight ${darkMode ? "text-white" : "text-black"}`}>{githubStats.openIssues}</span>
+                    </div>
+
+                    <div className={`flex flex-col justify-between p-4 rounded-xl border ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"} shadow-sm`}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <Star size={16} className="text-amber-500" />
+                        <span className={`text-[11px] font-bold uppercase tracking-wider ${themeClasses.muted}`}>Stars</span>
+                      </div>
+                      <span className={`text-2xl font-extrabold tracking-tight ${darkMode ? "text-white" : "text-black"}`}>{githubStats.stars}</span>
+                    </div>
                   </div>
-                  <a 
-                    href={`https://github.com/yash-pluto/refme/edit/main/frontend/content/${topicKey}.mdx`} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className={`flex w-full justify-center items-center gap-2 rounded-lg border px-3 py-2 text-[12px] font-semibold transition-colors hover:bg-current/5 ${themeClasses.border} ${darkMode ? "text-white" : "text-black"}`}
-                  >
-                    <FaGithub size={14} /> Edit this page on GitHub
-                  </a>
+
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+                    <div className="flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-start">
+                      {githubStats.contributors.length > 0 && (
+                        <>
+                          <div className="flex -space-x-4">
+                            {githubStats.contributors.slice(0, 5).map((user: any, idx: number) => (
+                              <img 
+                                key={user.id} 
+                                src={user.avatar_url} 
+                                alt={user.login}
+                                title={user.login}
+                                className={`h-10 w-10 rounded-full border-[3px] ${darkMode ? 'border-[#0a0a0a]' : 'border-white'} shadow-md`}
+                                style={{ zIndex: 10 - idx, opacity: 1 - (idx * 0.12) }} 
+                              />
+                            ))}
+                          </div>
+                          <p className={`text-[11px] font-bold uppercase tracking-wider pl-1 ${themeClasses.muted}`}>
+                            {githubStats.contributors.length > 5 ? `+${githubStats.contributors.length - 5} Devs` : 'Contributors'}
+                          </p>
+                        </>
+                      )}
+                    </div>
+                    
+                    <div className="flex gap-2 w-full sm:w-auto">
+                      <a 
+                        href={`https://github.com/yash-pluto/refme/edit/main/frontend/content/${topicKey}.mdx`} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className={`flex flex-1 sm:flex-none justify-center items-center gap-2 rounded-xl px-4 py-3 text-[13px] font-bold border transition-colors ${darkMode ? "border-[#333] hover:bg-white/5 text-zinc-300" : "border-[#E5E5E5] hover:bg-black/5 text-zinc-700"}`}
+                      >
+                        Edit Page
+                      </a>
+                      <a 
+                        href="https://github.com/yash-pluto/refme" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className={`flex flex-1 sm:flex-none justify-center items-center gap-2 rounded-xl px-5 py-3 text-[13px] font-bold transition-all active:scale-[0.98] ${darkMode ? "bg-white text-black hover:bg-zinc-200" : "bg-black text-white hover:bg-zinc-800"}`}
+                      >
+                        <FaGithub size={16} /> Contribute
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
