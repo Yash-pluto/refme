@@ -3,7 +3,7 @@
 /**
  * @fileoverview Layout wrapper for individual documentation topics.
  * Features a 3-column responsive grid, dynamic scroll-spy TOC, bottom pagination,
- * interactive breadcrumbs, and a sleek, minimal footer.
+ * interactive multi-level breadcrumbs, and a sleek, minimal footer.
  *
  * @author Yash Vardhan
  */
@@ -57,7 +57,6 @@ export default function TopicLayout({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileTocOpen, setIsMobileTocOpen] = useState(false);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
-  const [showContribute, setShowContribute] = useState(false);
 
   const { modifierKey, isMounted } = useSearchOSKey();
   const [expandedOutline, setExpandedOutline] = useState<Record<string, boolean>>({});
@@ -245,14 +244,34 @@ export default function TopicLayout({
     if (isPositive) {
       toast.success("Glad it helped! Thanks for the feedback.");
     } else {
-      toast("Thanks for the feedback! We'll work on improving this.", {
-        icon: '📝',
-      });
+      toast("Thanks for the feedback! We'll work on improving this.", { icon: '📝' });
     }
   };
 
   const currentTopicTitle = topics.find((t) => t.id === topicKey)?.title || frontmatter?.title || topicKey;
-  const activeHeadingTitle = activeOutlineId ? activeHeadings.find((h) => h.id === activeOutlineId)?.title : null;
+
+  let activeGroupTitle: string | null = null;
+  let activeChildTitle: string | null = null;
+  let activeGroupId: string | null = null;
+  let activeChildId: string | null = null;
+
+  if (activeOutlineId) {
+    for (const group of outlineGroups) {
+      if (group.id === activeOutlineId) {
+        activeGroupTitle = group.title;
+        activeGroupId = group.id;
+        break;
+      }
+      const child = group.items.find((item) => item.id === activeOutlineId);
+      if (child) {
+        activeGroupTitle = group.title;
+        activeGroupId = group.id;
+        activeChildTitle = child.title;
+        activeChildId = child.id;
+        break;
+      }
+    }
+  }
 
   return (
     <div className={`${themeClasses.page} min-h-screen font-sans selection:bg-[#C699FF]/25 transition-colors duration-200 flex flex-col`}>
@@ -267,10 +286,10 @@ export default function TopicLayout({
       
       <div className={`fixed bottom-0 left-0 top-0 z-50 w-[280px] transform border-r transition-transform duration-300 ease-in-out lg:hidden ${themeClasses.sidebar} ${themeClasses.border} ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className={`flex h-16 items-center justify-between border-b px-6 ${themeClasses.border}`}>
-          <div className="flex items-center gap-2">
-            <img src="/refme-logo.svg" alt="RefMe" className="h-6 w-6" />
+          <button onClick={() => router.push("/")} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <img src="/refme-logo.svg" alt="RefMe Logo" className="h-6 w-6" />
             <span className="text-[12px] font-bold uppercase tracking-[0.25em]">RefMe</span>
-          </div>
+          </button>
           <button onClick={() => setIsMobileMenuOpen(false)} className={`p-2 ${themeClasses.muted} ${themeClasses.hoverAccent}`}><X size={18} /></button>
         </div>
         <div className="h-full overflow-y-auto px-4 py-6 pb-24">
@@ -285,7 +304,7 @@ export default function TopicLayout({
                 <button
                   key={item.id}
                   onClick={() => { router.push(`/${item.id}`); setIsMobileMenuOpen(false); }}
-                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-all duration-200 ${isActive ? `${themeClasses.activeNavBg} font-semibold` : `${themeClasses.muted} hover:bg-current/5`}`}
+                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-all duration-200 ${isActive ? `${themeClasses.activeNavBg} font-semibold` : `text-zinc-600 dark:text-zinc-400 hover:bg-black/5 dark:hover:bg-white/10 dark:hover:text-white`}`}
                 >
                   <TopicIcon size={16} className={isActive ? "opacity-100" : "opacity-60"} />
                   <span className="truncate">{item.title || item.id}</span>
@@ -300,10 +319,12 @@ export default function TopicLayout({
         <div className="mx-auto flex h-full max-w-[1700px] items-center justify-between px-4 lg:px-6">
           <div className="flex items-center gap-4">
             <button onClick={() => setIsMobileMenuOpen(true)} className={`lg:hidden p-1 ${themeClasses.muted} ${themeClasses.hoverAccent}`}><Menu size={20} /></button>
-            <div className="hidden lg:flex items-center justify-center">
-              <img src="/refme-logo.svg" alt="RefMe Logo" className="h-7 w-7" />
-            </div>
-            <span className="hidden lg:block text-sm font-bold tracking-widest uppercase">RefMe</span>
+            <button onClick={() => router.push("/")} className="hidden lg:flex items-center gap-3 hover:opacity-80 transition-opacity">
+              <div className="flex items-center justify-center">
+                <img src="/refme-logo.svg" alt="RefMe Logo" className="h-7 w-7" />
+              </div>
+              <span className="text-sm font-bold tracking-widest uppercase">RefMe</span>
+            </button>
           </div>
 
           <div className="flex-1 flex justify-center px-4 max-w-2xl mx-auto">
@@ -333,7 +354,7 @@ export default function TopicLayout({
                   <button
                     key={item.id}
                     onClick={() => router.push(`/${item.id}`)}
-                    className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-all duration-200 ${isActive ? `${themeClasses.activeNavBg} font-semibold border-l-2 border-[#C699FF]` : `${themeClasses.muted} hover:bg-current/5 border-l-2 border-transparent`}`}
+                    className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-all duration-200 ${isActive ? `${themeClasses.activeNavBg} font-semibold border-l-2 border-[#C699FF]` : `text-zinc-600 dark:text-zinc-400 hover:bg-black/5 dark:hover:bg-white/10 dark:hover:text-white border-l-2 border-transparent`}`}
                   >
                     <span className="truncate">{item.title || item.id}</span>
                   </button>
@@ -345,38 +366,53 @@ export default function TopicLayout({
 
         <main className="flex-1 min-w-0 flex flex-col relative">
           
-          <div className={`sticky top-16 z-30 flex items-center gap-2.5 py-3 px-5 md:px-10 xl:px-16 border-b ${themeClasses.border} ${themeClasses.header} backdrop-blur-md overflow-x-auto whitespace-nowrap [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]`}>
+          <div className={`sticky top-16 z-30 flex items-center gap-2 py-3 px-5 md:px-10 xl:px-16 border-b ${themeClasses.border} ${themeClasses.header} backdrop-blur-md overflow-x-auto whitespace-nowrap [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]`}>
             <button onClick={() => router.push("/")} className={`shrink-0 transition-colors ${themeClasses.muted} ${themeClasses.hoverAccent}`}>
               <Home size={15} />
             </button>
             
-              {/* {frontmatter?.category && (
-                <>
-                  <ChevronRight size={14} className={`shrink-0 opacity-40 ${themeClasses.muted}`} />
-                  <button 
-                    onClick={() => router.push("/")}
-                    className={`shrink-0 text-[13px] font-medium transition-colors ${themeClasses.muted} ${themeClasses.hoverAccent}`}
-                  >
-                    {frontmatter.category}
-                  </button>
-                </>
-              )} */}
+            {frontmatter?.category && (
+              <>
+                <ChevronRight size={14} className={`shrink-0 opacity-40 ${themeClasses.muted}`} />
+                <button 
+                  onClick={() => router.push("/")}
+                  className={`shrink-0 text-[13px] font-medium transition-colors ${themeClasses.muted} ${themeClasses.hoverAccent}`}
+                >
+                  {frontmatter.category}
+                </button>
+              </>
+            )}
 
             <ChevronRight size={14} className={`shrink-0 opacity-40 ${themeClasses.muted}`} />
 
             <button 
-              onClick={() => router.push(`/${topicKey}`)}
-              className={`shrink-0 text-[13px] font-medium transition-colors ${!activeHeadingTitle ? (darkMode ? "text-[#C699FF]" : "text-[#6f45d6]") : `${themeClasses.muted} ${themeClasses.hoverAccent}`}`}
+              onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); setActiveOutlineId(null); }}
+              className={`shrink-0 text-[13px] font-medium transition-colors ${!activeGroupTitle ? (darkMode ? "text-[#C699FF]" : "text-[#6f45d6]") : `${themeClasses.muted} ${themeClasses.hoverAccent}`}`}
             >
               {currentTopicTitle}
             </button>
 
-            {activeHeadingTitle && (
+            {activeGroupTitle && (
               <>
                 <ChevronRight size={14} className={`shrink-0 opacity-40 ${themeClasses.muted}`} />
-                <div className={`shrink-0 px-2 py-0.5 rounded text-[13px] font-medium ${darkMode ? "bg-[#C699FF]/15 text-[#C699FF]" : "bg-[#6f45d6]/10 text-[#6f45d6]"}`}>
-                  {activeHeadingTitle}
-                </div>
+                <button 
+                  onClick={() => activeGroupId && scrollToSection(activeGroupId)}
+                  className={`shrink-0 transition-colors text-[13px] font-medium ${!activeChildTitle ? (darkMode ? "text-[#C699FF]" : "text-[#6f45d6]") : `${themeClasses.muted} ${themeClasses.hoverAccent}`}`}
+                >
+                  {activeGroupTitle}
+                </button>
+              </>
+            )}
+
+            {activeChildTitle && (
+              <>
+                <ChevronRight size={14} className={`shrink-0 opacity-40 ${themeClasses.muted}`} />
+                <button
+                  onClick={() => activeChildId && scrollToSection(activeChildId)}
+                  className={`shrink-0 px-2 py-0.5 rounded text-[13px] font-medium ${darkMode ? "bg-[#C699FF]/15 text-[#C699FF]" : "bg-[#6f45d6]/10 text-[#6f45d6]"}`}
+                >
+                  {activeChildTitle}
+                </button>
               </>
             )}
           </div>
@@ -420,9 +456,12 @@ export default function TopicLayout({
               {children}
             </article>
 
-            <div className={`mt-16 flex flex-col items-start justify-between gap-6 border-t pt-8 sm:flex-row sm:items-center sm:gap-4 ${themeClasses.border}`}>
-              <div className="relative flex items-center h-8 w-[280px]">
-                <div className={`absolute inset-0 flex items-center gap-4 transition-opacity duration-300 ${feedbackSubmitted ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
+            {/* Combined Bottom Section */}
+            <div className={`mt-10 xl:mt-16 flex flex-col items-center justify-center gap-10 border-t pt-10 ${themeClasses.border}`}>
+              
+              {/* Center Aligned Feedback Section */}
+              <div className="relative flex items-center justify-center h-8 w-full">
+                <div className={`absolute inset-0 flex items-center justify-center w-full gap-4 transition-opacity duration-300 ${feedbackSubmitted ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
                   <span className={`text-[13px] font-medium ${themeClasses.muted}`}>Was this page helpful?</span>
                   <div className="flex gap-2">
                     <button 
@@ -439,10 +478,48 @@ export default function TopicLayout({
                     </button>
                   </div>
                 </div>
-                <div className={`absolute inset-0 flex items-center transition-opacity duration-300 ${feedbackSubmitted ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+                <div className={`absolute inset-0 flex items-center justify-center w-full transition-opacity duration-300 ${feedbackSubmitted ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
                   <span className={`text-[13px] font-medium text-[#C699FF]`}>
                     Thank you for your feedback! 🎉
                   </span>
+                </div>
+              </div>
+
+              {/* Embedded Always-Active Contribute Section */}
+              <div className={`flex flex-col sm:flex-row items-center justify-between gap-6 rounded-xl border p-6 w-full ${darkMode ? "bg-[#161b22] border-[#30363d]" : "bg-zinc-50 border-[#d0d7de]"}`}>
+                <div className="flex-1 space-y-4">
+                  <div className="flex items-start gap-3">
+                    <BadgeCheck size={20} className="mt-0.5 shrink-0 text-[#C699FF]" />
+                    <p className={`text-[13px] font-medium leading-relaxed ${darkMode ? "text-[#e6edf3]" : "text-[#24292f]"}`}>
+                      Join <span className="text-[#C699FF] font-semibold"><a href="https://yash-pluto.vercel.app/">Yash Vardhan</a></span> and the community in keeping this documentation open and accessible.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-4 pl-8">
+                    <img 
+                      src="https://github.com/yash-pluto.png" 
+                      alt="Yash-pluto" 
+                      className="h-10 w-10 rounded-full border border-current/10 shadow-sm shrink-0 bg-[#C699FF]/20" 
+                    />
+                    <div>
+                      <p className={`text-[14px] font-bold ${darkMode ? "text-[#e6edf3]" : "text-[#24292f]"}`}><a href="https://github.com/yash-pluto">Yash-pluto</a></p>
+                      <p className={`text-[12px] ${themeClasses.muted}`}>Lead Maintainer</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`flex flex-col gap-4 sm:border-l sm:pl-6 w-full sm:w-auto ${darkMode ? "border-[#30363d]" : "border-[#d0d7de]"}`}>
+                  <div className="space-y-1.5">
+                    <p className={`text-[13px] font-medium ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>✓ Open Source Architecture</p>
+                    <p className={`text-[13px] font-medium ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>✓ Community Driven Updates</p>
+                  </div>
+                  <a 
+                    href={`https://github.com/yash-pluto/refme/edit/main/frontend/content/${topicKey}.mdx`} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className={`flex w-full justify-center items-center gap-2 rounded-lg border px-3 py-2 text-[12px] font-semibold transition-colors hover:bg-current/5 ${themeClasses.border} ${darkMode ? "text-white" : "text-black"}`}
+                  >
+                    <FaGithub size={14} /> Edit this page on GitHub
+                  </a>
                 </div>
               </div>
             </div>
@@ -474,52 +551,20 @@ export default function TopicLayout({
 
         <aside className={`sticky top-16 hidden h-[calc(100vh-4rem)] w-[260px] shrink-0 overflow-y-auto border-l xl:block ${themeClasses.sidebar} ${themeClasses.border}`}>
           <div className="px-6 py-10 pb-24">
-
-            <div className={`mb-10 border-b pb-10 ${themeClasses.border}`}>
-              <h4 className={`text-[11px] font-bold uppercase tracking-widest mb-4 ${themeClasses.muted}`}>Contribute</h4>
-              <button 
-                onClick={() => setShowContribute(!showContribute)}
-                className="flex items-center gap-1.5 text-left transition-opacity hover:opacity-80 focus:outline-none"
-              >
-                <span className="group relative inline-flex items-center justify-center">
-                <span className={`text-[14px] font-medium ${darkMode ? "text-white" : "text-black"} pr-1`}>
-                  Want to contribute?
-                </span>
-                <BadgeCheck size={20} fill="#C699FF" className={darkMode ? "text-[#101010]" : "text-[#F7F7F7]"} />
-                <span className={`pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded px-2 py-1 text-[10px] font-semibold opacity-0 transition-opacity group-hover:opacity-100 z-50 ${darkMode ? "bg-zinc-800 text-white border border-zinc-700" : "bg-white text-zinc-900 border border-zinc-200 shadow-sm"}`}>
-                  Become a Verified Contributor
-                </span>
-                </span>
-              </button>
-
-              <div className={`grid transition-all duration-300 ease-in-out ${showContribute ? "grid-rows-[1fr] opacity-100 mt-4" : "grid-rows-[0fr] opacity-0 mt-0"}`}>
-                <div className="overflow-hidden">
-                  <a 
-                    href={`https://github.com/yash-pluto/refme/edit/main/frontend/content/${topicKey}.mdx`} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className={`flex w-max items-center gap-2 rounded-lg border px-3 py-2 text-[13px] font-semibold transition-colors hover:bg-current/5 ${themeClasses.border} ${darkMode ? "text-white" : "text-black"}`}
-                  >
-                    <FaGithub size={15} /> Edit this page on GitHub
-                  </a>
-                </div>
-              </div>
-            </div>
-
             <div>
               <h4 className={`text-[11px] font-bold uppercase tracking-widest mb-5 ${themeClasses.muted}`}>Table of Contents</h4>
-              <nav className="space-y-1">
+              <nav className="space-y-1.5">
                 {outlineGroups.map((group) => {
                   const isActiveGroup = activeOutlineId === group.id;
                   return (
-                    <div key={group.id} className="mb-3">
-                      <a href={`#${group.id}`} onClick={(e) => { e.preventDefault(); scrollToSection(group.id); }} className={`block text-[13px] font-semibold leading-snug transition-colors mb-1.5 ${isActiveGroup ? (darkMode ? "text-[#C699FF]" : "text-[#6f45d6]") : `${themeClasses.muted} hover:text-current`}`}>
+                    <div key={group.id} className="mb-4">
+                      <a href={`#${group.id}`} onClick={(e) => { e.preventDefault(); scrollToSection(group.id); }} className={`block text-[13px] tracking-tight font-semibold leading-snug transition-colors mb-2 ${isActiveGroup ? (darkMode ? "text-[#C699FF] drop-shadow-[0_0_8px_rgba(198,153,255,0.4)]" : "text-[#6f45d6] drop-shadow-[0_0_8px_rgba(111,69,214,0.4)]") : `${themeClasses.muted} hover:text-current`}`}>
                         {group.title}
                       </a>
                       {group.items.length > 0 && (
-                        <div className={`border-l-2 ml-1.5 pl-3 mt-1 space-y-1.5 ${themeClasses.border}`}>
+                        <div className={`border-l ml-[3px] pl-3 mt-1 space-y-2 ${themeClasses.border}`}>
                           {group.items.map((item) => (
-                            <a key={item.id} href={`#${item.id}`} onClick={(e) => { e.preventDefault(); scrollToSection(item.id); }} className={`block text-[12px] font-medium leading-snug transition-colors ${activeOutlineId === item.id ? (darkMode ? "text-[#C699FF]" : "text-[#6f45d6]") : `${themeClasses.muted} hover:text-current`}`}>
+                            <a key={item.id} href={`#${item.id}`} onClick={(e) => { e.preventDefault(); scrollToSection(item.id); }} className={`block text-[12px] font-medium leading-snug transition-colors ${activeOutlineId === item.id ? (darkMode ? "text-[#C699FF] drop-shadow-[0_0_8px_rgba(198,153,255,0.4)]" : "text-[#6f45d6] drop-shadow-[0_0_8px_rgba(111,69,214,0.4)]") : `${themeClasses.muted} hover:text-current`}`}>
                               {item.title}
                             </a>
                           ))}
@@ -530,7 +575,6 @@ export default function TopicLayout({
                 })}
               </nav>
             </div>
-            
           </div>
         </aside>
       </div>
