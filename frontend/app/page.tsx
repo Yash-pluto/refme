@@ -25,111 +25,115 @@ import {
   GitMerge,
   CircleDot,
   Star,
-  CheckCircle2
+  CheckCircle2,
+  ArrowRight,
+  Play,
+  Copy,
+  Map
 } from "lucide-react";
 
 export const REFERENCE_DATA = [
   {
     category: "Core Languages",
-    icon: <Code2 size={16} />,
+    icon: <Code2 size={20} />,
     items: [
-      { name: "C++", href: "/cpp", icon: <Code2 size={18} />, desc: "Low-level systems, performance, and STL patterns." },
+      { name: "C++", href: "/cpp", icon: <Code2 size={18} />, desc: "Low-level systems, memory management, and STL patterns." },
       { name: "JavaScript", href: "/javascript", icon: <Braces size={18} />, desc: "Modern syntax, async flows, and browser fundamentals." },
-      { name: "Python", href: "/python", icon: <FileCode2 size={18} />, desc: "Data work, automation, and clean backend scripting." },
-      { name: "TypeScript", href: "/typescript", icon: <FileCode2 size={18} />, desc: "Types, interfaces, and safer large-scale JavaScript systems." },
-      { name: "Go", href: "/go", icon: <Binary size={18} />, desc: "Simple concurrency, tooling, and service-oriented code." },
-      { name: "Rust", href: "/rust", icon: <ShieldCheck size={18} />, desc: "Ownership, performance, and safety-first systems design." },
-      { name: "Java", href: "/java", icon: <Code2 size={18} />, desc: "Enterprise patterns, JVM tooling, and backend architecture." },
-      { name: "C#", href: "/csharp", icon: <ShieldCheck size={18} />, desc: "Strong typing, .NET frameworks, and application structure." },
+      { name: "Python", href: "/python", icon: <FileCode2 size={18} />, desc: "Data processing, automation scripts, and backend architectures." },
+      { name: "TypeScript", href: "/typescript", icon: <FileCode2 size={18} />, desc: "Strict typing, interfaces, and large-scale JS systems." },
+      { name: "Go", href: "/go", icon: <Binary size={18} />, desc: "Concurrency models, tooling, and service-oriented code." },
+      { name: "Rust", href: "/rust", icon: <ShieldCheck size={18} />, desc: "Memory ownership, performance, and safety-first design." },
+      { name: "Java", href: "/java", icon: <Code2 size={18} />, desc: "Enterprise patterns, JVM performance, and OOP structures." },
+      { name: "C#", href: "/csharp", icon: <ShieldCheck size={18} />, desc: "Strong typing, .NET frameworks, and scalable applications." },
     ],
   },
   {
     category: "Frontend & Web",
-    icon: <Globe size={16} />,
+    icon: <Globe size={20} />,
     items: [
-      { name: "React", href: "/react", icon: <Globe size={18} />, desc: "Components, state, effects, and rendering patterns." },
-      { name: "Next.js", href: "/nextjs", icon: <Globe size={18} />, desc: "App routing, server rendering, and performance patterns." },
-      { name: "CSS", href: "/css", icon: <Sparkles size={18} />, desc: "Layout, design systems, and modern responsive styling." },
-      { name: "HTML", href: "/html", icon: <Code2 size={18} />, desc: "Structure, semantics, and accessible document foundations." },
-      { name: "Tailwind", href: "/tailwind", icon: <Sparkles size={18} />, desc: "Utility-first styling, tokens, and rapid UI composition." },
-      { name: "Accessibility", href: "/accessibility", icon: <ShieldCheck size={18} />, desc: "Semantic structure, keyboard flows, and inclusive UI." },
+      { name: "React", href: "/react", icon: <Globe size={18} />, desc: "Component lifecycles, state management, and effects." },
+      { name: "Next.js", href: "/nextjs", icon: <Globe size={18} />, desc: "App router, SSR, static generation, and API routes." },
+      { name: "CSS", href: "/css", icon: <Sparkles size={18} />, desc: "Flexbox, Grid, design systems, and responsive layouts." },
+      { name: "HTML", href: "/html", icon: <Code2 size={18} />, desc: "Document structure, semantic web, and DOM fundamentals." },
+      { name: "Tailwind", href: "/tailwind", icon: <Sparkles size={18} />, desc: "Utility-first design, configuration, and rapid UI." },
+      { name: "Accessibility", href: "/accessibility", icon: <ShieldCheck size={18} />, desc: "ARIA roles, keyboard navigation, and inclusive design." },
     ],
   },
   {
     category: "Backend & Systems",
-    icon: <TerminalSquare size={16} />,
+    icon: <TerminalSquare size={20} />,
     items: [
-      { name: "Bash", href: "/bash", icon: <TerminalSquare size={18} />, desc: "Shell workflows, pipelines, and automation basics." },
-      { name: "Node.js", href: "/nodejs", icon: <Binary size={18} />, desc: "Runtime fundamentals and server-side JavaScript patterns." },
-      { name: "SQL", href: "/sql", icon: <Database size={18} />, desc: "Queries, joins, indexing, and data modeling essentials." },
-      { name: "APIs", href: "/apis", icon: <Lock size={18} />, desc: "Request patterns, auth flows, and contract design." },
-      { name: "Docker", href: "/docker", icon: <TerminalSquare size={18} />, desc: "Containers, images, and deployment isolation basics." },
-      { name: "Git", href: "/git", icon: <Code2 size={18} />, desc: "Branching, commits, and collaboration workflows." },
+      { name: "Bash", href: "/bash", icon: <TerminalSquare size={18} />, desc: "Shell scripting, pipelines, and server automation." },
+      { name: "Node.js", href: "/nodejs", icon: <Binary size={18} />, desc: "V8 runtime, event loop, and server-side TS/JS." },
+      { name: "SQL", href: "/sql", icon: <Database size={18} />, desc: "Relational queries, table joins, and performance indexing." },
+      { name: "APIs", href: "/apis", icon: <Lock size={18} />, desc: "RESTful architecture, GraphQL, and request contracts." },
+      { name: "Docker", href: "/docker", icon: <TerminalSquare size={18} />, desc: "Containerization, volumes, and deployment isolation." },
+      { name: "Git", href: "/git", icon: <Code2 size={18} />, desc: "Version control, branching strategies, and rebasing." },
     ],
   },
   {
     category: "Concepts & Patterns",
-    icon: <Sparkles size={16} />,
+    icon: <Sparkles size={20} />,
     items: [
-      { name: "Async", href: "/async", icon: <Braces size={18} />, desc: "Promises, async/await, event loops, and scheduling." },
-      { name: "Testing", href: "/testing", icon: <TestTube size={18} />, desc: "Unit tests, integration coverage, and reliability habits." },
-      { name: "Security", href: "/security", icon: <ShieldCheck size={18} />, desc: "Auth, validation, and safer defaults for production code." },
-      { name: "Data Structures", href: "/data-structures", icon: <Database size={18} />, desc: "Arrays, trees, hash maps, and choosing the right shape." },
-      { name: "Algorithms", href: "/algorithms", icon: <Binary size={18} />, desc: "Sorting, traversal, recursion, and complexity trade-offs." },
-      { name: "System Design", href: "/system-design", icon: <Globe size={18} />, desc: "Scalability, resilience, and architecture composition." },
-      { name: "State Management", href: "/state-management", icon: <Braces size={18} />, desc: "Global UI state, immutability, and predictable app flows." },
-      { name: "OAuth", href: "/oauth", icon: <Lock size={18} />, desc: "Delegated access, tokens, and identity flows in real apps." },
-      { name: "Caching", href: "/caching", icon: <Database size={18} />, desc: "Read-through patterns, invalidation, and latency reduction." },
-      { name: "Web Security", href: "/web-security", icon: <ShieldCheck size={18} />, desc: "XSS, CSRF, headers, and safer web defaults." },
-      { name: "Design Patterns", href: "/design-patterns", icon: <Sparkles size={18} />, desc: "Factory, strategy, observer, and reusable software shapes." },
-      { name: "Dependency Injection", href: "/dependency-injection", icon: <Braces size={18} />, desc: "Loose coupling, wiring, and testable architecture." },
-      { name: "Validation", href: "/validation", icon: <ShieldCheck size={18} />, desc: "Input checks, schema rules, and safer user data flows." },
+      { name: "Async", href: "/async", icon: <Braces size={18} />, desc: "Promises, event loops, and asynchronous scheduling." },
+      { name: "Testing", href: "/testing", icon: <TestTube size={18} />, desc: "Unit assertions, integration flows, and mocking." },
+      { name: "Security", href: "/security", icon: <ShieldCheck size={18} />, desc: "Authentication, authorization, and data validation." },
+      { name: "Data Structures", href: "/data-structures", icon: <Database size={18} />, desc: "Memory layouts, trees, graphs, and hash maps." },
+      { name: "Algorithms", href: "/algorithms", icon: <Binary size={18} />, desc: "Time complexity, sorting, and traversal methods." },
+      { name: "System Design", href: "/system-design", icon: <Globe size={18} />, desc: "Horizontal scaling, bottlenecks, and distributed computing." },
+      { name: "State Management", href: "/state-management", icon: <Braces size={18} />, desc: "Global stores, context isolation, and immutability." },
+      { name: "OAuth", href: "/oauth", icon: <Lock size={18} />, desc: "Delegated access, JWTs, and secure identity flows." },
+      { name: "Caching", href: "/caching", icon: <Database size={18} />, desc: "Redis patterns, invalidation, and edge networks." },
+      { name: "Web Security", href: "/web-security", icon: <ShieldCheck size={18} />, desc: "XSS prevention, CSRF tokens, and security headers." },
+      { name: "Design Patterns", href: "/design-patterns", icon: <Sparkles size={18} />, desc: "Singleton, Factory, Observer, and SOLID principles." },
+      { name: "Dependency Injection", href: "/dependency-injection", icon: <Braces size={18} />, desc: "Inversion of control and modular architecture." },
+      { name: "Validation", href: "/validation", icon: <ShieldCheck size={18} />, desc: "Schema parsing, type guarding, and error handling." },
     ],
   },
   {
     category: "Architecture & DevOps",
-    icon: <Globe size={16} />,
+    icon: <Globe size={20} />,
     items: [
-      { name: "Microservices", href: "/microservices", icon: <Globe size={18} />, desc: "Service boundaries, contracts, and deployment autonomy." },
-      { name: "Event-Driven", href: "/event-driven", icon: <Binary size={18} />, desc: "Streams, decoupling, and asynchronous communication patterns." },
-      { name: "Load Balancing", href: "/load-balancing", icon: <TerminalSquare size={18} />, desc: "Traffic distribution, resilience, and horizontal scale." },
-      { name: "Kubernetes", href: "/kubernetes", icon: <TerminalSquare size={18} />, desc: "Container orchestration, scaling, and service management." },
-      { name: "Deployment", href: "/deployment", icon: <ShieldCheck size={18} />, desc: "Release flow, environments, rollout safety, and automation." },
-      { name: "Monitoring", href: "/monitoring", icon: <Sparkles size={18} />, desc: "Metrics, logs, traces, and runtime health visibility." },
-      { name: "Cloud Architecture", href: "/cloud-architecture", icon: <Globe size={18} />, desc: "Multi-region design, edge services, and resilient platforms." },
-      { name: "Databases", href: "/databases", icon: <Database size={18} />, desc: "Storage models, schemas, indexes, and query trade-offs." },
-      { name: "Reliability", href: "/reliability", icon: <ShieldCheck size={18} />, desc: "Failover, redundancy, and designing for graceful degradation." },
+      { name: "Microservices", href: "/microservices", icon: <Globe size={18} />, desc: "Service decoupling, bounded contexts, and API gateways." },
+      { name: "Event-Driven", href: "/event-driven", icon: <Binary size={18} />, desc: "Message brokers, pub/sub, and eventual consistency." },
+      { name: "Load Balancing", href: "/load-balancing", icon: <TerminalSquare size={18} />, desc: "Traffic distribution, health checks, and reverse proxies." },
+      { name: "Kubernetes", href: "/kubernetes", icon: <TerminalSquare size={18} />, desc: "Pod orchestration, cluster scaling, and deployment manifests." },
+      { name: "Deployment", href: "/deployment", icon: <ShieldCheck size={18} />, desc: "Blue-green releases, canary rollouts, and CI pipelines." },
+      { name: "Monitoring", href: "/monitoring", icon: <Sparkles size={18} />, desc: "Telemetry, distributed tracing, and incident alerting." },
+      { name: "Cloud Architecture", href: "/cloud-architecture", icon: <Globe size={18} />, desc: "AWS/GCP infrastructure, VPCs, and serverless compute." },
+      { name: "Databases", href: "/databases", icon: <Database size={18} />, desc: "NoSQL vs SQL, replication, and sharding strategies." },
+      { name: "Reliability", href: "/reliability", icon: <ShieldCheck size={18} />, desc: "Fault tolerance, circuit breakers, and SLA targeting." },
     ],
   },
   {
     category: "Data & AI",
-    icon: <Database size={16} />,
+    icon: <Database size={20} />,
     items: [
-      { name: "Data Science", href: "/data-science", icon: <Database size={18} />, desc: "Analysis, notebooks, and patterns for working with data." },
-      { name: "Machine Learning", href: "/ml", icon: <Binary size={18} />, desc: "Model basics, pipelines, and practical deployment notes." },
-      { name: "LLMs", href: "/llms", icon: <Sparkles size={18} />, desc: "Prompt design, structured outputs, and app integration basics." },
-      { name: "Vectors", href: "/vectors", icon: <Database size={18} />, desc: "Embeddings, similarity search, and retrieval patterns." },
-      { name: "Prompt Engineering", href: "/prompt-engineering", icon: <Sparkles size={18} />, desc: "Instruction design, context framing, and reliable outputs." },
-      { name: "RAG", href: "/rag", icon: <Database size={18} />, desc: "Grounded generation with retrieval and relevance filtering." },
-      { name: "Model Evaluation", href: "/model-evaluation", icon: <TestTube size={18} />, desc: "Benchmarking, scoring, and quality checks for outputs." },
-      { name: "AI Safety", href: "/ai-safety", icon: <ShieldCheck size={18} />, desc: "Guardrails, risk mitigation, and responsible model usage." },
-      { name: "Agents", href: "/agents", icon: <Sparkles size={18} />, desc: "Tool use, planning loops, and autonomous execution patterns." },
+      { name: "Data Science", href: "/data-science", icon: <Database size={18} />, desc: "Statistical models, Jupyter notebooks, and pandas processing." },
+      { name: "Machine Learning", href: "/ml", icon: <Binary size={18} />, desc: "Supervised training, neural networks, and model deployment." },
+      { name: "LLMs", href: "/llms", icon: <Sparkles size={18} />, desc: "Transformer architectures, tokenization, and API integration." },
+      { name: "Vectors", href: "/vectors", icon: <Database size={18} />, desc: "High-dimensional embeddings and cosine similarity search." },
+      { name: "Prompt Engineering", href: "/prompt-engineering", icon: <Sparkles size={18} />, desc: "Few-shot learning, context windows, and output framing." },
+      { name: "RAG", href: "/rag", icon: <Database size={18} />, desc: "Retrieval-augmented generation and knowledge grounding." },
+      { name: "Model Evaluation", href: "/model-evaluation", icon: <TestTube size={18} />, desc: "Accuracy benchmarking, hallucination checks, and scoring." },
+      { name: "AI Safety", href: "/ai-safety", icon: <ShieldCheck size={18} />, desc: "Prompt injection defense, guardrails, and data privacy." },
+      { name: "Agents", href: "/agents", icon: <Sparkles size={18} />, desc: "ReAct patterns, tool calling, and autonomous loops." },
     ],
   },
   {
     category: "Developer Tools",
-    icon: <TerminalSquare size={16} />,
+    icon: <TerminalSquare size={20} />,
     items: [
-      { name: "VS Code", href: "/vscode", icon: <TerminalSquare size={18} />, desc: "Editor workflows, extensions, and keyboard efficiency." },
-      { name: "Linux", href: "/linux", icon: <TerminalSquare size={18} />, desc: "Filesystems, processes, permissions, and command-line habits." },
-      { name: "CI/CD", href: "/ci-cd", icon: <ShieldCheck size={18} />, desc: "Pipelines, automation, and release safety checks." },
-      { name: "Observability", href: "/observability", icon: <Sparkles size={18} />, desc: "Logging, tracing, and debugging production systems." },
-      { name: "Nginx", href: "/nginx", icon: <TerminalSquare size={18} />, desc: "Reverse proxying, performance tuning, and request routing." },
-      { name: "Terraform", href: "/terraform", icon: <ShieldCheck size={18} />, desc: "Infrastructure as code, repeatable environments, and provisioning." },
-      { name: "GitHub Actions", href: "/github-actions", icon: <Code2 size={18} />, desc: "CI pipelines, automation, and shipping code confidently." },
-      { name: "Webpack", href: "/webpack", icon: <Sparkles size={18} />, desc: "Bundling, module resolution, and frontend build optimization." },
-      { name: "Vercel", href: "/vercel", icon: <Globe size={18} />, desc: "Edge deployment, previews, and modern app delivery." },
-      { name: "Debugging", href: "/debugging", icon: <TestTube size={18} />, desc: "Root cause analysis, traces, breakpoints, and narrowing bugs." },
+      { name: "VS Code", href: "/vscode", icon: <TerminalSquare size={18} />, desc: "Workspace configuration, snippets, and integrated debugging." },
+      { name: "Linux", href: "/linux", icon: <TerminalSquare size={18} />, desc: "Kernel architecture, system permissions, and POSIX standards." },
+      { name: "CI/CD", href: "/ci-cd", icon: <ShieldCheck size={18} />, desc: "Continuous integration, artifact building, and delivery." },
+      { name: "Observability", href: "/observability", icon: <Sparkles size={18} />, desc: "Log aggregation, metrics dashboards, and performance tracking." },
+      { name: "Nginx", href: "/nginx", icon: <TerminalSquare size={18} />, desc: "Web serving, TLS termination, and connection tuning." },
+      { name: "Terraform", href: "/terraform", icon: <ShieldCheck size={18} />, desc: "Infrastructure as code, state management, and provider blocks." },
+      { name: "GitHub Actions", href: "/github-actions", icon: <Code2 size={18} />, desc: "Workflow YAMLs, runner environments, and matrix builds." },
+      { name: "Webpack", href: "/webpack", icon: <Sparkles size={18} />, desc: "Asset bundling, code splitting, and tree shaking." },
+      { name: "Vercel", href: "/vercel", icon: <Globe size={18} />, desc: "Edge functions, middleware routing, and preview environments." },
+      { name: "Debugging", href: "/debugging", icon: <TestTube size={18} />, desc: "Memory profiling, network waterfalls, and root cause analysis." },
     ],
   },
 ];
@@ -150,6 +154,8 @@ export default function LandingPage() {
     loading: true
   });
 
+  const [cycle, setCycle] = useState(0);
+
   const themeClasses = {
     page: darkMode ? "bg-[#0a0a0a] text-[#ededed]" : "bg-[#FFFFFF] text-[#111111]",
     header: darkMode ? "bg-[#0a0a0a]/95" : "bg-[#FFFFFF]/95",
@@ -160,7 +166,7 @@ export default function LandingPage() {
     inputBg: darkMode ? "bg-[#1a1a1a]" : "bg-[#F4F4F4]",
     hoverAccent: darkMode ? "hover:text-[#C699FF]" : "hover:text-[#6f45d6]",
     cardHover: darkMode
-      ? "hover:border-[#555] hover:bg-[#141414]"
+      ? "hover:border-[#555] hover:bg-[#111]"
       : "hover:border-[#ccc] hover:bg-[#fafafa]",
     iconBox: darkMode ? "bg-[#1a1a1a] border-[#333] text-zinc-400" : "bg-[#f4f4f4] border-[#E5E5E5] text-zinc-500",
     iconBoxHover: darkMode 
@@ -202,6 +208,13 @@ export default function LandingPage() {
   }, []);
 
   useEffect(() => {
+    const interval = setInterval(() => {
+      setCycle(c => (c + 1) % 3);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setCmdOpen(false);
@@ -236,8 +249,23 @@ export default function LandingPage() {
     if (item.type === "topic" && item.href) router.push(item.href);
   };
 
+  const dynamicBuildStats = [
+    { title: "Active Community", desc: `${githubStats.contributors.length} devs building RefMe`, icon: <CheckCircle2 size={16} />, bg: darkMode ? "bg-white text-black" : "bg-black text-white" },
+    { title: "Repository Reach", desc: `${githubStats.stars} developers starred`, icon: <Star size={16} />, bg: darkMode ? "bg-[#222] text-white" : "bg-zinc-100 text-black" },
+    { title: "Code Reviews", desc: `${githubStats.openPrs} pull requests pending`, icon: <GitPullRequest size={16} />, bg: darkMode ? "bg-[#222] text-white" : "bg-zinc-100 text-black" }
+  ];
+
+  const dynamicActivityFeeds = [
+    { title: "Codebase Integrity", desc: `${githubStats.mergedPrs} PRs successfully merged`, icon: <GitMerge size={16} />, bg: darkMode ? "bg-[#222] text-white" : "bg-zinc-100 text-black" },
+    { title: "Issue Tracking", desc: `${githubStats.openIssues} active issues logged`, icon: <CircleDot size={16} />, bg: darkMode ? "bg-[#222] text-white" : "bg-zinc-100 text-black" },
+    { title: "Community Driven", desc: "Open-source architecture", icon: <Globe size={16} />, bg: darkMode ? "bg-[#222] text-white" : "bg-zinc-100 text-black" }
+  ];
+
+  const currentBuild = dynamicBuildStats[cycle];
+  const currentActivity = dynamicActivityFeeds[cycle];
+
   return (
-    <div className={`${themeClasses.page} min-h-screen flex flex-col transition-colors duration-200`}>
+    <div className={`${themeClasses.page} min-h-screen flex flex-col transition-colors duration-200 overflow-x-hidden`}>
       
       <SearchPalette isOpen={cmdOpen} onClose={() => setCmdOpen(false)} searchData={searchData} onSelect={handleSearchSelect} placeholder="Search algorithms, frameworks, or concepts..." />
 
@@ -265,9 +293,9 @@ export default function LandingPage() {
         </div>
       </header>
 
-      <section className={`relative border-b overflow-hidden w-full ${themeClasses.border} px-4 py-12 sm:py-16 md:px-6 lg:px-8 lg:py-32`}>
+     <section className={`relative border-b w-full ${themeClasses.border} px-4 py-12 sm:py-16 md:px-6 lg:px-8 lg:py-32`}>
         <div className="mx-auto w-full max-w-[1400px]">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-8 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-12 items-center">
             
             <div className="lg:col-span-6 space-y-8">
               <div className={`text-[11px] font-bold uppercase tracking-[0.2em] ${themeClasses.muted}`}>
@@ -281,12 +309,17 @@ export default function LandingPage() {
               </p>
               
               <div className="flex flex-wrap items-center gap-4 pt-2">
-                <button 
-                  onClick={() => router.push('/javascript')} 
-                  className={`rounded-full px-8 py-3.5 text-sm font-bold transition-transform hover:scale-[0.98] ${darkMode ? "bg-white text-black" : "bg-black text-white"}`}
-                >
-                  Start reading
-                </button>
+                <div className="relative group inline-flex">
+                  <button 
+                    onClick={() => router.push('/javascript')} 
+                    className={`rounded-full px-8 py-3.5 text-sm font-bold transition-transform hover:scale-[0.98] ${darkMode ? "bg-white text-black" : "bg-black text-white"}`}
+                  >
+                    Start reading
+                  </button>
+                  <div className={`absolute top-full left-1/2 mt-3 -translate-x-1/2 px-4 py-2 rounded-lg text-[13px] font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 border shadow-2xl ${darkMode ? "bg-[#222222] text-white border-[#333333]" : "bg-white text-black border-[#E5E5E5]"}`}>
+                    Explore JS, React, System Design & more
+                  </div>
+                </div>
 
                 <a 
                   href="https://github.com/yash-pluto/refme" 
@@ -298,19 +331,25 @@ export default function LandingPage() {
                 </a>
               </div>
 
-              <div className={`flex items-center gap-6 pt-6 text-sm font-medium ${themeClasses.muted}`}>
-                <div className="flex items-center gap-2">
-                  <ShieldCheck size={16} /> Open Source
+              <div className="pt-6 flex flex-col gap-5">
+                <div className={`flex items-center gap-6 text-sm font-semibold ${themeClasses.muted}`}>
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck size={16} /> Open Source
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Code2 size={16} /> Community Driven
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Code2 size={16} /> Community Driven
-                </div>
+                
+                <Link href="/docs" className={`inline-flex items-center gap-2 text-[13px] font-bold tracking-wide uppercase transition-colors w-fit ${darkMode ? "text-[#C699FF] hover:text-white" : "text-[#6f45d6] hover:text-black"}`}>
+                  Read the RefMe Philosophy <ArrowRight size={14} />
+                </Link>
               </div>
             </div>
 
-            <div className="lg:col-span-6 w-full flex justify-end relative mt-10 lg:mt-0">
+            <div className="lg:col-span-6 w-full flex justify-center lg:justify-end relative mt-10 lg:mt-0">
               
-              <div className={`relative z-10 flex flex-col rounded-3xl border w-full max-w-[600px] shadow-2xl overflow-hidden ${darkMode ? "bg-[#0a0a0a] border-[#333]" : "bg-white border-[#E5E5E5]"}`}>
+              <div className={`relative z-10 flex flex-col rounded-3xl border w-full max-w-[560px] shadow-2xl overflow-hidden ${darkMode ? "bg-[#0a0a0a] border-[#333]" : "bg-white border-[#E5E5E5]"}`}>
                 
                 <div className={`p-6 sm:p-10 border-b ${darkMode ? "bg-[#111] border-[#333]" : "bg-zinc-50 border-[#E5E5E5]"}`}>
                   <div className="flex items-start justify-between mb-8">
@@ -392,45 +431,57 @@ export default function LandingPage() {
                     <div className="flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-start">
                       {githubStats.contributors.length > 0 && (
                         <>
-                          <div className="flex -space-x-3">
+                          <div className="flex -space-x-4">
                             {githubStats.contributors.slice(0, 5).map((user: any, idx: number) => (
                               <img 
                                 key={user.id} 
                                 src={user.avatar_url} 
                                 alt={user.login}
                                 title={user.login}
-                                className={`h-10 w-10 rounded-full border-[3px] ${darkMode ? 'border-[#0a0a0a]' : 'border-white'} shadow-sm`}
+                                className={`h-10 w-10 rounded-full border-[3px] ${darkMode ? 'border-[#0a0a0a]' : 'border-white'} shadow-md`}
                                 style={{ zIndex: 10 - idx, opacity: 1 - (idx * 0.12) }} 
                               />
                             ))}
                           </div>
-                          <p className={`text-xs font-semibold ${themeClasses.muted}`}>
-                            {githubStats.contributors.length > 5 ? `+${githubStats.contributors.length - 5} contributors` : 'Awesome contributors'}
+                          <p className={`text-xs font-bold uppercase tracking-wider pl-1 ${themeClasses.muted}`}>
+                            {githubStats.contributors.length > 5 ? `+${githubStats.contributors.length - 5} Contributors` : 'Contributors'}
                           </p>
                         </>
                       )}
                     </div>
+                    
+                    <a 
+                      href="https://github.com/yash-pluto/refme" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className={`flex w-full sm:w-auto justify-center items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold transition-all active:scale-[0.98] ${darkMode ? "bg-white text-black hover:bg-zinc-200" : "bg-black text-white hover:bg-zinc-800"}`}
+                    >
+                      <FaGithub size={18} /> Contribute on GitHub
+                    </a>
                   </div>
                 </div>
+
               </div>
 
-              <div className={`hidden md:flex absolute -top-8 -right-8 z-20 items-center gap-3 rounded-xl border p-3.5 shadow-xl ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"}`}>
-                <div className={`flex h-8 w-8 items-center justify-center rounded-full ${darkMode ? "bg-white text-black" : "bg-black text-white"}`}>
-                  <CheckCircle2 size={16} />
+              {/* Dynamic Floating Element 1 - Top Right */}
+              <div key={`build-${cycle}`} className={`absolute -top-12 right-0 sm:-top-8 sm:-right-8 z-20 flex items-center gap-3.5 rounded-2xl border p-3 sm:p-3.5 shadow-2xl scale-[0.85] sm:scale-100 origin-top-right sm:origin-center animate-in fade-in zoom-in duration-500 pointer-events-none ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"}`}>
+                <div className={`flex h-10 w-10 items-center justify-center rounded-full ${currentBuild.bg}`}>
+                  {currentBuild.icon}
                 </div>
-                <div>
-                  <p className={`text-xs font-bold ${darkMode ? "text-white" : "text-black"}`}>Build passing</p>
-                  <p className={`text-[10px] ${themeClasses.muted}`}>Main branch</p>
+                <div className="pr-2">
+                  <p className={`text-[13px] font-bold ${darkMode ? "text-white" : "text-black"}`}>{currentBuild.title}</p>
+                  <p className={`text-[11px] font-medium ${themeClasses.muted}`}>{currentBuild.desc}</p>
                 </div>
               </div>
 
-              <div className={`hidden md:flex absolute -bottom-8 -left-8 z-20 items-center gap-3 rounded-xl border p-3.5 shadow-xl ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"}`}>
-                <div className={`flex h-8 w-8 items-center justify-center rounded-full ${darkMode ? "bg-[#222] text-white" : "bg-zinc-100 text-black"}`}>
-                  <GitPullRequest size={16} />
+              {/* Dynamic Floating Element 2 - Bottom Left */}
+              <div key={`activity-${cycle}`} className={`absolute -bottom-12 left-0 sm:-bottom-8 sm:-left-8 z-20 flex items-center gap-3.5 rounded-2xl border p-3 sm:p-3.5 shadow-2xl scale-[0.85] sm:scale-100 origin-bottom-left sm:origin-center animate-in fade-in zoom-in duration-500 pointer-events-none ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"}`}>
+                <div className={`flex h-10 w-10 items-center justify-center rounded-full ${currentActivity.bg}`}>
+                  {currentActivity.icon}
                 </div>
-                <div>
-                  <p className={`text-xs font-bold ${darkMode ? "text-white" : "text-black"}`}>PR Merged</p>
-                  <p className={`text-[10px] ${themeClasses.muted}`}>Docs updated • 2m ago</p>
+                <div className="pr-2">
+                  <p className={`text-[13px] font-bold ${darkMode ? "text-white" : "text-black"}`}>{currentActivity.title}</p>
+                  <p className={`text-[11px] font-medium ${themeClasses.muted}`}>{currentActivity.desc}</p>
                 </div>
               </div>
 
@@ -439,35 +490,152 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+      {/* Refined 3-Step Process - Learning Centric */}
+      <section className={`py-24 border-b ${themeClasses.border} ${darkMode ? "bg-[#050505]" : "bg-zinc-50/50"}`}>
+        <div className="mx-auto max-w-[1400px] px-4 md:px-6 lg:px-8 text-center">
+          
+          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">
+            Three steps to master any tech stack.
+          </h2>
+          <p className={`max-w-2xl mx-auto text-base md:text-lg mb-20 ${themeClasses.muted}`}>
+            Stop getting stuck in tutorial hell. Follow curated roadmaps, learn from high-quality videos, and reference syntax on the fly.
+          </p>
 
-      <main className="mx-auto w-full max-w-[1400px] px-4 py-16 md:px-6 lg:px-8">
-        <div className="space-y-20">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-10 text-left">
+            
+            {/* Step 1: Roadmaps */}
+            <div className="flex flex-col relative">
+              <Link href="/roadmaps" className={`group h-56 mb-8 rounded-2xl border flex flex-col relative overflow-hidden transition-colors ${darkMode ? "bg-[#0a0a0a] border-[#333] hover:border-[#555]" : "bg-white border-[#E5E5E5] hover:border-[#ccc]"}`}>
+                <div className={`px-5 py-4 border-b flex items-center justify-between ${darkMode ? "bg-[#111] border-[#333]" : "bg-zinc-50 border-[#E5E5E5]"}`}>
+                  <div className="flex items-center gap-2">
+                    <Map size={14} className={themeClasses.muted} />
+                    <span className="text-xs font-bold uppercase tracking-wider">Frontend Path</span>
+                  </div>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${darkMode ? "bg-[#222] text-zinc-300" : "bg-zinc-200 text-zinc-700"}`}>Module 2</span>
+                </div>
+                <div className="flex-1 p-5 relative pl-8 border-l-2 border-dashed ml-6 mt-4 mb-4 space-y-5 border-zinc-200 dark:border-zinc-800">
+                  <div className="relative">
+                    <div className="absolute -left-[27px] top-1 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20" />
+                    <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">HTML & CSS</span>
+                  </div>
+                  <div className="relative">
+                    <div className="absolute -left-[27px] top-1 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20" />
+                    <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">JavaScript Basics</span>
+                  </div>
+                  <div className="relative">
+                    <div className="absolute -left-[27px] top-1 w-2.5 h-2.5 rounded-full transition-all duration-300 shadow-[0_0_10px_rgba(198,153,255,0)] bg-zinc-300 dark:bg-zinc-700 group-hover:bg-[#C699FF] group-hover:shadow-[0_0_10px_rgba(198,153,255,0.8)]" />
+                    <span className="text-xs font-bold transition-colors text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100">React Components</span>
+                  </div>
+                </div>
+              </Link>
+              <div className="flex items-center mb-6 w-full">
+                <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-[13px] font-bold border shadow-sm relative z-10 ${darkMode ? "bg-white text-black border-white" : "bg-black text-white border-black"}`}>
+                  1
+                </div>
+                <div className={`hidden md:block flex-1 h-[1px] w-[calc(100%+2.5rem)] ${darkMode ? 'bg-[#333]' : 'bg-[#E5E5E5]'}`} />
+              </div>
+              <h3 className="text-xl font-bold tracking-tight mb-2">Pick your roadmap</h3>
+              <p className={`text-sm leading-relaxed ${themeClasses.muted}`}>
+                Whether you're a student or a senior dev, find the exact step-by-step path to learn Frontend, Backend, or DevOps.
+              </p>
+            </div>
+
+            {/* Step 2: Tutorials */}
+            <div className="flex flex-col relative">
+              <Link href="/tutorials" className={`group h-56 mb-8 rounded-2xl border flex flex-col relative overflow-hidden transition-colors ${darkMode ? "bg-[#0a0a0a] border-[#333] hover:border-[#555]" : "bg-white border-[#E5E5E5] hover:border-[#ccc]"}`}>
+                <div className="absolute inset-0 bg-black/5 dark:bg-white/5 group-hover:bg-transparent transition-colors z-10" />
+                <div className={`flex-1 relative flex items-center justify-center ${darkMode ? "bg-[#111]" : "bg-zinc-100"}`}>
+                  <div className={`w-12 h-12 rounded-full border shadow-lg flex items-center justify-center z-20 transition-all duration-300 group-hover:scale-110 group-hover:text-[#C699FF] ${darkMode ? "bg-[#222] border-[#444]" : "bg-white border-[#E5E5E5]"}`}>
+                    <Play className="ml-1" size={18} />
+                  </div>
+                </div>
+                <div className={`h-[68px] px-5 py-3 border-t relative z-20 flex flex-col justify-center ${darkMode ? "bg-[#0a0a0a] border-[#333]" : "bg-white border-[#E5E5E5]"}`}>
+                  <p className="text-xs font-bold truncate">Understanding Server Components</p>
+                  <p className={`text-[10px] mt-0.5 ${themeClasses.muted}`}>12:45 • Next.js Advanced</p>
+                  <div className="absolute bottom-0 left-0 h-1 bg-[#C699FF] w-[15%] group-hover:w-full transition-all duration-700 ease-out" />
+                </div>
+              </Link>
+              <div className="flex items-center mb-6 w-full">
+                <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-[13px] font-bold border shadow-sm relative z-10 ${darkMode ? "bg-white text-black border-white" : "bg-black text-white border-black"}`}>
+                  2
+                </div>
+                <div className={`hidden md:block flex-1 h-[1px] w-[calc(100%+2.5rem)] ${darkMode ? 'bg-[#333]' : 'bg-[#E5E5E5]'}`} />
+              </div>
+              <h3 className="text-xl font-bold tracking-tight mb-2">Watch & Learn</h3>
+              <p className={`text-sm leading-relaxed ${themeClasses.muted}`}>
+                Access hand-picked video tutorials and instantly reference the core syntax whenever you need it to bridge the gap.
+              </p>
+            </div>
+
+            {/* Step 3: Reference/Execute */}
+            <div className="flex flex-col relative">
+              <Link href="/javascript" className={`group h-56 mb-8 rounded-2xl border flex flex-col relative overflow-hidden transition-colors ${darkMode ? "bg-[#0a0a0a] border-[#333] hover:border-[#555]" : "bg-white border-[#E5E5E5] hover:border-[#ccc]"}`}>
+                <div className={`px-5 py-3 border-b flex items-center justify-between ${darkMode ? "bg-[#111] border-[#333]" : "bg-zinc-50 border-[#E5E5E5]"}`}>
+                  <div className="flex items-center gap-2">
+                    <FileCode2 size={14} className="text-blue-500" />
+                    <span className="text-xs font-bold">fetchData.ts</span>
+                  </div>
+                  <div className={`p-1.5 rounded-md border transition-colors ${darkMode ? "bg-[#222] border-[#444] text-zinc-400 group-hover:text-emerald-500" : "bg-white border-[#ccc] text-zinc-500 group-hover:text-emerald-600"}`}>
+                    <Copy size={12} />
+                  </div>
+                </div>
+                <div className={`flex-1 p-5 font-mono text-[11px] leading-[1.8] ${darkMode ? "bg-[#0a0a0a] text-zinc-300" : "bg-white text-zinc-600"}`}>
+                  <span className="text-purple-500">const</span> fetchUser = <span className="text-purple-500">async</span> () ={'>'} {'{\n'}
+                  {'  '}<span className="text-purple-500">const</span> res = <span className="text-purple-500">await</span> <span className="text-blue-500">fetch</span>(<span className="text-emerald-500">'/api/user'</span>);<br/>
+                  {'  '}<span className="text-purple-500">return</span> res.<span className="text-blue-500">json</span>();\n
+                  {'}'}
+                </div>
+              </Link>
+              <div className="flex items-center mb-6 w-full">
+                <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-[13px] font-bold border shadow-sm relative z-10 ${darkMode ? "bg-white text-black border-white" : "bg-black text-white border-black"}`}>
+                  3
+                </div>
+              </div>
+              <h3 className="text-xl font-bold tracking-tight mb-2">Copy & Build</h3>
+              <p className={`text-sm leading-relaxed ${themeClasses.muted}`}>
+                Put your knowledge into practice. Copy strictly-typed code examples and ship your projects without the boilerplate.
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* Enterprise Architecture Vercel/Next.js Documentation Grid Layout */}
+      <main className="mx-auto w-full max-w-[1400px] px-4 py-20 md:px-6 lg:px-8">
+        <div className="space-y-24">
           {REFERENCE_DATA.map((category) => (
             <section key={category.category} className="scroll-mt-24">
-              <div className={`mb-6 flex items-center gap-3 border-b pb-3 ${themeClasses.border}`}>
-                <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-500">
-                  {category.category}
-                </h2>
+              
+              <div className="mb-8 flex items-center gap-4">
+                <div className={`flex h-12 w-12 items-center justify-center rounded-xl border shadow-sm ${darkMode ? "bg-[#111] border-[#333]" : "bg-white border-[#E5E5E5]"}`}>
+                  {category.icon}
+                </div>
+                <div>
+                  <h2 className={`text-2xl font-extrabold tracking-tight ${darkMode ? "text-white" : "text-zinc-900"}`}>
+                    {category.category}
+                  </h2>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {category.items.map((item: any) => (
                   <Link 
                     key={item.name} 
                     href={item.href} 
-                    className={`group flex items-start gap-4 rounded-xl border p-4 transition-all duration-200 ${themeClasses.border} ${themeClasses.cardHover}`}
+                    className={`group flex flex-col gap-4 rounded-xl border p-5 transition-all duration-300 ${darkMode ? "bg-[#0a0a0a] border-[#333] hover:border-[#555] hover:bg-[#111]" : "bg-white border-[#E5E5E5] hover:border-[#ccc] hover:bg-zinc-50 hover:shadow-sm"}`}
                   >
-                    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md border transition-colors duration-200 ${themeClasses.iconBox} ${themeClasses.iconBoxHover}`}>
-                      {item.icon}
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                      <h3 className={`text-sm font-semibold truncate transition-colors duration-200 ${darkMode ? "text-zinc-200 group-hover:text-white" : "text-zinc-800 group-hover:text-black"}`}>
+                    <div className="flex items-center gap-3">
+                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border transition-colors duration-300 ${darkMode ? "bg-[#141414] border-[#333] text-zinc-400 group-hover:text-white group-hover:bg-[#222]" : "bg-zinc-50 border-[#E5E5E5] text-zinc-500 group-hover:text-black group-hover:bg-white"}`}>
+                        {item.icon}
+                      </div>
+                      <h3 className={`text-[15px] font-bold tracking-tight transition-colors duration-300 ${darkMode ? "text-zinc-100 group-hover:text-white" : "text-zinc-900 group-hover:text-black"}`}>
                         {item.name}
                       </h3>
-                      <p className={`mt-1 text-[13px] leading-snug line-clamp-2 transition-colors duration-200 ${themeClasses.muted} ${darkMode ? "group-hover:text-zinc-300" : "group-hover:text-zinc-600"}`}>
-                        {item.desc}
-                      </p>
                     </div>
+                    <p className={`text-[13px] leading-relaxed transition-colors duration-300 ${darkMode ? "text-zinc-400 group-hover:text-zinc-300" : "text-zinc-500 group-hover:text-zinc-700"}`}>
+                      {item.desc}
+                    </p>
                   </Link>
                 ))}
               </div>
@@ -478,13 +646,13 @@ export default function LandingPage() {
 
       <footer className={`mt-auto border-t py-8 text-center ${themeClasses.border} bg-transparent`}>
         <div className="mx-auto flex max-w-[1400px] flex-col items-center justify-between gap-4 px-4 md:flex-row md:px-6 lg:px-8">
-          <p className={`text-sm ${themeClasses.muted}`}>
+          <p className={`text-sm font-medium ${themeClasses.muted}`}>
             Built by{" "}
             <a 
               href="https://yash-pluto.vercel.app" 
               target="_blank" 
               rel="noopener noreferrer" 
-              className={`font-medium transition-colors hover:text-[#C699FF] ${darkMode ? "text-white" : "text-black"}`}
+              className={`font-bold transition-colors hover:text-[#C699FF] ${darkMode ? "text-white" : "text-black"}`}
             >
               Yash
             </a>
