@@ -12,6 +12,7 @@ import { useTheme } from "../../src/context/ThemeContext";
 import { useState } from "react";
 import { Copy, Check, FileCode2 } from "lucide-react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import {Skeleton} from "../../app/components/Skeleton";
 
 export interface ClientCodeBlockProps {
   /** The raw code string to be highlighted */
@@ -203,11 +204,29 @@ export default function ClientCodeBlock({
       </div>
 
       <div className="w-full py-4 overflow-x-auto bg-[#F4F4F0] dark:bg-[#101010] transition-colors duration-200">
-        {/* Render a height-preserving invisible block before hydration, then swap to real highlighter */}
+        {/* Render a height-preserving invisible block before hydration, overlaid with Skeleton lines, then swap to real highlighter */}
         {!mounted ? (
-          <pre className="m-0 p-0 text-[0.9rem] leading-[1.7] opacity-0" aria-hidden="true">
-            <code>{code}</code>
-          </pre>
+          <div className="relative w-full">
+            <div 
+              className="absolute inset-0 flex flex-col gap-[10.5px] pl-[13px] pr-[16px] pt-[2px] overflow-hidden pointer-events-none" 
+              aria-hidden="true"
+            >
+              {Array.from({ length: Math.min(code.split('\n').length, 30) }).map((_, i) => {
+                // cycle through varied widths to mock natural code lines
+                const widths = ['w-3/4', 'w-1/2', 'w-5/6', 'w-2/3', 'w-1/3', 'w-4/5', 'w-[90%]', 'w-2/5', 'w-3/5', 'w-1/4'];
+                return (
+                  <Skeleton 
+                    key={i} 
+                    variant="text" 
+                    className={`h-[14px] rounded-sm ${widths[i % widths.length]}`} 
+                  />
+                );
+              })}
+            </div>
+            <pre className="m-0 p-0 text-[0.9rem] leading-[1.7] opacity-0" aria-hidden="true">
+              <code>{code}</code>
+            </pre>
+          </div>
         ) : (
           <SyntaxHighlighter
             language={language}

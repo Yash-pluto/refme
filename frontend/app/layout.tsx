@@ -3,6 +3,11 @@ import "./globals.css";
 import { ThemeProvider } from "../src/context/ThemeContext";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://refmev1.vercel.app"),
+  manifest: "/manifest.json",
+  alternates: {
+    canonical: "https://refmev1.vercel.app",
+  },
   title: "RefMe_ | Technical Reference for Modern Developers",
   description:
     "The ultimate centralized, fast, and minimal technical reference hub for modern full-stack development. Built for clarity and speed.",
@@ -24,16 +29,32 @@ export const metadata: Metadata = {
     title: "RefMe_ | Technical Reference",
     description:
       "The ultimate technical reference for modern full-stack development.",
-    url: "https://refme.vercel.app",
+    url: "https://refmev1.vercel.app",
     siteName: "RefMe",
     locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "RefMe_ | Technical Reference for Modern Developers",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "RefMe_ | Technical Reference",
     description:
       "The ultimate technical reference for modern full-stack development.",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "RefMe_ | Technical Reference for Modern Developers",
+      },
+    ],
   },
 };
 
@@ -42,12 +63,25 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "RefMe",
+    url: "https://refmev1.vercel.app",
+    description:
+      "The ultimate centralized, fast, and minimal technical reference hub for modern full-stack development. Built for clarity and speed.",
+  };
+
   return (
     <html lang='en' className='h-full antialiased' suppressHydrationWarning>
       <head>
         <meta
           name='viewport'
           content='width=device-width, initial-scale=1, maximum-scale=5'
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
         <script
           suppressHydrationWarning

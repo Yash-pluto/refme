@@ -6,8 +6,10 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "../src/context/ThemeContext";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import SearchPalette, { useSearchOSKey, SearchItem } from "../app/components/SearchPalette";
+import { Skeleton } from "../app/components/Skeleton";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import Footer from "./components/Footer";
+import { useGitHubStats } from "../src/hooks/useGitHubStats"; 
 
 import {
   BadgeCheck,
@@ -162,25 +164,16 @@ function timeSince(dateString: string) {
 }
 
 export default function LandingPage() {
-  const { toggleTheme } = useTheme(); // No longer pulling in `darkMode` state!
+  const { toggleTheme } = useTheme();
   const router = useRouter();
   
   const [mounted, setMounted] = useState(false);
-  
   const [cmdOpen, setCmdOpen] = useState(false);
   const { modifierKey } = useSearchOSKey();
-  
   const shouldReduceMotion = useReducedMotion();
   
-  const [githubStats, setGithubStats] = useState({
-    stars: "-",
-    openIssues: "-",
-    openPrs: "-",
-    mergedPrs: "-",
-    lastPush: "",
-    contributors: [] as any[],
-    loading: true
-  });
+  // Clean, single-line hook consumption (replaces the massive inline fetch)
+  const githubStats = useGitHubStats();
 
   const [cycle, setCycle] = useState(0);
   const [activeTab, setActiveTab] = useState(0);
@@ -192,7 +185,6 @@ export default function LandingPage() {
     setMounted(true);
   }, []);
 
-  // Centralized Tailwind classes using dark: instead of JS ternary logic
   const themeClasses = {
     page: "bg-[#FFFFFF] text-[#111111] dark:bg-[#0a0a0a] dark:text-[#ededed]",
     header: "bg-[#FFFFFF]/95 dark:bg-[#0a0a0a]/95",
@@ -208,40 +200,6 @@ export default function LandingPage() {
   };
 
   useEffect(() => {
-    const fetchGitHubStats = async () => {
-      try {
-        const [repoRes, openPrsRes, mergedPrsRes, issuesRes, contributorsRes] = await Promise.all([
-          fetch('https://api.github.com/repos/yash-pluto/refme').catch(() => null),
-          fetch('https://api.github.com/search/issues?q=repo:yash-pluto/refme+is:pr+is:open').catch(() => null),
-          fetch('https://api.github.com/search/issues?q=repo:yash-pluto/refme+is:pr+is:merged').catch(() => null),
-          fetch('https://api.github.com/search/issues?q=repo:yash-pluto/refme+is:issue+is:open').catch(() => null),
-          fetch('https://api.github.com/repos/yash-pluto/refme/contributors').catch(() => null)
-        ]);
-
-        const repoData = repoRes && repoRes.ok ? await repoRes.json() : {};
-        const openPrsData = openPrsRes && openPrsRes.ok ? await openPrsRes.json() : {};
-        const mergedPrsData = mergedPrsRes && mergedPrsRes.ok ? await mergedPrsRes.json() : {};
-        const issuesData = issuesRes && issuesRes.ok ? await issuesRes.json() : {};
-        const contributorsData = contributorsRes && contributorsRes.ok ? await contributorsRes.json() : [];
-
-        setGithubStats({
-          stars: repoData.stargazers_count !== undefined ? repoData.stargazers_count.toString() : "-",
-          openIssues: issuesData.total_count !== undefined ? issuesData.total_count.toString() : "-",
-          openPrs: openPrsData.total_count !== undefined ? openPrsData.total_count.toString() : "-",
-          mergedPrs: mergedPrsData.total_count !== undefined ? mergedPrsData.total_count.toString() : "-",
-          lastPush: repoData.pushed_at || repoData.updated_at || "",
-          contributors: Array.isArray(contributorsData) ? contributorsData : [],
-          loading: false
-        });
-      } catch (error) {
-        setGithubStats(prev => ({ ...prev, loading: false }));
-      }
-    };
-
-    fetchGitHubStats();
-  }, []);
-
-  useEffect(() => {
     const interval = setInterval(() => {
       setCycle(c => (c + 1) % 3);
     }, 4500);
@@ -249,7 +207,6 @@ export default function LandingPage() {
   }, []);
 
   useEffect(() => {
-    // Break the autoplay circuit entirely if user prefers reduced motion
     if (!isAutoPlaying || shouldReduceMotion) return;
     const interval = setInterval(() => {
       setActiveTab((prev) => (prev + 1) % REFERENCE_DATA.length);
@@ -303,7 +260,6 @@ export default function LandingPage() {
 
   const timeSinceStr = timeSince(githubStats.lastPush);
   
-  // Dynamic arrays converted to Tailwind
   const dynamicBuildStats = [
     { title: "Repository Synced", desc: `Last push: ${timeSinceStr}`, icon: <CheckCircle2 size={16} />, bg: "bg-black text-white dark:bg-white dark:text-black" },
     { title: "Active Contributors", desc: `${githubStats.contributors.length} devs building RefMe`, icon: <Code2 size={16} />, bg: "bg-zinc-100 text-black dark:bg-[#222] dark:text-white" },
@@ -321,36 +277,17 @@ export default function LandingPage() {
 
   const tabContentVariants = {
     hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.08,
-        delayChildren: 0.1,
-      },
-    },
-    exit: {
-      opacity: 0,
-      transition: { duration: 0.15 }
-    }
+    visible: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
+    exit: { opacity: 0, transition: { duration: 0.15 } }
   };
 
   const isReducedMotionSafe = mounted && shouldReduceMotion;
 
   const itemVariants = {
-    hidden: { 
-      opacity: 0, 
-      y: isReducedMotionSafe ? 0 : 15 
-    },
+    hidden: { opacity: 0, y: isReducedMotionSafe ? 0 : 15 },
     visible: {
-      opacity: 1,
-      y: 0,
-      transition: isReducedMotionSafe 
-        ? { duration: 0.15 } 
-        : {
-            type: "spring" as const,
-            stiffness: 400,
-            damping: 30
-          }
+      opacity: 1, y: 0,
+      transition: isReducedMotionSafe ? { duration: 0.15 } : { type: "spring" as const, stiffness: 400, damping: 30 }
     },
   };
 
@@ -511,7 +448,11 @@ export default function LandingPage() {
                         <GitPullRequest size={16} className="text-emerald-500" />
                         <span className={`text-[11px] font-bold uppercase tracking-wider ${themeClasses.muted}`}>Open PRs</span>
                       </div>
-                      <span className={`text-3xl font-extrabold tracking-tight text-black dark:text-white`}>{githubStats.openPrs}</span>
+                      {githubStats.loading ? (
+                        <Skeleton className="h-9 w-12" />
+                      ) : (
+                        <span className={`text-3xl font-extrabold tracking-tight text-black dark:text-white`}>{githubStats.openPrs}</span>
+                      )}
                     </div>
                     
                     <div className={`flex flex-col justify-between p-4 rounded-xl border bg-white border-[#E5E5E5] shadow-sm dark:bg-[#141414] dark:border-[#333]`}>
@@ -519,7 +460,11 @@ export default function LandingPage() {
                         <GitMerge size={16} className="text-purple-500" />
                         <span className={`text-[11px] font-bold uppercase tracking-wider ${themeClasses.muted}`}>Merged</span>
                       </div>
-                      <span className={`text-3xl font-extrabold tracking-tight text-black dark:text-white`}>{githubStats.mergedPrs}</span>
+                      {githubStats.loading ? (
+                        <Skeleton className="h-9 w-12" />
+                      ) : (
+                        <span className={`text-3xl font-extrabold tracking-tight text-black dark:text-white`}>{githubStats.mergedPrs}</span>
+                      )}
                     </div>
 
                     <div className={`flex flex-col justify-between p-4 rounded-xl border bg-white border-[#E5E5E5] shadow-sm dark:bg-[#141414] dark:border-[#333]`}>
@@ -527,7 +472,11 @@ export default function LandingPage() {
                         <CircleDot size={16} className="text-emerald-500" />
                         <span className={`text-[11px] font-bold uppercase tracking-wider ${themeClasses.muted}`}>Issues</span>
                       </div>
-                      <span className={`text-3xl font-extrabold tracking-tight text-black dark:text-white`}>{githubStats.openIssues}</span>
+                      {githubStats.loading ? (
+                        <Skeleton className="h-9 w-12" />
+                      ) : (
+                        <span className={`text-3xl font-extrabold tracking-tight text-black dark:text-white`}>{githubStats.openIssues}</span>
+                      )}
                     </div>
 
                     <div className={`flex flex-col justify-between p-4 rounded-xl border bg-white border-[#E5E5E5] shadow-sm dark:bg-[#141414] dark:border-[#333]`}>
@@ -535,14 +484,32 @@ export default function LandingPage() {
                         <Star size={16} className="text-amber-500" />
                         <span className={`text-[11px] font-bold uppercase tracking-wider ${themeClasses.muted}`}>Stars</span>
                       </div>
-                      <span className={`text-3xl font-extrabold tracking-tight text-black dark:text-white`}>{githubStats.stars}</span>
+                      {githubStats.loading ? (
+                        <Skeleton className="h-9 w-12" />
+                      ) : (
+                        <span className={`text-3xl font-extrabold tracking-tight text-black dark:text-white`}>{githubStats.stars}</span>
+                      )}
                     </div>
 
                   </div>
 
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
                     <div className="flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-start">
-                      {githubStats.contributors.length > 0 && (
+                      {githubStats.loading ? (
+                        <>
+                          <div className="flex -space-x-4">
+                            {[0, 1, 2, 3, 4].map((idx) => (
+                              <Skeleton
+                                key={idx}
+                                variant="circle"
+                                className={`h-10 w-10 border-[3px] border-white shadow-md dark:border-[#0a0a0a]`}
+                                style={{ zIndex: 10 - idx, opacity: 1 - (idx * 0.12) }}
+                              />
+                            ))}
+                          </div>
+                          <Skeleton className="h-3 w-24 ml-1" />
+                        </>
+                      ) : githubStats.contributors.length > 0 ? (
                         <>
                           <div className="flex -space-x-4">
                             {githubStats.contributors.slice(0, 5).map((user: any, idx: number) => (
@@ -560,7 +527,7 @@ export default function LandingPage() {
                             {githubStats.contributors.length > 5 ? `+${githubStats.contributors.length - 5} Contributors` : 'Contributors'}
                           </p>
                         </>
-                      )}
+                      ) : null}
                     </div>
                     
                     <a 

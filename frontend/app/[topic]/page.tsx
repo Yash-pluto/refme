@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getAllTopics, getTopicBySlug } from "../../src/lib/mdx";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import SkeletonTopic from "../components/SkeletonTopic";
@@ -19,6 +20,40 @@ const mdxComponents = {
     return <ClientCodeBlock code={codeChunk} language={language} />;
   },
 };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ topic: string }>;
+}): Promise<Metadata> {
+  const resolvedParams = await params;
+  const topicData = getTopicBySlug(resolvedParams.topic);
+
+  if (!topicData || !topicData.frontmatter) {
+    return {};
+  }
+
+  const { title, description } = topicData.frontmatter;
+  const pageTitle = `${title} | RefMe_`;
+
+  return {
+    title: pageTitle,
+    description: description,
+    openGraph: {
+      title: pageTitle,
+      description: description,
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: pageTitle,
+      description: description,
+    },
+    alternates: {
+      canonical: `https://refmev1.vercel.app/${resolvedParams.topic}`,
+    },
+  };
+}
 
 export async function generateStaticParams() {
   const topics = getAllTopics();
@@ -58,6 +93,46 @@ export default async function TopicPage({
     );
   }
 
+  const { title, description, category } = topicData.frontmatter;
+  const pageUrl = `https://refmev1.vercel.app/${resolvedParams.topic}`;
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://refmev1.vercel.app",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: category || "Category",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: title,
+        item: pageUrl,
+      },
+    ],
+  };
+
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    headline: title,
+    description: description,
+    author: {
+      "@type": "Person",
+      name: "Yash Vardhan",
+      url: "https://www.linkedin.com/in/vardhan-yash3105/",
+    },
+    url: pageUrl,
+  };
+
   return (
     <TopicLayout
       frontmatter={topicData.frontmatter}
@@ -67,6 +142,14 @@ export default async function TopicPage({
       prevTopic={prevTopic}
       nextTopic={nextTopic}
     >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       <MDXRemote source={topicData.content} components={mdxComponents} />
     </TopicLayout>
   );
