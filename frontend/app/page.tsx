@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "../src/context/ThemeContext";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import SearchPalette, { useSearchOSKey, SearchItem } from "../app/components/SearchPalette";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import Footer from "./components/Footer";
 
 import {
@@ -168,6 +168,9 @@ export default function LandingPage() {
   const [cmdOpen, setCmdOpen] = useState(false);
   const { modifierKey, isMounted } = useSearchOSKey();
   
+  // OS Prefers-reduced-motion check
+  const shouldReduceMotion = useReducedMotion();
+  
   const [githubStats, setGithubStats] = useState({
     stars: "-",
     openIssues: "-",
@@ -243,14 +246,14 @@ export default function LandingPage() {
     return () => clearInterval(interval);
   }, []);
 
-
   useEffect(() => {
-    if (!isAutoPlaying) return;
+    // Break the autoplay circuit entirely if user prefers reduced motion
+    if (!isAutoPlaying || shouldReduceMotion) return;
     const interval = setInterval(() => {
       setActiveTab((prev) => (prev + 1) % REFERENCE_DATA.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, [isAutoPlaying]);
+  }, [isAutoPlaying, shouldReduceMotion]);
 
   const checkScroll = () => {
     if (scrollContainerRef.current) {
@@ -328,16 +331,22 @@ export default function LandingPage() {
     }
   };
 
+  // Switch from spring y-offset to a standard opacity fade if reduced motion is preferred
   const itemVariants = {
-    hidden: { opacity: 0, y: 15 },
+    hidden: { 
+      opacity: 0, 
+      y: shouldReduceMotion ? 0 : 15 
+    },
     visible: {
       opacity: 1,
       y: 0,
-      transition: {
-        type: "spring" as const,
-        stiffness: 400,
-        damping: 30
-      }
+      transition: shouldReduceMotion 
+        ? { duration: 0.15 } 
+        : {
+            type: "spring" as const,
+            stiffness: 400,
+            damping: 30
+          }
     },
   };
 
@@ -366,7 +375,7 @@ export default function LandingPage() {
         searchData={searchData} 
         onSelect={handleSearchSelect} 
         placeholder="Search algorithms, frameworks, or concepts..." 
-/>
+      />
       <header className={`fixed top-0 left-0 w-full z-50 h-16 border-b ${themeClasses.border} ${themeClasses.header} backdrop-blur-md`}>
         <div className="mx-auto flex h-full max-w-[1700px] items-center justify-between px-4 lg:px-6">
           <div className="flex items-center gap-4">

@@ -2,15 +2,14 @@
 
 /**
  * @fileoverview Reusable Client-side Code Block component with syntax highlighting.
- * Safely handles server-side rendering (SSR) hydration mismatches, applies a custom 
- * "Pitch Black" textmate theme mapping, and enforces strict flex boundaries to 
- * prevent mobile viewport overflow.
+ * Applies a custom "Pitch Black" textmate theme mapping, and enforces strict flex 
+ * boundaries to prevent mobile viewport overflow.
  *
  * @author Yash Vardhan
  */
 
 import { useTheme } from "../../src/context/ThemeContext";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Copy, Check, FileCode2 } from "lucide-react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 
@@ -32,17 +31,7 @@ export default function ClientCodeBlock({
   highlightLines = [],
 }: ClientCodeBlockProps) {
   const { darkMode } = useTheme();
-  
-  // Track mount state to defer rendering of browser-specific APIs (clipboard, highlighter)
-  const [mounted, setMounted] = useState(false);
   const [copied, setCopied] = useState(false);
-
-  /**
-   * Initializes the component safely on the client.
-   * Prevents React Hydration Mismatch errors caused by rendering 
-   * theme-dependent or layout-heavy nodes on the server.
-   */
-  useEffect(() => setMounted(true), []);
 
   /**
    * Writes the active code block to the system clipboard.
@@ -191,17 +180,9 @@ export default function ClientCodeBlock({
     iconHover: darkMode ? "hover:text-[#C699FF]" : "hover:text-indigo-600",
   };
 
-  // Render a structural skeleton while waiting for client hydration
-  if (!mounted) {
-    return (
-      <div
-        className={`w-full h-48 animate-pulse rounded-md mb-8 mt-4 border ${darkMode ? "bg-[#101010] border-[#232323]" : "bg-[#EAEAEA] border-[#D1D1D1]"}`}
-      ></div>
-    );
-  }
-
   return (
     <div
+      suppressHydrationWarning
       className={`w-full min-w-0 border ${theme.border} flex flex-col mb-8 mt-4 rounded-md overflow-hidden transition-colors duration-200`}
     >
       <div

@@ -1,7 +1,7 @@
-// src/lib/mdx.ts
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import { cache } from 'react';
 
 export type DocHeading = {
   id: string;
@@ -9,7 +9,6 @@ export type DocHeading = {
   depth: number;
 };
 
-// This safely resolves the 'content' directory at the root of your Next.js app
 const contentDir = path.join(process.cwd(), "content");
 
 export function extractHeadings(content: string): DocHeading[] {
@@ -41,7 +40,6 @@ export function extractHeadings(content: string): DocHeading[] {
 export function getTopicBySlug(slug: string) {
   const fullPath = path.join(contentDir, `${slug}.mdx`);
 
-  // If the file doesn't exist, return null (this triggers the 404)
   if (!fs.existsSync(fullPath)) return null;
 
   const fileContents = fs.readFileSync(fullPath, "utf8");
@@ -50,12 +48,12 @@ export function getTopicBySlug(slug: string) {
   return { frontmatter: data, content, headings: extractHeadings(content) };
 }
 
-export function getAllTopics() {
+export const getAllTopics = cache(() => {
   if (!fs.existsSync(contentDir)) return [];
 
   const fileNames = fs.readdirSync(contentDir);
   const topics = fileNames
-    .filter((fileName) => fileName.endsWith(".mdx")) // Only get MDX files
+    .filter((fileName) => fileName.endsWith(".mdx")) 
     .map((fileName) => {
       const id = fileName.replace(/\.mdx$/, "");
       const fullPath = path.join(contentDir, fileName);
@@ -70,4 +68,4 @@ export function getAllTopics() {
     });
 
   return topics;
-}
+});

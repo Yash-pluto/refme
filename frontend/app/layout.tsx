@@ -50,18 +50,27 @@ export default function RootLayout({
           content='width=device-width, initial-scale=1, maximum-scale=5'
         />
         <script
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
-                const stored = localStorage.getItem('refme-theme');
-                const dark = stored ? stored === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
-                document.documentElement.classList.toggle('dark', dark);
+                try {
+                  const stored = localStorage.getItem('refme-theme');
+                  const dark = stored ? stored === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+                  if (dark) {
+                    document.documentElement.classList.add('dark');
+                    document.body.classList.add('dark');
+                  }
+                } catch (e) {}
               })();
             `,
           }}
         />
       </head>
-      <body className='min-h-full flex flex-col bg-zinc-50 text-zinc-950 dark:bg-[#050505] dark:text-zinc-100 font-sans tracking-tight'>
+      <body 
+        suppressHydrationWarning 
+        className='min-h-full flex flex-col bg-zinc-50 text-zinc-950 dark:bg-[#050505] dark:text-zinc-100 font-sans tracking-tight'
+      >
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
