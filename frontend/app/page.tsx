@@ -662,43 +662,57 @@ export default function LandingPage() {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-stretch max-w-[1400px] mx-auto lg:h-[720px]">
-          <div className="w-full lg:w-[35%] flex flex-col gap-3 h-full">
-            {REFERENCE_DATA.map((cat, idx) => {
-              const isActive = activeTab === idx;
-              return (
-                <button
-                  key={cat.category}
-                  onClick={() => {
-                    setActiveTab(idx);
-                    setIsAutoPlaying(false);
-                  }}
-                  className={`flex items-start gap-4 p-5 rounded-2xl border text-left transition-all duration-300 ${
-                    isActive 
-                      ? "bg-white border-[#ccc] shadow-md dark:bg-[#1a1a1a] dark:border-[#444]"
-                      : "bg-zinc-50 border-transparent hover:bg-zinc-100 hover:border-[#E5E5E5] dark:bg-[#0a0a0a] dark:border-[#222] dark:hover:bg-[#111] dark:hover:border-[#333]"
-                  }`}
-                >
-                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-colors ${
-                    isActive 
-                      ? "bg-zinc-100 border-[#ddd] text-black dark:bg-[#333] dark:border-[#555] dark:text-white"
-                      : "bg-white border-[#E5E5E5] text-zinc-500 dark:bg-[#111] dark:border-[#333] dark:text-zinc-400"
-                  }`}>
-                    {cat.icon}
-                  </div>
-                  <div>
-                    <h3 className={`text-base font-bold mb-1 transition-colors ${
-                      isActive ? "text-black dark:text-white" : "text-zinc-700 dark:text-zinc-300"
-                    }`}>
-                      {cat.category}
-                    </h3>
-                    <p className={`text-[13px] leading-relaxed ${themeClasses.muted}`}>
-                      {cat.desc}
-                    </p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+<div className="w-full lg:w-[35%] flex flex-col gap-3 h-full">
+  {REFERENCE_DATA.map((cat, idx) => {
+    const isActive = activeTab === idx;
+    return (
+      <button
+        key={cat.category}
+        onClick={() => {
+          setActiveTab(idx);
+          setIsAutoPlaying(false); 
+        }}
+        className={`group relative flex items-start gap-4 p-5 rounded-2xl border text-left transition-all duration-300 ${
+          isActive 
+            ? "border-transparent" 
+            : "bg-zinc-50 border-transparent hover:bg-zinc-100 hover:border-[#E5E5E5] dark:bg-[#0a0a0a] dark:border-transparent dark:hover:bg-[#111] dark:hover:border-[#333]"
+        }`}
+      >
+        {/* The Animated Framer Motion Background */}
+        {isActive && (
+          <motion.div
+            layoutId="activeCategoryBg"
+            className="absolute inset-0 rounded-2xl bg-white border border-[#ccc] shadow-md dark:bg-[#1a1a1a] dark:border-[#444]"
+            initial={false}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          />
+        )}
+        
+        {/* Content wrapped in relative z-10 to sit above the animated background */}
+        <div className={`relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-colors ${
+          isActive 
+            ? "bg-zinc-100 border-[#ddd] text-black dark:bg-[#333] dark:border-[#555] dark:text-white"
+            : "bg-white border-[#E5E5E5] text-zinc-500 dark:bg-[#111] dark:border-[#333] dark:text-zinc-400 group-hover:text-black dark:group-hover:text-white group-hover:border-[#ccc] dark:group-hover:border-[#555]"
+        }`}>
+          {cat.icon}
+        </div>
+        
+        <div className="relative z-10">
+          <h3 className={`text-base font-bold mb-1 transition-colors ${
+            isActive ? "text-black dark:text-white" : "text-zinc-700 dark:text-zinc-300 group-hover:text-black dark:group-hover:text-white"
+          }`}>
+            {cat.category}
+          </h3>
+          <p className={`text-[13px] leading-relaxed transition-colors ${
+             isActive ? themeClasses.muted : "text-zinc-500 dark:text-zinc-400"
+          }`}>
+            {cat.desc}
+          </p>
+        </div>
+      </button>
+    );
+  })}
+</div>
 
           <div className={`w-full lg:w-[65%] rounded-3xl border p-6 sm:p-10 flex flex-col relative h-[600px] lg:h-full overflow-hidden bg-white border-[#E5E5E5] shadow-sm dark:bg-[#111] dark:border-[#333]`}>
             
