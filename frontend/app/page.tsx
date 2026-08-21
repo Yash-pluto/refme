@@ -243,22 +243,6 @@ export default function LandingPage() {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setCmdOpen(false);
-        return;
-      }
-      const isModifier = event.metaKey || event.ctrlKey;
-      if (!isModifier || event.key.toLowerCase() !== "k") return;
-      
-      event.preventDefault();
-      setCmdOpen((open) => !open);
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
 
   useEffect(() => {
     if (!isAutoPlaying) return;
@@ -375,8 +359,14 @@ export default function LandingPage() {
         }
       `}} />
       
-      <SearchPalette isOpen={cmdOpen} onClose={() => setCmdOpen(false)} searchData={searchData} onSelect={handleSearchSelect} placeholder="Search algorithms, frameworks, or concepts..." />
-
+      <SearchPalette 
+        isOpen={cmdOpen} 
+        onClose={() => setCmdOpen(false)} 
+        onToggle={() => setCmdOpen((prev) => !prev)} 
+        searchData={searchData} 
+        onSelect={handleSearchSelect} 
+        placeholder="Search algorithms, frameworks, or concepts..." 
+/>
       <header className={`fixed top-0 left-0 w-full z-50 h-16 border-b ${themeClasses.border} ${themeClasses.header} backdrop-blur-md`}>
         <div className="mx-auto flex h-full max-w-[1700px] items-center justify-between px-4 lg:px-6">
           <div className="flex items-center gap-4">

@@ -87,23 +87,6 @@ export default function TopicLayout({
   const headingElementsRef = useRef<{ id: string; el: HTMLElement }[]>([]);
 
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setCmdOpen(false);
-        return;
-      }
-      const isModifier = event.metaKey || event.ctrlKey;
-      if (!isModifier || event.key.toLowerCase() !== "k") return;
-      
-      event.preventDefault();
-      setCmdOpen((open) => !open);
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  useEffect(() => {
     document.body.style.overflow = isMobileMenuOpen || cmdOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
@@ -332,8 +315,15 @@ export default function TopicLayout({
 
       <Toaster position="bottom-center" toastOptions={{ style: { background: darkMode ? '#111' : '#fff', color: darkMode ? '#fff' : '#111', border: `1px solid ${darkMode ? '#222' : '#E5E5E5'}` }}} />
 
-      <SearchPalette isOpen={cmdOpen} onClose={() => setCmdOpen(false)} searchData={searchData} onSelect={handleSearchSelect} placeholder="Search documentation or type a command..." />
-
+    <SearchPalette 
+        isOpen={cmdOpen} 
+        onClose={() => setCmdOpen(false)} 
+        onToggle={() => setCmdOpen((prev) => !prev)}
+        searchData={searchData} 
+        onSelect={handleSearchSelect} 
+        placeholder="Search documentation or type a command..." 
+      />
+      
       {isMobileMenuOpen && <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm lg:hidden" onClick={() => setIsMobileMenuOpen(false)} />}
       
       <div className={`fixed bottom-0 left-0 top-0 z-50 w-[280px] transform border-r transition-transform duration-300 ease-in-out lg:hidden ${themeClasses.sidebar} ${themeClasses.border} ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>

@@ -34,6 +34,7 @@ export interface SearchItem {
 interface SearchPaletteProps {
   isOpen: boolean;
   onClose: () => void;
+  onToggle: () => void;
   searchData: SearchItem[];
   onSelect: (item: SearchItem) => void;
   placeholder?: string;
@@ -102,6 +103,7 @@ function HighlightText({
 export default function SearchPalette({
   isOpen,
   onClose,
+  onToggle,
   searchData,
   onSelect,
   placeholder = "Search topics, commands, or concepts...",
@@ -202,20 +204,21 @@ export default function SearchPalette({
     [searchData]
   );
 
-  useEffect(() => {
+useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        onClose();
+        if (isOpen) onClose();
         return;
       }
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        onClose();
+        onToggle();
       }
     };
+    
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, onToggle]);
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";

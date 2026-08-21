@@ -16,21 +16,16 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [darkMode, setDarkMode] = useState(true);
-
-  useEffect(() => {
-    const storedTheme = window.localStorage.getItem("refme-theme");
-    if (storedTheme === "light" || storedTheme === "dark") {
-      setDarkMode(storedTheme === "dark");
-      return;
+  // Initialize state lazily by reading what the blocking script already applied to the DOM.
+  // Fall back to `false` (or `true`) for SSR where document is undefined.
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof document !== "undefined") {
+      return document.documentElement.classList.contains("dark");
     }
+    return false; 
+  });
 
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)",
-    ).matches;
-    setDarkMode(prefersDark);
-  }, []);
-
+  // Keep the persistent write-effect for when the user actively toggles the theme later
   useEffect(() => {
     const root = document.documentElement;
     const body = document.body;
