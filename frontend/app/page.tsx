@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "../src/context/ThemeContext";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import SearchPalette, { useSearchOSKey, SearchItem } from "../app/components/SearchPalette";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import Footer from "./components/Footer";
 
 import {
@@ -162,11 +162,15 @@ function timeSince(dateString: string) {
 }
 
 export default function LandingPage() {
-  const { darkMode, toggleTheme } = useTheme();
+  const { toggleTheme } = useTheme(); // No longer pulling in `darkMode` state!
   const router = useRouter();
   
+  const [mounted, setMounted] = useState(false);
+  
   const [cmdOpen, setCmdOpen] = useState(false);
-  const { modifierKey, isMounted } = useSearchOSKey();
+  const { modifierKey } = useSearchOSKey();
+  
+  const shouldReduceMotion = useReducedMotion();
   
   const [githubStats, setGithubStats] = useState({
     stars: "-",
@@ -184,22 +188,23 @@ export default function LandingPage() {
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Centralized Tailwind classes using dark: instead of JS ternary logic
   const themeClasses = {
-    page: darkMode ? "bg-[#0a0a0a] text-[#ededed]" : "bg-[#FFFFFF] text-[#111111]",
-    header: darkMode ? "bg-[#0a0a0a]/95" : "bg-[#FFFFFF]/95",
-    panel: darkMode ? "bg-[#141414]" : "bg-[#F7F7F7]",
-    border: darkMode ? "border-[#333333]" : "border-[#E5E5E5]",
-    muted: darkMode ? "text-zinc-400" : "text-zinc-500",
-    accent: darkMode ? "text-zinc-100" : "text-zinc-900",
-    inputBg: darkMode ? "bg-[#1a1a1a]" : "bg-[#F4F4F4]",
-    hoverAccent: darkMode ? "hover:text-[#C699FF]" : "hover:text-[#6f45d6]",
-    cardHover: darkMode
-      ? "hover:border-[#555] hover:bg-[#141414]"
-      : "hover:border-[#ccc] hover:bg-[#fafafa]",
-    iconBox: darkMode ? "bg-[#1a1a1a] border-[#333] text-zinc-400" : "bg-[#f4f4f4] border-[#E5E5E5] text-zinc-500",
-    iconBoxHover: darkMode 
-      ? "group-hover:text-white" 
-      : "group-hover:text-black",
+    page: "bg-[#FFFFFF] text-[#111111] dark:bg-[#0a0a0a] dark:text-[#ededed]",
+    header: "bg-[#FFFFFF]/95 dark:bg-[#0a0a0a]/95",
+    panel: "bg-[#F7F7F7] dark:bg-[#141414]",
+    border: "border-[#E5E5E5] dark:border-[#333333]",
+    muted: "text-zinc-500 dark:text-zinc-400",
+    accent: "text-zinc-900 dark:text-zinc-100",
+    inputBg: "bg-[#F4F4F4] dark:bg-[#1a1a1a]",
+    hoverAccent: "hover:text-[#6f45d6] dark:hover:text-[#C699FF]",
+    cardHover: "hover:border-[#ccc] hover:bg-[#fafafa] dark:hover:border-[#555] dark:hover:bg-[#141414]",
+    iconBox: "bg-[#f4f4f4] border-[#E5E5E5] text-zinc-500 dark:bg-[#1a1a1a] dark:border-[#333] dark:text-zinc-400",
+    iconBoxHover: "group-hover:text-black dark:group-hover:text-white",
   };
 
   useEffect(() => {
@@ -244,29 +249,13 @@ export default function LandingPage() {
   }, []);
 
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setCmdOpen(false);
-        return;
-      }
-      const isModifier = event.metaKey || event.ctrlKey;
-      if (!isModifier || event.key.toLowerCase() !== "k") return;
-      
-      event.preventDefault();
-      setCmdOpen((open) => !open);
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  useEffect(() => {
-    if (!isAutoPlaying) return;
+    // Break the autoplay circuit entirely if user prefers reduced motion
+    if (!isAutoPlaying || shouldReduceMotion) return;
     const interval = setInterval(() => {
       setActiveTab((prev) => (prev + 1) % REFERENCE_DATA.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, [isAutoPlaying]);
+  }, [isAutoPlaying, shouldReduceMotion]);
 
   const checkScroll = () => {
     if (scrollContainerRef.current) {
@@ -314,16 +303,17 @@ export default function LandingPage() {
 
   const timeSinceStr = timeSince(githubStats.lastPush);
   
+  // Dynamic arrays converted to Tailwind
   const dynamicBuildStats = [
-    { title: "Repository Synced", desc: `Last push: ${timeSinceStr}`, icon: <CheckCircle2 size={16} />, bg: darkMode ? "bg-white text-black" : "bg-black text-white" },
-    { title: "Active Contributors", desc: `${githubStats.contributors.length} devs building RefMe`, icon: <Code2 size={16} />, bg: darkMode ? "bg-[#222] text-white" : "bg-zinc-100 text-black" },
-    { title: "Code Reviews", desc: `${githubStats.openPrs} open PRs pending`, icon: <GitPullRequest size={16} />, bg: darkMode ? "bg-[#222] text-white" : "bg-zinc-100 text-black" }
+    { title: "Repository Synced", desc: `Last push: ${timeSinceStr}`, icon: <CheckCircle2 size={16} />, bg: "bg-black text-white dark:bg-white dark:text-black" },
+    { title: "Active Contributors", desc: `${githubStats.contributors.length} devs building RefMe`, icon: <Code2 size={16} />, bg: "bg-zinc-100 text-black dark:bg-[#222] dark:text-white" },
+    { title: "Code Reviews", desc: `${githubStats.openPrs} open PRs pending`, icon: <GitPullRequest size={16} />, bg: "bg-zinc-100 text-black dark:bg-[#222] dark:text-white" }
   ];
 
   const dynamicActivityFeeds = [
-    { title: "Successful Merges", desc: `${githubStats.mergedPrs} PRs merged to main`, icon: <GitMerge size={16} />, bg: darkMode ? "bg-[#222] text-white" : "bg-zinc-100 text-black" },
-    { title: "Community Health", desc: `${githubStats.openIssues} open issues tracked`, icon: <CircleDot size={16} />, bg: darkMode ? "bg-[#222] text-white" : "bg-zinc-100 text-black" },
-    { title: "Global Reach", desc: `${githubStats.stars} repository stars`, icon: <Star size={16} />, bg: darkMode ? "bg-[#222] text-white" : "bg-zinc-100 text-black" }
+    { title: "Successful Merges", desc: `${githubStats.mergedPrs} PRs merged to main`, icon: <GitMerge size={16} />, bg: "bg-zinc-100 text-black dark:bg-[#222] dark:text-white" },
+    { title: "Community Health", desc: `${githubStats.openIssues} open issues tracked`, icon: <CircleDot size={16} />, bg: "bg-zinc-100 text-black dark:bg-[#222] dark:text-white" },
+    { title: "Global Reach", desc: `${githubStats.stars} repository stars`, icon: <Star size={16} />, bg: "bg-zinc-100 text-black dark:bg-[#222] dark:text-white" }
   ];
 
   const currentBuild = dynamicBuildStats[cycle];
@@ -344,16 +334,23 @@ export default function LandingPage() {
     }
   };
 
+  const isReducedMotionSafe = mounted && shouldReduceMotion;
+
   const itemVariants = {
-    hidden: { opacity: 0, y: 15 },
+    hidden: { 
+      opacity: 0, 
+      y: isReducedMotionSafe ? 0 : 15 
+    },
     visible: {
       opacity: 1,
       y: 0,
-      transition: {
-        type: "spring" as const,
-        stiffness: 400,
-        damping: 30
-      }
+      transition: isReducedMotionSafe 
+        ? { duration: 0.15 } 
+        : {
+            type: "spring" as const,
+            stiffness: 400,
+            damping: 30
+          }
     },
   };
 
@@ -375,8 +372,14 @@ export default function LandingPage() {
         }
       `}} />
       
-      <SearchPalette isOpen={cmdOpen} onClose={() => setCmdOpen(false)} searchData={searchData} onSelect={handleSearchSelect} placeholder="Search algorithms, frameworks, or concepts..." />
-
+      <SearchPalette 
+        isOpen={cmdOpen} 
+        onClose={() => setCmdOpen(false)} 
+        onToggle={() => setCmdOpen((prev) => !prev)} 
+        searchData={searchData} 
+        onSelect={handleSearchSelect} 
+        placeholder="Search algorithms, frameworks, or concepts..." 
+      />
       <header className={`fixed top-0 left-0 w-full z-50 h-16 border-b ${themeClasses.border} ${themeClasses.header} backdrop-blur-md`}>
         <div className="mx-auto flex h-full max-w-[1700px] items-center justify-between px-4 lg:px-6">
           <div className="flex items-center gap-4">
@@ -391,12 +394,15 @@ export default function LandingPage() {
           <div className="flex-1 flex justify-center px-4 max-w-2xl mx-auto">
             <button onClick={() => setCmdOpen(true)} className={`flex w-full items-center justify-between rounded-full border px-4 py-1.5 transition-all hover:border-[#C699FF]/50 ${themeClasses.border} ${themeClasses.inputBg}`}>
               <div className="flex items-center gap-3 text-sm opacity-60"><Search className="h-4 w-4" /> <span>Search...</span></div>
-              <span className={`hidden md:block rounded border border-current/20 px-1.5 py-0.5 text-[10px] font-bold opacity-50`}>{modifierKey}K</span>
+              <span suppressHydrationWarning className={`hidden md:block rounded border border-current/20 px-1.5 py-0.5 text-[10px] font-bold opacity-50`}>
+                {mounted ? modifierKey : "Ctrl"}K
+              </span>
             </button>
           </div>
 
           <button onClick={toggleTheme} className={`shrink-0 rounded-full border px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] transition-colors ${themeClasses.border} ${themeClasses.panel} ${themeClasses.hoverAccent}`}>
-            {darkMode ? "Light" : "Dark"}
+            <span className="block dark:hidden">Dark</span>
+            <span className="hidden dark:block">Light</span>
           </button>
         </div>
       </header>
@@ -418,11 +424,11 @@ export default function LandingPage() {
                 <div className="relative group inline-flex">
                   <button 
                     onClick={() => document.getElementById('ecosystem')?.scrollIntoView({ behavior: 'smooth' })} 
-                    className={`rounded-full px-8 py-3.5 text-sm font-bold transition-transform hover:scale-[0.98] ${darkMode ? "bg-white text-black" : "bg-black text-white"}`}
+                    className={`rounded-full px-8 py-3.5 text-sm font-bold transition-transform hover:scale-[0.98] bg-black text-white dark:bg-white dark:text-black`}
                   >
                     Start reading
                   </button>
-                  <div className={`absolute top-full left-1/2 mt-3 -translate-x-1/2 px-4 py-2 rounded-lg text-[13px] font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 border shadow-2xl ${darkMode ? "bg-[#222222] text-white border-[#333333]" : "bg-white text-black border-[#E5E5E5]"}`}>
+                  <div className={`absolute top-full left-1/2 mt-3 -translate-x-1/2 px-4 py-2 rounded-lg text-[13px] font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 border shadow-2xl bg-white text-black border-[#E5E5E5] dark:bg-[#222222] dark:text-white dark:border-[#333333]`}>
                     Explore JS, React, System Design & more
                   </div>
                   
@@ -448,7 +454,7 @@ export default function LandingPage() {
                     <Code2 size={16} /> Community Driven
                   </div>
                 </div>
-                <Link href="/docs" className={`inline-flex items-center gap-2 text-[13px] font-bold tracking-wide uppercase transition-colors w-fit ${darkMode ? "text-[#C699FF] hover:text-white" : "text-[#6f45d6] hover:text-black"}`}>
+                <Link href="/docs" className={`inline-flex items-center gap-2 text-[13px] font-bold tracking-wide uppercase transition-colors w-fit text-[#6f45d6] hover:text-black dark:text-[#C699FF] dark:hover:text-white`}>
                   Read the RefMe Philosophy <ArrowRight size={14} />
                 </Link>
               </div>
@@ -456,19 +462,19 @@ export default function LandingPage() {
 
             <div className="lg:col-span-6 w-full flex justify-center lg:justify-end relative mt-10 lg:mt-0">
               
-              <div className={`relative z-10 flex flex-col rounded-3xl border w-full max-w-[560px] shadow-2xl overflow-hidden ${darkMode ? "bg-[#0a0a0a] border-[#333]" : "bg-white border-[#E5E5E5]"}`}>
+              <div className={`relative z-10 flex flex-col rounded-3xl border w-full max-w-[560px] shadow-2xl overflow-hidden bg-white border-[#E5E5E5] dark:bg-[#0a0a0a] dark:border-[#333]`}>
                 
-                <div className={`p-6 sm:p-10 border-b ${darkMode ? "bg-[#111] border-[#333]" : "bg-zinc-50 border-[#E5E5E5]"}`}>
+                <div className={`p-6 sm:p-10 border-b bg-zinc-50 border-[#E5E5E5] dark:bg-[#111] dark:border-[#333]`}>
                   <div className="flex items-start justify-between mb-8">
                     <div className="flex items-center gap-5">
                       <img 
                         src="https://github.com/yash-pluto.png" 
                         alt="Yash Vardhan" 
-                        className={`h-20 w-20 rounded-full border-4 shadow-sm ${darkMode ? "border-[#222]" : "border-white"}`} 
+                        className={`h-20 w-20 rounded-full border-4 shadow-sm border-white dark:border-[#222]`} 
                       />
                       <div>
                         <div className="flex items-center gap-2 mb-1">
-                          <a href="https://yash-pluto.vercel.app/" target="_blank" rel="noopener noreferrer" className={`text-2xl sm:text-3xl font-extrabold tracking-tight hover:underline ${darkMode ? "text-white" : "text-black"}`}>
+                          <a href="https://yash-pluto.vercel.app/" target="_blank" rel="noopener noreferrer" className={`text-2xl sm:text-3xl font-extrabold tracking-tight hover:underline text-black dark:text-white`}>
                             Yash-Pluto
                           </a>
                           <BadgeCheck size={24} className="text-[#C699FF]" />
@@ -477,22 +483,22 @@ export default function LandingPage() {
                       </div>
                     </div>
                     <a href="https://github.com/yash-pluto/refme" target="_blank" rel="noopener noreferrer" className="pt-1">
-                      <FaGithub size={32} className={`${darkMode ? "text-white" : "text-zinc-900"} hover:opacity-70 transition-opacity`} />
+                      <FaGithub size={32} className={`text-zinc-900 hover:opacity-70 transition-opacity dark:text-white`} />
                     </a>
                   </div>
                   
-                  <p className={`text-base leading-relaxed mb-6 ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>
+                  <p className={`text-base leading-relaxed mb-6 text-zinc-700 dark:text-zinc-300`}>
                     Join the community building the ultimate quick-reference. Contributions are welcome for all categories and languages.
                   </p>
 
                   <div className="flex flex-col sm:flex-row flex-wrap gap-3">
-                    <div className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border ${darkMode ? "bg-[#1a1a1a] border-[#333] shadow-inner" : "bg-white border-[#E5E5E5] shadow-sm"}`}>
+                    <div className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border bg-white border-[#E5E5E5] shadow-sm dark:bg-[#1a1a1a] dark:border-[#333] dark:shadow-inner`}>
                       <span className="text-[#C699FF] text-base font-black">✓</span>
-                      <span className={`text-xs font-bold uppercase tracking-wide ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>Open Source Architecture</span>
+                      <span className={`text-xs font-bold uppercase tracking-wide text-zinc-700 dark:text-zinc-300`}>Open Source Architecture</span>
                     </div>
-                    <div className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border ${darkMode ? "bg-[#1a1a1a] border-[#333] shadow-inner" : "bg-white border-[#E5E5E5] shadow-sm"}`}>
+                    <div className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border bg-white border-[#E5E5E5] shadow-sm dark:bg-[#1a1a1a] dark:border-[#333] dark:shadow-inner`}>
                       <span className="text-[#C699FF] text-base font-black">✓</span>
-                      <span className={`text-xs font-bold uppercase tracking-wide ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>Community Driven Updates</span>
+                      <span className={`text-xs font-bold uppercase tracking-wide text-zinc-700 dark:text-zinc-300`}>Community Driven Updates</span>
                     </div>
                   </div>
                 </div>
@@ -500,36 +506,36 @@ export default function LandingPage() {
                 <div className="p-6 sm:p-8">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
                     
-                    <div className={`flex flex-col justify-between p-4 rounded-xl border ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"} shadow-sm`}>
+                    <div className={`flex flex-col justify-between p-4 rounded-xl border bg-white border-[#E5E5E5] shadow-sm dark:bg-[#141414] dark:border-[#333]`}>
                       <div className="flex items-center gap-2 mb-3">
                         <GitPullRequest size={16} className="text-emerald-500" />
                         <span className={`text-[11px] font-bold uppercase tracking-wider ${themeClasses.muted}`}>Open PRs</span>
                       </div>
-                      <span className={`text-3xl font-extrabold tracking-tight ${darkMode ? "text-white" : "text-black"}`}>{githubStats.openPrs}</span>
+                      <span className={`text-3xl font-extrabold tracking-tight text-black dark:text-white`}>{githubStats.openPrs}</span>
                     </div>
                     
-                    <div className={`flex flex-col justify-between p-4 rounded-xl border ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"} shadow-sm`}>
+                    <div className={`flex flex-col justify-between p-4 rounded-xl border bg-white border-[#E5E5E5] shadow-sm dark:bg-[#141414] dark:border-[#333]`}>
                       <div className="flex items-center gap-2 mb-3">
                         <GitMerge size={16} className="text-purple-500" />
                         <span className={`text-[11px] font-bold uppercase tracking-wider ${themeClasses.muted}`}>Merged</span>
                       </div>
-                      <span className={`text-3xl font-extrabold tracking-tight ${darkMode ? "text-white" : "text-black"}`}>{githubStats.mergedPrs}</span>
+                      <span className={`text-3xl font-extrabold tracking-tight text-black dark:text-white`}>{githubStats.mergedPrs}</span>
                     </div>
 
-                    <div className={`flex flex-col justify-between p-4 rounded-xl border ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"} shadow-sm`}>
+                    <div className={`flex flex-col justify-between p-4 rounded-xl border bg-white border-[#E5E5E5] shadow-sm dark:bg-[#141414] dark:border-[#333]`}>
                       <div className="flex items-center gap-2 mb-3">
                         <CircleDot size={16} className="text-emerald-500" />
                         <span className={`text-[11px] font-bold uppercase tracking-wider ${themeClasses.muted}`}>Issues</span>
                       </div>
-                      <span className={`text-3xl font-extrabold tracking-tight ${darkMode ? "text-white" : "text-black"}`}>{githubStats.openIssues}</span>
+                      <span className={`text-3xl font-extrabold tracking-tight text-black dark:text-white`}>{githubStats.openIssues}</span>
                     </div>
 
-                    <div className={`flex flex-col justify-between p-4 rounded-xl border ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"} shadow-sm`}>
+                    <div className={`flex flex-col justify-between p-4 rounded-xl border bg-white border-[#E5E5E5] shadow-sm dark:bg-[#141414] dark:border-[#333]`}>
                       <div className="flex items-center gap-2 mb-3">
                         <Star size={16} className="text-amber-500" />
                         <span className={`text-[11px] font-bold uppercase tracking-wider ${themeClasses.muted}`}>Stars</span>
                       </div>
-                      <span className={`text-3xl font-extrabold tracking-tight ${darkMode ? "text-white" : "text-black"}`}>{githubStats.stars}</span>
+                      <span className={`text-3xl font-extrabold tracking-tight text-black dark:text-white`}>{githubStats.stars}</span>
                     </div>
 
                   </div>
@@ -545,7 +551,7 @@ export default function LandingPage() {
                                 src={user.avatar_url} 
                                 alt={user.login}
                                 title={user.login}
-                                className={`h-10 w-10 rounded-full border-[3px] ${darkMode ? 'border-[#0a0a0a]' : 'border-white'} shadow-md`}
+                                className={`h-10 w-10 rounded-full border-[3px] border-white shadow-md dark:border-[#0a0a0a]`}
                                 style={{ zIndex: 10 - idx, opacity: 1 - (idx * 0.12) }} 
                               />
                             ))}
@@ -561,7 +567,7 @@ export default function LandingPage() {
                       href="https://github.com/yash-pluto/refme" 
                       target="_blank" 
                       rel="noopener noreferrer" 
-                      className={`flex w-full sm:w-auto justify-center items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold transition-all active:scale-[0.98] ${darkMode ? "bg-white text-black hover:bg-zinc-200" : "bg-black text-white hover:bg-zinc-800"}`}
+                      className={`flex w-full sm:w-auto justify-center items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold transition-all active:scale-[0.98] bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200`}
                     >
                       <FaGithub size={18} /> Contribute on GitHub
                     </a>
@@ -571,23 +577,23 @@ export default function LandingPage() {
               </div>
 
               {/* Dynamic Floating Element 1 - Top Right */}
-              <div key={`build-${cycle}`} className={`absolute -top-12 right-0 sm:-top-8 sm:-right-8 z-20 flex items-center gap-3.5 rounded-2xl border p-3 sm:p-3.5 shadow-2xl scale-[0.85] sm:scale-100 origin-top-right sm:origin-center animate-in fade-in zoom-in duration-500 pointer-events-none ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"}`}>
+              <div key={`build-${cycle}`} className={`absolute -top-12 right-0 sm:-top-8 sm:-right-8 z-20 flex items-center gap-3.5 rounded-2xl border p-3 sm:p-3.5 shadow-2xl scale-[0.85] sm:scale-100 origin-top-right sm:origin-center animate-in fade-in zoom-in duration-500 pointer-events-none bg-white border-[#E5E5E5] dark:bg-[#141414] dark:border-[#333]`}>
                 <div className={`flex h-10 w-10 items-center justify-center rounded-full ${currentBuild.bg}`}>
                   {currentBuild.icon}
                 </div>
                 <div className="pr-2">
-                  <p className={`text-[13px] font-bold ${darkMode ? "text-white" : "text-black"}`}>{currentBuild.title}</p>
+                  <p className={`text-[13px] font-bold text-black dark:text-white`}>{currentBuild.title}</p>
                   <p className={`text-[11px] font-medium ${themeClasses.muted}`}>{currentBuild.desc}</p>
                 </div>
               </div>
 
               {/* Dynamic Floating Element 2 - Bottom Left */}
-              <div key={`activity-${cycle}`} className={`absolute -bottom-12 left-0 sm:-bottom-8 sm:-left-8 z-20 flex items-center gap-3.5 rounded-2xl border p-3 sm:p-3.5 shadow-2xl scale-[0.85] sm:scale-100 origin-bottom-left sm:origin-center animate-in fade-in zoom-in duration-500 pointer-events-none ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"}`}>
+              <div key={`activity-${cycle}`} className={`absolute -bottom-12 left-0 sm:-bottom-8 sm:-left-8 z-20 flex items-center gap-3.5 rounded-2xl border p-3 sm:p-3.5 shadow-2xl scale-[0.85] sm:scale-100 origin-bottom-left sm:origin-center animate-in fade-in zoom-in duration-500 pointer-events-none bg-white border-[#E5E5E5] dark:bg-[#141414] dark:border-[#333]`}>
                 <div className={`flex h-10 w-10 items-center justify-center rounded-full ${currentActivity.bg}`}>
                   {currentActivity.icon}
                 </div>
                 <div className="pr-2">
-                  <p className={`text-[13px] font-bold ${darkMode ? "text-white" : "text-black"}`}>{currentActivity.title}</p>
+                  <p className={`text-[13px] font-bold text-black dark:text-white`}>{currentActivity.title}</p>
                   <p className={`text-[11px] font-medium ${themeClasses.muted}`}>{currentActivity.desc}</p>
                 </div>
               </div>
@@ -598,13 +604,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className={`py-24 md:py-32 border-b ${themeClasses.border} ${darkMode ? "bg-[#050505]" : "bg-zinc-50/50"}`}>
+      <section className={`py-24 md:py-32 border-b ${themeClasses.border} bg-zinc-50/50 dark:bg-[#050505]`}>
         <div className="mx-auto max-w-[1200px] px-4 md:px-6 lg:px-8 text-center flex flex-col items-center">
           
           <p className={`text-sm font-bold tracking-wide uppercase mb-4 ${themeClasses.muted}`}>
             Built for everyone who wants to learn
           </p>
-          <h2 className={`text-4xl md:text-5xl font-extrabold tracking-tight mb-6 text-balance ${darkMode ? "text-white" : "text-zinc-900"}`}>
+          <h2 className={`text-4xl md:text-5xl font-extrabold tracking-tight mb-6 text-balance text-zinc-900 dark:text-white`}>
             For students, professors, teachers, and developers.
           </h2>
 
@@ -612,61 +618,61 @@ export default function LandingPage() {
             
             <div className="max-w-4xl mx-auto w-full px-2 sm:px-4">
               <div className="flex justify-between items-center px-4 sm:px-12 md:px-24 mb-6">
-                <div className={`px-4 py-1.5 rounded-lg border text-xs font-bold shadow-sm ${darkMode ? "bg-[#111] border-zinc-600 text-zinc-200" : "bg-white border-[#E5E5E5] text-zinc-700"}`}>Students</div>
-                <div className={`px-4 py-1.5 rounded-lg border text-xs font-bold shadow-sm ${darkMode ? "bg-[#111] border-zinc-600 text-zinc-200" : "bg-white border-[#E5E5E5] text-zinc-700"}`}>Educators</div>
-                <div className={`px-4 py-1.5 rounded-lg border text-xs font-bold shadow-sm ${darkMode ? "bg-[#111] border-zinc-600 text-zinc-200" : "bg-white border-[#E5E5E5] text-zinc-700"}`}>Developers</div>
+                <div className={`px-4 py-1.5 rounded-lg border text-xs font-bold shadow-sm bg-white border-[#E5E5E5] text-zinc-700 dark:bg-[#111] dark:border-zinc-600 dark:text-zinc-200`}>Students</div>
+                <div className={`px-4 py-1.5 rounded-lg border text-xs font-bold shadow-sm bg-white border-[#E5E5E5] text-zinc-700 dark:bg-[#111] dark:border-zinc-600 dark:text-zinc-200`}>Educators</div>
+                <div className={`px-4 py-1.5 rounded-lg border text-xs font-bold shadow-sm bg-white border-[#E5E5E5] text-zinc-700 dark:bg-[#111] dark:border-zinc-600 dark:text-zinc-200`}>Developers</div>
               </div>
 
               <div className="relative flex justify-between items-center px-8 sm:px-16 md:px-28 mb-10 sm:mb-16">
-                <div className={`absolute top-1/2 left-8 right-8 sm:left-16 sm:right-16 md:left-28 md:right-28 h-[2px] -translate-y-1/2 z-0 ${darkMode ? "bg-zinc-600" : "bg-zinc-200"}`} />
-                <div className={`w-3.5 h-3.5 rounded-full border-[3px] z-10 ${darkMode ? "border-zinc-400 bg-zinc-900" : "border-zinc-300 bg-zinc-50"}`} />
-                <div className={`w-3.5 h-3.5 rounded-full border-[3px] z-10 ${darkMode ? "border-zinc-400 bg-zinc-900" : "border-zinc-300 bg-zinc-50"}`} />
-                <div className={`w-3.5 h-3.5 rounded-full border-[3px] z-10 ${darkMode ? "border-zinc-400 bg-zinc-900" : "border-zinc-300 bg-zinc-50"}`} />
+                <div className={`absolute top-1/2 left-8 right-8 sm:left-16 sm:right-16 md:left-28 md:right-28 h-[2px] -translate-y-1/2 z-0 bg-zinc-200 dark:bg-zinc-600`} />
+                <div className={`w-3.5 h-3.5 rounded-full border-[3px] z-10 border-zinc-300 bg-zinc-50 dark:border-zinc-400 dark:bg-zinc-900`} />
+                <div className={`w-3.5 h-3.5 rounded-full border-[3px] z-10 border-zinc-300 bg-zinc-50 dark:border-zinc-400 dark:bg-zinc-900`} />
+                <div className={`w-3.5 h-3.5 rounded-full border-[3px] z-10 border-zinc-300 bg-zinc-50 dark:border-zinc-400 dark:bg-zinc-900`} />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left max-w-5xl mx-auto px-4">
               
-              <div className={`flex flex-col rounded-3xl border p-8 shadow-sm ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"}`}>
-                <h3 className={`text-xl font-bold tracking-tight mb-6 ${darkMode ? "text-white" : "text-black"}`}>Structured Roadmaps.</h3>
+              <div className={`flex flex-col rounded-3xl border p-8 shadow-sm bg-white border-[#E5E5E5] dark:bg-[#141414] dark:border-[#333]`}>
+                <h3 className={`text-xl font-bold tracking-tight mb-6 text-black dark:text-white`}>Structured Roadmaps.</h3>
                 <div className="space-y-4">
-                  <div className={`flex items-start gap-3 text-sm font-medium ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>
+                  <div className={`flex items-start gap-3 text-sm font-medium text-zinc-700 dark:text-zinc-300`}>
                     <span className={themeClasses.muted}>✓</span> Step-by-step learning paths
                   </div>
-                  <div className={`flex items-start gap-3 text-sm font-medium ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>
+                  <div className={`flex items-start gap-3 text-sm font-medium text-zinc-700 dark:text-zinc-300`}>
                     <span className={themeClasses.muted}>✓</span> Master the topics listed below
                   </div>
-                  <div className={`flex items-start gap-3 text-sm font-medium ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>
+                  <div className={`flex items-start gap-3 text-sm font-medium text-zinc-700 dark:text-zinc-300`}>
                     <span className={themeClasses.muted}>✓</span> Clear progression for all levels
                   </div>
                 </div>
               </div>
 
-              <div className={`flex flex-col rounded-3xl border p-8 shadow-sm ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"}`}>
-                <h3 className={`text-xl font-bold tracking-tight mb-6 ${darkMode ? "text-white" : "text-black"}`}>Video Tutorials.</h3>
+              <div className={`flex flex-col rounded-3xl border p-8 shadow-sm bg-white border-[#E5E5E5] dark:bg-[#141414] dark:border-[#333]`}>
+                <h3 className={`text-xl font-bold tracking-tight mb-6 text-black dark:text-white`}>Video Tutorials.</h3>
                 <div className="space-y-4">
-                  <div className={`flex items-start gap-3 text-sm font-medium ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>
+                  <div className={`flex items-start gap-3 text-sm font-medium text-zinc-700 dark:text-zinc-300`}>
                     <span className={themeClasses.muted}>✓</span> Dedicated videos for every concept
                   </div>
-                  <div className={`flex items-start gap-3 text-sm font-medium ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>
+                  <div className={`flex items-start gap-3 text-sm font-medium text-zinc-700 dark:text-zinc-300`}>
                     <span className={themeClasses.muted}>✓</span> Visual explanations that stick
                   </div>
-                  <div className={`flex items-start gap-3 text-sm font-medium ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>
+                  <div className={`flex items-start gap-3 text-sm font-medium text-zinc-700 dark:text-zinc-300`}>
                     <span className={themeClasses.muted}>✓</span> Learn at your own pace
                   </div>
                 </div>
               </div>
 
-              <div className={`flex flex-col rounded-3xl border p-8 shadow-sm ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"}`}>
-                <h3 className={`text-xl font-bold tracking-tight mb-6 ${darkMode ? "text-white" : "text-black"}`}>For Everyone.</h3>
+              <div className={`flex flex-col rounded-3xl border p-8 shadow-sm bg-white border-[#E5E5E5] dark:bg-[#141414] dark:border-[#333]`}>
+                <h3 className={`text-xl font-bold tracking-tight mb-6 text-black dark:text-white`}>For Everyone.</h3>
                 <div className="space-y-4">
-                  <div className={`flex items-start gap-3 text-sm font-medium ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>
+                  <div className={`flex items-start gap-3 text-sm font-medium text-zinc-700 dark:text-zinc-300`}>
                     <span className={themeClasses.muted}>✓</span> Perfect for students & learners
                   </div>
-                  <div className={`flex items-start gap-3 text-sm font-medium ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>
+                  <div className={`flex items-start gap-3 text-sm font-medium text-zinc-700 dark:text-zinc-300`}>
                     <span className={themeClasses.muted}>✓</span> Resources for teachers & professors
                   </div>
-                  <div className={`flex items-start gap-3 text-sm font-medium ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>
+                  <div className={`flex items-start gap-3 text-sm font-medium text-zinc-700 dark:text-zinc-300`}>
                     <span className={themeClasses.muted}>✓</span> Quick reference for developers
                   </div>
                 </div>
@@ -680,7 +686,7 @@ export default function LandingPage() {
 
       <section id="ecosystem" className={`py-24 md:py-32 w-full mx-auto px-4 md:px-6 lg:px-8 max-w-[1500px]`}>
         <div className="mb-16 text-center flex flex-col items-center">
-          <h2 className={`text-4xl md:text-5xl font-extrabold tracking-tight mb-4 ${darkMode ? "text-white" : "text-zinc-900"}`}>
+          <h2 className={`text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-zinc-900 dark:text-white`}>
             Explore the Ecosystem
           </h2>
           <p className={`text-lg font-medium max-w-2xl ${themeClasses.muted}`}>
@@ -701,19 +707,21 @@ export default function LandingPage() {
                   }}
                   className={`flex items-start gap-4 p-5 rounded-2xl border text-left transition-all duration-300 ${
                     isActive 
-                      ? (darkMode ? "bg-[#1a1a1a] border-[#444] shadow-md" : "bg-white border-[#ccc] shadow-md")
-                      : (darkMode ? "bg-[#0a0a0a] border-[#222] hover:bg-[#111] hover:border-[#333]" : "bg-zinc-50 border-transparent hover:bg-zinc-100 hover:border-[#E5E5E5]")
+                      ? "bg-white border-[#ccc] shadow-md dark:bg-[#1a1a1a] dark:border-[#444]"
+                      : "bg-zinc-50 border-transparent hover:bg-zinc-100 hover:border-[#E5E5E5] dark:bg-[#0a0a0a] dark:border-[#222] dark:hover:bg-[#111] dark:hover:border-[#333]"
                   }`}
                 >
                   <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-colors ${
                     isActive 
-                      ? (darkMode ? "bg-[#333] border-[#555] text-white" : "bg-zinc-100 border-[#ddd] text-black")
-                      : (darkMode ? "bg-[#111] border-[#333] text-zinc-400" : "bg-white border-[#E5E5E5] text-zinc-500")
+                      ? "bg-zinc-100 border-[#ddd] text-black dark:bg-[#333] dark:border-[#555] dark:text-white"
+                      : "bg-white border-[#E5E5E5] text-zinc-500 dark:bg-[#111] dark:border-[#333] dark:text-zinc-400"
                   }`}>
                     {cat.icon}
                   </div>
                   <div>
-                    <h3 className={`text-base font-bold mb-1 transition-colors ${isActive ? (darkMode ? "text-white" : "text-black") : (darkMode ? "text-zinc-300" : "text-zinc-700")}`}>
+                    <h3 className={`text-base font-bold mb-1 transition-colors ${
+                      isActive ? "text-black dark:text-white" : "text-zinc-700 dark:text-zinc-300"
+                    }`}>
                       {cat.category}
                     </h3>
                     <p className={`text-[13px] leading-relaxed ${themeClasses.muted}`}>
@@ -725,7 +733,7 @@ export default function LandingPage() {
             })}
           </div>
 
-          <div className={`w-full lg:w-[65%] rounded-3xl border p-6 sm:p-10 flex flex-col relative h-[600px] lg:h-full overflow-hidden ${darkMode ? "bg-[#111] border-[#333]" : "bg-white border-[#E5E5E5] shadow-sm"}`}>
+          <div className={`w-full lg:w-[65%] rounded-3xl border p-6 sm:p-10 flex flex-col relative h-[600px] lg:h-full overflow-hidden bg-white border-[#E5E5E5] shadow-sm dark:bg-[#111] dark:border-[#333]`}>
             
             <AnimatePresence mode="wait">
               <motion.div
@@ -737,10 +745,10 @@ export default function LandingPage() {
                 className="flex flex-col h-full overflow-hidden"
               >
                 <motion.div variants={itemVariants} className="mb-6 shrink-0">
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl border mb-5 shadow-sm ${darkMode ? "bg-[#1a1a1a] border-[#444] text-white" : "bg-zinc-50 border-[#ccc] text-black"}`}>
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl border mb-5 shadow-sm bg-zinc-50 border-[#ccc] text-black dark:bg-[#1a1a1a] dark:border-[#444] dark:text-white`}>
                       {REFERENCE_DATA[activeTab].icon}
                   </div>
-                  <h2 className={`text-3xl font-extrabold tracking-tight mb-2 ${darkMode ? "text-white" : "text-black"}`}>
+                  <h2 className={`text-3xl font-extrabold tracking-tight mb-2 text-black dark:text-white`}>
                     {REFERENCE_DATA[activeTab].category}
                   </h2>
                   <p className={`text-base ${themeClasses.muted}`}>
@@ -757,13 +765,13 @@ export default function LandingPage() {
                     <motion.div key={item.name} variants={itemVariants}>
                       <Link
                         href={item.href}
-                        className={`group flex items-center gap-4 p-4 rounded-xl border transition-all ${darkMode ? "bg-[#1a1a1a] border-[#333] hover:border-[#555] hover:bg-[#222]" : "bg-zinc-50 border-[#E5E5E5] hover:border-[#ccc] hover:bg-zinc-100"}`}
+                        className={`group flex items-center gap-4 p-4 rounded-xl border transition-all bg-zinc-50 border-[#E5E5E5] hover:border-[#ccc] hover:bg-zinc-100 dark:bg-[#1a1a1a] dark:border-[#333] dark:hover:border-[#555] dark:hover:bg-[#222]`}
                       >
                         <div className="shrink-0 flex items-center justify-center relative">
-                          <CheckCircle2 size={20} className={`${darkMode ? "text-zinc-500 group-hover:text-zinc-300" : "text-zinc-400 group-hover:text-zinc-600"} transition-colors`} />
+                          <CheckCircle2 size={20} className={`transition-colors text-zinc-400 group-hover:text-zinc-600 dark:text-zinc-500 dark:group-hover:text-zinc-300`} />
                         </div>
                         <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                          <span className={`text-[15px] font-bold ${darkMode ? "text-zinc-200 group-hover:text-white" : "text-zinc-800 group-hover:text-black"}`}>
+                          <span className={`text-[15px] font-bold text-zinc-800 group-hover:text-black dark:text-zinc-200 dark:group-hover:text-white`}>
                             {item.name}
                           </span>
                           <span className={`hidden sm:block text-zinc-500 text-sm opacity-50`}>-</span>
@@ -784,10 +792,10 @@ export default function LandingPage() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className={`absolute bottom-0 left-0 right-0 h-32 pointer-events-none flex items-end justify-center pb-6 ${darkMode ? "bg-gradient-to-t from-[#111] to-transparent" : "bg-gradient-to-t from-white to-transparent"}`}
+                  className={`absolute bottom-0 left-0 right-0 h-32 pointer-events-none flex items-end justify-center pb-6 bg-gradient-to-t from-white to-transparent dark:from-[#111]`}
                 >
                   <div
-                    className={`flex items-center gap-2 text-[11px] font-bold tracking-widest uppercase px-4 py-2 rounded-full border shadow-sm backdrop-blur-sm ${darkMode ? "bg-black/50 border-[#333] text-zinc-300" : "bg-white/70 border-[#E5E5E5] text-zinc-600"}`}
+                    className={`flex items-center gap-2 text-[11px] font-bold tracking-widest uppercase px-4 py-2 rounded-full border shadow-sm backdrop-blur-sm bg-white/70 border-[#E5E5E5] text-zinc-600 dark:bg-black/50 dark:border-[#333] dark:text-zinc-300`}
                   >
                     Scroll for more
                   </div>

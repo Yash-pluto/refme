@@ -2,15 +2,14 @@
 
 /**
  * @fileoverview Reusable Client-side Code Block component with syntax highlighting.
- * Safely handles server-side rendering (SSR) hydration mismatches, applies a custom 
- * "Pitch Black" textmate theme mapping, and enforces strict flex boundaries to 
- * prevent mobile viewport overflow.
+ * Applies a custom "Pitch Black" textmate theme mapping, and enforces strict flex 
+ * boundaries to prevent mobile viewport overflow.
  *
  * @author Yash Vardhan
  */
 
 import { useTheme } from "../../src/context/ThemeContext";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Copy, Check, FileCode2 } from "lucide-react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 
@@ -31,18 +30,9 @@ export default function ClientCodeBlock({
   filename,
   highlightLines = [],
 }: ClientCodeBlockProps) {
-  const { darkMode } = useTheme();
-  
-  // Track mount state to defer rendering of browser-specific APIs (clipboard, highlighter)
-  const [mounted, setMounted] = useState(false);
+  // Grab `mounted` to defer the Javascript-heavy SyntaxHighlighter
+  const { darkMode, mounted } = useTheme();
   const [copied, setCopied] = useState(false);
-
-  /**
-   * Initializes the component safely on the client.
-   * Prevents React Hydration Mismatch errors caused by rendering 
-   * theme-dependent or layout-heavy nodes on the server.
-   */
-  useEffect(() => setMounted(true), []);
 
   /**
    * Writes the active code block to the system clipboard.
@@ -60,7 +50,6 @@ export default function ClientCodeBlock({
 
   /**
    * Pitch Black Theme Mapping
-   * Mapped directly from the custom VSCode textmate token JSON.
    */
   const pitchBlackModernStyle = {
     'code[class*="language-"]': {
@@ -179,46 +168,22 @@ export default function ClientCodeBlock({
     delete: { background: '#F4F4F0' },
   };
 
-  /**
-   * Theme-aware structural classes.
-   * Matches the newly provided VSCode palette for borders and active tabs.
-   */
-  const theme = {
-    border: darkMode ? "border-[#232323]" : "border-[#D1D1D1]",
-    headerBg: darkMode ? "bg-[#101010]" : "bg-[#EAEAEA]",
-    codeBg: darkMode ? "bg-[#101010]" : "bg-[#F4F4F0]",
-    text: darkMode ? "text-[#FFF]" : "text-zinc-700",
-    iconHover: darkMode ? "hover:text-[#C699FF]" : "hover:text-indigo-600",
-  };
-
-  // Render a structural skeleton while waiting for client hydration
-  if (!mounted) {
-    return (
-      <div
-        className={`w-full h-48 animate-pulse rounded-md mb-8 mt-4 border ${darkMode ? "bg-[#101010] border-[#232323]" : "bg-[#EAEAEA] border-[#D1D1D1]"}`}
-      ></div>
-    );
-  }
-
   return (
     <div
-      className={`w-full min-w-0 border ${theme.border} flex flex-col mb-8 mt-4 rounded-md overflow-hidden transition-colors duration-200`}
+      suppressHydrationWarning
+      className="w-full min-w-0 border border-[#D1D1D1] dark:border-[#232323] flex flex-col mb-8 mt-4 rounded-md overflow-hidden transition-colors duration-200"
     >
-      <div
-        className={`w-full flex items-center justify-between px-4 py-2.5 border-b ${theme.border} ${theme.headerBg} transition-colors duration-200`}
-      >
+      <div className="w-full flex items-center justify-between px-4 py-2.5 border-b border-[#D1D1D1] dark:border-[#232323] bg-[#EAEAEA] dark:bg-[#101010] transition-colors duration-200">
         <div className="flex items-center gap-2">
           {filename ? (
             <>
               <FileCode2 size={14} className="opacity-60 text-[#A0A0A0]" />
-              <span className={`font-mono text-xs font-medium ${theme.text}`}>
+              <span className="font-mono text-xs font-medium text-zinc-700 dark:text-[#FFF]">
                 {filename}
               </span>
             </>
           ) : (
-            <span
-              className={`font-mono text-[10px] font-bold uppercase tracking-widest opacity-70 ${theme.text}`}
-            >
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest opacity-70 text-zinc-700 dark:text-[#FFF]">
               {language}
             </span>
           )}
@@ -226,55 +191,57 @@ export default function ClientCodeBlock({
         
         <button
           onClick={copyToClipboard}
-          className={`opacity-50 ${theme.iconHover} transition-colors`}
+          className="opacity-50 hover:text-indigo-600 dark:hover:text-[#C699FF] transition-colors"
           aria-label="Copy code"
         >
           {copied ? (
-            <Check
-              size={15}
-              className={darkMode ? "text-[#99FFE4]" : "text-emerald-600"}
-            />
+            <Check size={15} className="text-emerald-600 dark:text-[#99FFE4]" />
           ) : (
             <Copy size={15} />
           )}
         </button>
       </div>
 
-      <div
-        className={`w-full py-4 overflow-x-auto ${theme.codeBg} transition-colors duration-200`}
-      >
-        <SyntaxHighlighter
-          language={language}
-          style={darkMode ? pitchBlackModernStyle : softLightModernStyle}
-          wrapLines={true}
-          lineProps={(lineNumber) => {
-            const isHighlighted = highlightLines.includes(lineNumber);
-            return {
-              style: {
-                display: "block",
-                minWidth: "fit-content", // Ensures highlights stretch across scrollable container
-                backgroundColor: isHighlighted 
-                  ? (darkMode ? "rgba(198, 153, 255, 0.1)" : "rgba(111, 69, 214, 0.1)") 
-                  : "transparent",
-                borderLeft: isHighlighted 
-                  ? (darkMode ? "3px solid #C699FF" : "3px solid #6f45d6") 
-                  : "3px solid transparent",
-                paddingLeft: "13px",
-                paddingRight: "16px",
-              }
-            };
-          }}
-          customStyle={{
-            background: "transparent",
-            padding: 0,
-            margin: 0,
-            fontSize: "0.9rem",
-            lineHeight: "1.7",
-            overflowX: "auto", 
-          }}
-        >
-          {code}
-        </SyntaxHighlighter>
+      <div className="w-full py-4 overflow-x-auto bg-[#F4F4F0] dark:bg-[#101010] transition-colors duration-200">
+        {/* Render a height-preserving invisible block before hydration, then swap to real highlighter */}
+        {!mounted ? (
+          <pre className="m-0 p-0 text-[0.9rem] leading-[1.7] opacity-0" aria-hidden="true">
+            <code>{code}</code>
+          </pre>
+        ) : (
+          <SyntaxHighlighter
+            language={language}
+            style={darkMode ? pitchBlackModernStyle : softLightModernStyle}
+            wrapLines={true}
+            lineProps={(lineNumber) => {
+              const isHighlighted = highlightLines.includes(lineNumber);
+              return {
+                style: {
+                  display: "block",
+                  minWidth: "fit-content",
+                  backgroundColor: isHighlighted 
+                    ? (darkMode ? "rgba(198, 153, 255, 0.1)" : "rgba(111, 69, 214, 0.1)") 
+                    : "transparent",
+                  borderLeft: isHighlighted 
+                    ? (darkMode ? "3px solid #C699FF" : "3px solid #6f45d6") 
+                    : "3px solid transparent",
+                  paddingLeft: "13px",
+                  paddingRight: "16px",
+                }
+              };
+            }}
+            customStyle={{
+              background: "transparent",
+              padding: 0,
+              margin: 0,
+              fontSize: "0.9rem",
+              lineHeight: "1.7",
+              overflowX: "auto", 
+            }}
+          >
+            {code}
+          </SyntaxHighlighter>
+        )}
       </div>
     </div>
   );

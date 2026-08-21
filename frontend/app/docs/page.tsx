@@ -1,44 +1,31 @@
-// app/docs/page.tsx
-"use client";
-
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { useTheme } from "../../src/context/ThemeContext";
 
 export default function DocumentationPage() {
-  const { darkMode } = useTheme();
-
   return (
-    <div
-      className={`min-h-screen ${darkMode ? "bg-[#050505] text-zinc-100" : "bg-zinc-50 text-zinc-900"} font-sans selection:bg-zinc-500/30 pb-20`}
-    >
-      <div className='max-w-3xl mx-auto px-6 pt-24'>
+    <div className="min-h-screen bg-zinc-50 dark:bg-[#050505] text-zinc-900 dark:text-zinc-100 font-sans selection:bg-zinc-500/30 pb-20">
+      <div className="max-w-3xl mx-auto px-6 pt-24">
         <Link
-          href='/'
-          className='inline-flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300 transition-colors mb-12'
+          href="/"
+          className="inline-flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300 transition-colors mb-12"
         >
           <ArrowLeft size={16} /> Back to Hub
         </Link>
 
-        <h1 className='text-4xl font-black tracking-tighter mb-4'>
-          RefMe<span className='text-zinc-500'>_</span> Architecture & Vision
+        <h1 className="text-4xl font-black tracking-tighter mb-4">
+          RefMe<span className="text-zinc-500">_</span> Architecture & Vision
         </h1>
-        <p
-          className={`text-lg mb-12 ${darkMode ? "text-zinc-400" : "text-zinc-600"}`}
-        >
+        <p className="text-lg mb-12 text-zinc-600 dark:text-zinc-400">
           A deep dive into how RefMe is built, the problem it solves, and the
           journey of crafting a modern full-stack reference tool.
         </p>
 
-        <div className='space-y-12'>
-          {/* Section: The Problem */}
+        <div className="space-y-12">
           <section>
-            <h2 className='text-2xl font-bold border-b border-zinc-200 dark:border-zinc-800 pb-2 mb-4'>
+            <h2 className="text-2xl font-bold border-b border-zinc-200 dark:border-zinc-800 pb-2 mb-4">
               The Problem
             </h2>
-            <p
-              className={`leading-relaxed ${darkMode ? "text-zinc-400" : "text-zinc-600"}`}
-            >
+            <p className="leading-relaxed text-zinc-600 dark:text-zinc-400">
               As developers, we constantly switch contexts between writing code,
               running CLI commands, managing infrastructure, and configuring
               tools. The syntax escapes us. We end up opening dozens of browser
@@ -49,14 +36,11 @@ export default function DocumentationPage() {
             </p>
           </section>
 
-          {/* Section: The Solution */}
           <section>
-            <h2 className='text-2xl font-bold border-b border-zinc-200 dark:border-zinc-800 pb-2 mb-4'>
+            <h2 className="text-2xl font-bold border-b border-zinc-200 dark:border-zinc-800 pb-2 mb-4">
               The Solution
             </h2>
-            <p
-              className={`leading-relaxed ${darkMode ? "text-zinc-400" : "text-zinc-600"}`}
-            >
+            <p className="leading-relaxed text-zinc-600 dark:text-zinc-400">
               <strong>RefMe</strong> is built to be the antidote to
               documentation fatigue. It is a centralized repository of core
               programming languages, CLI tools, infrastructure templates, and AI
@@ -66,14 +50,11 @@ export default function DocumentationPage() {
             </p>
           </section>
 
-          {/* Section: Tech Stack & System Design */}
           <section>
-            <h2 className='text-2xl font-bold border-b border-zinc-200 dark:border-zinc-800 pb-2 mb-4'>
+            <h2 className="text-2xl font-bold border-b border-zinc-200 dark:border-zinc-800 pb-2 mb-4">
               System Design & Tech Stack
             </h2>
-            <ul
-              className={`list-disc pl-5 space-y-3 ${darkMode ? "text-zinc-400" : "text-zinc-600"}`}
-            >
+            <ul className="list-disc pl-5 space-y-3 text-zinc-600 dark:text-zinc-400">
               <li>
                 <strong>Framework:</strong> Next.js 15 (App Router) to ensure
                 excellent SEO, fast server-side rendering, and easy API route
@@ -86,14 +67,15 @@ export default function DocumentationPage() {
                 syntax highlighting to reduce visual noise.
               </li>
               <li>
-                <strong>Architecture:</strong> Component-driven. A custom global
-                `ThemeContext` seamlessly orchestrates the dark/light modes
-                without relying on heavy third-party theme providers.
+                <strong>Architecture:</strong> Component-driven and Server-first. 
+                Theme resolution is handled via a blocking pre-hydration script, 
+                eliminating hydration mismatches and removing the need for heavy 
+                client-side theme providers on static pages.
               </li>
               <li>
                 <strong>Data Layer:</strong> Currently utilizing modularized
                 static JSON/TypeScript data structures (`cheatsheets.ts` and
-                `references.json`) for zero-latency retrieval.{" "}
+                `references.json`) for zero-latency retrieval.
               </li>
               <li>
                 <strong>Icons & Assets:</strong> Lucide React for consistent,
@@ -102,19 +84,16 @@ export default function DocumentationPage() {
             </ul>
           </section>
 
-          {/* Section: Future Roadmap */}
           <section>
-            <h2 className='text-2xl font-bold border-b border-zinc-200 dark:border-zinc-800 pb-2 mb-4'>
+            <h2 className="text-2xl font-bold border-b border-zinc-200 dark:border-zinc-800 pb-2 mb-4">
               Future Ideas & Roadmap
             </h2>
-            <div
-              className={`space-y-4 ${darkMode ? "text-zinc-400" : "text-zinc-600"}`}
-            >
+            <div className="space-y-4 text-zinc-600 dark:text-zinc-400">
               <p>
                 As this side project evolves, several key features are planned
                 for the pipeline:
               </p>
-              <ul className='list-disc pl-5 space-y-2'>
+              <ul className="list-disc pl-5 space-y-2">
                 <li>
                   <strong>Backend Integration:</strong> Migrating static data to
                   a database (like PostgreSQL via Prisma) to allow dynamic

@@ -1,3 +1,4 @@
+// app/components/SearchPalette.tsx
 "use client";
 
 /**
@@ -34,6 +35,7 @@ export interface SearchItem {
 interface SearchPaletteProps {
   isOpen: boolean;
   onClose: () => void;
+  onToggle: () => void;
   searchData: SearchItem[];
   onSelect: (item: SearchItem) => void;
   placeholder?: string;
@@ -99,27 +101,28 @@ function HighlightText({
   return <>{elements}</>;
 }
 
+// 1. Moved themeClasses outside the component since it is now static CSS strings!
+const themeClasses = {
+  panel: "bg-white dark:bg-[#050505]",
+  border: "border-black/10 dark:border-white/10",
+  muted: "text-zinc-500 dark:text-zinc-400",
+  navItem: "text-[#111111] dark:text-[#F5F5F5]",
+  hoverAccent: "hover:text-zinc-900 dark:hover:text-white",
+  highlightText: "font-medium rounded-[3px] px-[2px] bg-[#6f45d6]/15 text-[#6f45d6] dark:bg-[#C699FF]/25 dark:text-[#C699FF]",
+};
+
 export default function SearchPalette({
   isOpen,
   onClose,
+  onToggle,
   searchData,
   onSelect,
   placeholder = "Search topics, commands, or concepts...",
 }: SearchPaletteProps) {
+  // We keep useTheme solely for the toggle function and the dynamic label string
   const { darkMode, toggleTheme } = useTheme();
   const router = useRouter();
   const [docSearch, setDocSearch] = useState("");
-
-  const themeClasses = {
-    panel: darkMode ? "bg-[#050505]" : "bg-white",
-    border: darkMode ? "border-white/10" : "border-black/10",
-    muted: darkMode ? "text-zinc-400" : "text-zinc-500",
-    navItem: darkMode ? "text-[#F5F5F5]" : "text-[#111111]",
-    hoverAccent: darkMode ? "hover:text-white" : "hover:text-zinc-900",
-    highlightText: darkMode
-      ? "font-medium bg-[#C699FF]/25 text-[#C699FF] rounded-[3px] px-[2px]"
-      : "font-medium bg-[#6f45d6]/15 text-[#6f45d6] rounded-[3px] px-[2px]",
-  };
 
   /**
    * Static global actions bound to the palette default state.
@@ -136,6 +139,7 @@ export default function SearchPalette({
       },
       {
         id: "action-theme",
+        // This is safe from hydration mismatch because the modal returns null if !isOpen
         title: `Switch to ${darkMode ? "Light" : "Dark"} Mode`,
         type: "action",
         icon: <Monitor size={16} className="opacity-70" />,
@@ -205,17 +209,18 @@ export default function SearchPalette({
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        onClose();
+        if (isOpen) onClose();
         return;
       }
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        onClose();
+        onToggle();
       }
     };
+    
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, onToggle]);
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
@@ -336,7 +341,8 @@ export default function SearchPalette({
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       {item.icon && (
-                        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md border ${darkMode ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"}`}>
+                        // 2. Switched from a JS ternary to standard Tailwind classes for the icon container
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border bg-black/5 border-black/10 dark:bg-white/5 dark:border-white/10">
                           {item.icon}
                         </div>
                       )}

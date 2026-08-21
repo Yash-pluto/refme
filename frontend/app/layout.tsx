@@ -1,4 +1,3 @@
-// app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "../src/context/ThemeContext";
@@ -44,15 +43,34 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='en' className='h-full antialiased'>
+    <html lang='en' className='h-full antialiased' suppressHydrationWarning>
       <head>
         <meta
           name='viewport'
           content='width=device-width, initial-scale=1, maximum-scale=5'
         />
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const stored = localStorage.getItem('refme-theme');
+                  const dark = stored ? stored === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+                  if (dark) {
+                    document.documentElement.classList.add('dark');
+                    document.body.classList.add('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
       </head>
-      {/* Added font-sans here so it applies globally by default */}
-      <body className='min-h-full flex flex-col bg-zinc-50 text-zinc-950 dark:bg-[#050505] dark:text-zinc-100 font-sans tracking-tight'>
+      <body 
+        suppressHydrationWarning 
+        className='min-h-full flex flex-col bg-zinc-50 text-zinc-950 dark:bg-[#050505] dark:text-zinc-100 font-sans tracking-tight'
+      >
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

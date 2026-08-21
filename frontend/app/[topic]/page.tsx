@@ -20,10 +20,18 @@ const mdxComponents = {
   },
 };
 
+export async function generateStaticParams() {
+  const topics = getAllTopics();
+  
+  return topics.map((topic) => ({
+    topic: topic.id,
+  }));
+}
+
 export default async function TopicPage({
   params,
 }: {
-  params: { topic: string };
+  params: Promise<{ topic: string }>;
 }) {
   const resolvedParams = await params;
   const topicData = getTopicBySlug(resolvedParams.topic);
