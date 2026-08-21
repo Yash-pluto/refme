@@ -56,7 +56,8 @@ export default function TopicLayout({
   prevTopic?: { id: string; title?: string } | null;
   nextTopic?: { id: string; title?: string } | null;
 }) {
-  const { darkMode, toggleTheme } = useTheme();
+  // Removed `darkMode` - we only need toggleTheme for the button!
+  const { toggleTheme } = useTheme();
   const router = useRouter();
 
   const [domHeadings, setDomHeadings] = useState<Array<{ id: string; title: string; depth: number }>>([]);
@@ -69,7 +70,6 @@ export default function TopicLayout({
   const [expandedOutline, setExpandedOutline] = useState<Record<string, boolean>>({});
   const [activeOutlineId, setActiveOutlineId] = useState<string | null>(null);
 
-  // <-- Using the extracted hook here
   const githubStats = useGitHubStats();
 
   const progressBarRef = useRef<HTMLDivElement>(null);
@@ -198,15 +198,16 @@ export default function TopicLayout({
     });
   }, [outlineGroups]);
 
+  // REFACTORED: Converted all JS logic to pure Tailwind `dark:` classes
   const themeClasses = {
-    page: darkMode ? "bg-[#050505] text-[#F5F5F5]" : "bg-[#FFFFFF] text-[#111111]",
-    sidebar: darkMode ? "bg-[#101010]" : "bg-[#F7F7F7]",
-    header: darkMode ? "bg-[#050505]/90" : "bg-[#FFFFFF]/90",
-    border: darkMode ? "border-[#222222]" : "border-[#E5E5E5]",
-    muted: darkMode ? "text-zinc-400" : "text-zinc-500",
-    hoverAccent: darkMode ? "hover:text-[#C699FF]" : "hover:text-[#6f45d6]",
-    activeNavBg: darkMode ? "bg-[#C699FF]/15 text-[#C699FF]" : "bg-[#6f45d6]/10 text-[#6f45d6]",
-    inputBg: darkMode ? "bg-[#101010]" : "bg-[#F4F4F4]",
+    page: "bg-[#FFFFFF] text-[#111111] dark:bg-[#050505] dark:text-[#F5F5F5]",
+    sidebar: "bg-[#F7F7F7] dark:bg-[#101010]",
+    header: "bg-[#FFFFFF]/90 dark:bg-[#050505]/90",
+    border: "border-[#E5E5E5] dark:border-[#222222]",
+    muted: "text-zinc-500 dark:text-zinc-400",
+    hoverAccent: "hover:text-[#6f45d6] dark:hover:text-[#C699FF]",
+    activeNavBg: "bg-[#6f45d6]/10 text-[#6f45d6] dark:bg-[#C699FF]/15 dark:text-[#C699FF]",
+    inputBg: "bg-[#F4F4F4] dark:bg-[#101010]",
   };
 
   const getTopicIcon = (topicId: string) => {
@@ -271,7 +272,13 @@ export default function TopicLayout({
 
       <div ref={progressBarRef} className="fixed left-0 top-0 z-[100] h-[3px] bg-[#C699FF] will-change-[width]" style={{ width: "0%" }} />
 
-      <Toaster position="bottom-center" toastOptions={{ style: { background: darkMode ? '#111' : '#fff', color: darkMode ? '#fff' : '#111', border: `1px solid ${darkMode ? '#222' : '#E5E5E5'}` }}} />
+      {/* REFACTORED: Used !important classes to override react-hot-toast defaults via Tailwind instead of JS styles */}
+      <Toaster 
+        position="bottom-center" 
+        toastOptions={{ 
+          className: '!bg-white dark:!bg-[#111] !text-[#111] dark:!text-white !border !border-[#E5E5E5] dark:!border-[#222]' 
+        }} 
+      />
 
     <SearchPalette 
         isOpen={cmdOpen} 
@@ -334,8 +341,10 @@ export default function TopicLayout({
             </button>
           </div>
 
-          <button onClick={toggleTheme} className={`shrink-0 rounded-full border px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] transition-colors ${themeClasses.border} ${themeClasses.inputBg} ${themeClasses.hoverAccent}`}>
-            {darkMode ? "Light" : "Dark"}
+          {/* REFACTORED: Used CSS display classes instead of JS ternary for the text! */}
+          <button onClick={toggleTheme} className={`shrink-0 flex justify-center items-center min-w-[70px] rounded-full border px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] transition-colors ${themeClasses.border} ${themeClasses.inputBg} ${themeClasses.hoverAccent}`}>
+            <span className="block dark:hidden">Dark</span>
+            <span className="hidden dark:block">Light</span>
           </button>
         </div>
       </header>
@@ -387,7 +396,7 @@ export default function TopicLayout({
 
             <button 
               onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); setActiveOutlineId(null); }}
-              className={`shrink-0 text-[13px] font-medium transition-colors ${!activeGroupTitle ? (darkMode ? "text-[#C699FF]" : "text-[#6f45d6]") : `${themeClasses.muted} ${themeClasses.hoverAccent}`}`}
+              className={`shrink-0 text-[13px] font-medium transition-colors ${!activeGroupTitle ? "text-[#6f45d6] dark:text-[#C699FF]" : `${themeClasses.muted} ${themeClasses.hoverAccent}`}`}
             >
               {currentTopicTitle}
             </button>
@@ -397,7 +406,7 @@ export default function TopicLayout({
                 <ChevronRight size={14} className={`shrink-0 opacity-40 ${themeClasses.muted}`} />
                 <button 
                   onClick={() => activeGroupId && scrollToSection(activeGroupId)}
-                  className={`shrink-0 transition-colors text-[13px] font-medium ${!activeChildTitle ? (darkMode ? "text-[#C699FF]" : "text-[#6f45d6]") : `${themeClasses.muted} ${themeClasses.hoverAccent}`}`}
+                  className={`shrink-0 transition-colors text-[13px] font-medium ${!activeChildTitle ? "text-[#6f45d6] dark:text-[#C699FF]" : `${themeClasses.muted} ${themeClasses.hoverAccent}`}`}
                 >
                   {activeGroupTitle}
                 </button>
@@ -409,7 +418,7 @@ export default function TopicLayout({
                 <ChevronRight size={14} className={`shrink-0 opacity-40 ${themeClasses.muted}`} />
                 <button
                   onClick={() => activeChildId && scrollToSection(activeChildId)}
-                  className={`shrink-0 px-2 py-0.5 rounded text-[13px] font-medium ${darkMode ? "bg-[#C699FF]/15 text-[#C699FF]" : "bg-[#6f45d6]/10 text-[#6f45d6]"}`}
+                  className={`shrink-0 px-2 py-0.5 rounded text-[13px] font-medium bg-[#6f45d6]/10 text-[#6f45d6] dark:bg-[#C699FF]/15 dark:text-[#C699FF]`}
                 >
                   {activeChildTitle}
                 </button>
@@ -430,13 +439,13 @@ export default function TopicLayout({
                     <div className={`border-t px-4 py-4 space-y-4 ${themeClasses.border}`}>
                       {outlineGroups.map((group) => (
                         <div key={group.id} className="space-y-2">
-                          <a href={`#${group.id}`} onClick={(e) => { e.preventDefault(); scrollToSection(group.id); setIsMobileTocOpen(false); }} className={`block text-[14px] font-medium ${activeOutlineId === group.id ? (darkMode ? "text-[#C699FF]" : "text-[#6f45d6]") : themeClasses.muted}`}>
+                          <a href={`#${group.id}`} onClick={(e) => { e.preventDefault(); scrollToSection(group.id); setIsMobileTocOpen(false); }} className={`block text-[14px] font-medium ${activeOutlineId === group.id ? "text-[#6f45d6] dark:text-[#C699FF]" : themeClasses.muted}`}>
                             {group.title}
                           </a>
                           {group.items.length > 0 && (
                             <div className={`ml-1 space-y-2 border-l pl-3 ${themeClasses.border}`}>
                               {group.items.map((item) => (
-                                <a key={item.id} href={`#${item.id}`} onClick={(e) => { e.preventDefault(); scrollToSection(item.id); setIsMobileTocOpen(false); }} className={`block text-[13px] font-medium ${activeOutlineId === item.id ? (darkMode ? "text-[#C699FF]" : "text-[#6f45d6]") : themeClasses.muted}`}>
+                                <a key={item.id} href={`#${item.id}`} onClick={(e) => { e.preventDefault(); scrollToSection(item.id); setIsMobileTocOpen(false); }} className={`block text-[13px] font-medium ${activeOutlineId === item.id ? "text-[#6f45d6] dark:text-[#C699FF]" : themeClasses.muted}`}>
                                   {item.title}
                                 </a>
                               ))}
@@ -456,10 +465,8 @@ export default function TopicLayout({
               {children}
             </article>
 
-            {/* Combined Bottom Section */}
             <div className={`mt-10 xl:mt-16 flex flex-col items-center justify-center gap-10 border-t pt-10 ${themeClasses.border}`}>
               
-              {/* Center Aligned Feedback Section */}
               <div className="relative flex items-center justify-center h-8 w-full">
                 <div className={`absolute inset-0 flex items-center justify-center w-full gap-4 transition-opacity duration-300 ${feedbackSubmitted ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
                   <span className={`text-[13px] font-medium ${themeClasses.muted}`}>Was this page helpful?</span>
@@ -485,19 +492,19 @@ export default function TopicLayout({
                 </div>
               </div>
 
-              {/* Updated Dynamic GitHub Widget */}
-              <div className={`relative z-10 flex flex-col rounded-3xl border w-full max-w-2xl mx-auto shadow-sm overflow-hidden ${darkMode ? "bg-[#0a0a0a] border-[#333]" : "bg-white border-[#E5E5E5]"}`}>
-                <div className={`p-6 sm:p-8 border-b ${darkMode ? "bg-[#111] border-[#333]" : "bg-zinc-50 border-[#E5E5E5]"}`}>
+              {/* REFACTORED: Completely eliminated JS conditional rendering for the GitHub widget */}
+              <div className={`relative z-10 flex flex-col rounded-3xl border w-full max-w-2xl mx-auto shadow-sm overflow-hidden bg-white border-[#E5E5E5] dark:bg-[#0a0a0a] dark:border-[#333]`}>
+                <div className={`p-6 sm:p-8 border-b bg-zinc-50 border-[#E5E5E5] dark:bg-[#111] dark:border-[#333]`}>
                   <div className="flex items-start justify-between mb-8">
                     <div className="flex items-center gap-5">
                       <img 
                         src="https://github.com/yash-pluto.png" 
                         alt="Yash Vardhan" 
-                        className={`h-20 w-20 rounded-full border-4 shadow-sm ${darkMode ? "border-[#222]" : "border-white"}`} 
+                        className={`h-20 w-20 rounded-full border-4 shadow-sm border-white dark:border-[#222]`} 
                       />
                       <div>
                         <div className="flex items-center gap-2 mb-1">
-                          <a href="https://yash-pluto.vercel.app/" target="_blank" rel="noopener noreferrer" className={`text-2xl font-extrabold tracking-tight hover:underline ${darkMode ? "text-white" : "text-black"}`}>
+                          <a href="https://yash-pluto.vercel.app/" target="_blank" rel="noopener noreferrer" className={`text-2xl font-extrabold tracking-tight hover:underline text-black dark:text-white`}>
                             Yash-Pluto
                           </a>
                           <BadgeCheck size={20} className="text-[#C699FF]" />
@@ -506,58 +513,58 @@ export default function TopicLayout({
                       </div>
                     </div>
                     <a href="https://github.com/yash-pluto/refme" target="_blank" rel="noopener noreferrer" className="pt-1 hidden sm:block">
-                      <FaGithub size={32} className={`${darkMode ? "text-white" : "text-zinc-900"} hover:opacity-70 transition-opacity`} />
+                      <FaGithub size={32} className={`text-zinc-900 dark:text-white hover:opacity-70 transition-opacity`} />
                     </a>
                   </div>
                   
-                  <p className={`text-[15px] leading-relaxed mb-6 ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>
+                  <p className={`text-[15px] leading-relaxed mb-6 text-zinc-700 dark:text-zinc-300`}>
                     Join the community building the ultimate quick-reference. Contributions are welcome for all categories and languages.
                   </p>
 
                   <div className="flex flex-col sm:flex-row flex-wrap gap-3">
-                    <div className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border ${darkMode ? "bg-[#1a1a1a] border-[#333] shadow-inner" : "bg-white border-[#E5E5E5] shadow-sm"}`}>
+                    <div className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border bg-white border-[#E5E5E5] shadow-sm dark:bg-[#1a1a1a] dark:border-[#333] dark:shadow-inner`}>
                       <span className="text-[#C699FF] text-base font-black">✓</span>
-                      <span className={`text-xs font-bold uppercase tracking-wide ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>Open Source Architecture</span>
+                      <span className={`text-xs font-bold uppercase tracking-wide text-zinc-700 dark:text-zinc-300`}>Open Source Architecture</span>
                     </div>
-                    <div className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border ${darkMode ? "bg-[#1a1a1a] border-[#333] shadow-inner" : "bg-white border-[#E5E5E5] shadow-sm"}`}>
+                    <div className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border bg-white border-[#E5E5E5] shadow-sm dark:bg-[#1a1a1a] dark:border-[#333] dark:shadow-inner`}>
                       <span className="text-[#C699FF] text-base font-black">✓</span>
-                      <span className={`text-xs font-bold uppercase tracking-wide ${darkMode ? "text-zinc-300" : "text-zinc-700"}`}>Community Driven Updates</span>
+                      <span className={`text-xs font-bold uppercase tracking-wide text-zinc-700 dark:text-zinc-300`}>Community Driven Updates</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="p-6 sm:p-8">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-                    <div className={`flex flex-col justify-between p-4 rounded-xl border ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"} shadow-sm`}>
+                    <div className={`flex flex-col justify-between p-4 rounded-xl border bg-white border-[#E5E5E5] shadow-sm dark:bg-[#141414] dark:border-[#333]`}>
                       <div className="flex items-center gap-2 mb-3">
                         <GitPullRequest size={16} className="text-emerald-500" />
                         <span className={`text-[11px] font-bold uppercase tracking-wider ${themeClasses.muted}`}>Open PRs</span>
                       </div>
-                      <span className={`text-2xl font-extrabold tracking-tight ${darkMode ? "text-white" : "text-black"}`}>{githubStats.openPrs}</span>
+                      <span className={`text-2xl font-extrabold tracking-tight text-black dark:text-white`}>{githubStats.openPrs}</span>
                     </div>
                     
-                    <div className={`flex flex-col justify-between p-4 rounded-xl border ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"} shadow-sm`}>
+                    <div className={`flex flex-col justify-between p-4 rounded-xl border bg-white border-[#E5E5E5] shadow-sm dark:bg-[#141414] dark:border-[#333]`}>
                       <div className="flex items-center gap-2 mb-3">
                         <GitMerge size={16} className="text-purple-500" />
                         <span className={`text-[11px] font-bold uppercase tracking-wider ${themeClasses.muted}`}>Merged</span>
                       </div>
-                      <span className={`text-2xl font-extrabold tracking-tight ${darkMode ? "text-white" : "text-black"}`}>{githubStats.mergedPrs}</span>
+                      <span className={`text-2xl font-extrabold tracking-tight text-black dark:text-white`}>{githubStats.mergedPrs}</span>
                     </div>
 
-                    <div className={`flex flex-col justify-between p-4 rounded-xl border ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"} shadow-sm`}>
+                    <div className={`flex flex-col justify-between p-4 rounded-xl border bg-white border-[#E5E5E5] shadow-sm dark:bg-[#141414] dark:border-[#333]`}>
                       <div className="flex items-center gap-2 mb-3">
                         <CircleDot size={16} className="text-emerald-500" />
                         <span className={`text-[11px] font-bold uppercase tracking-wider ${themeClasses.muted}`}>Issues</span>
                       </div>
-                      <span className={`text-2xl font-extrabold tracking-tight ${darkMode ? "text-white" : "text-black"}`}>{githubStats.openIssues}</span>
+                      <span className={`text-2xl font-extrabold tracking-tight text-black dark:text-white`}>{githubStats.openIssues}</span>
                     </div>
 
-                    <div className={`flex flex-col justify-between p-4 rounded-xl border ${darkMode ? "bg-[#141414] border-[#333]" : "bg-white border-[#E5E5E5]"} shadow-sm`}>
+                    <div className={`flex flex-col justify-between p-4 rounded-xl border bg-white border-[#E5E5E5] shadow-sm dark:bg-[#141414] dark:border-[#333]`}>
                       <div className="flex items-center gap-2 mb-3">
                         <Star size={16} className="text-amber-500" />
                         <span className={`text-[11px] font-bold uppercase tracking-wider ${themeClasses.muted}`}>Stars</span>
                       </div>
-                      <span className={`text-2xl font-extrabold tracking-tight ${darkMode ? "text-white" : "text-black"}`}>{githubStats.stars}</span>
+                      <span className={`text-2xl font-extrabold tracking-tight text-black dark:text-white`}>{githubStats.stars}</span>
                     </div>
                   </div>
 
@@ -572,7 +579,7 @@ export default function TopicLayout({
                                 src={user.avatar_url} 
                                 alt={user.login}
                                 title={user.login}
-                                className={`h-10 w-10 rounded-full border-[3px] ${darkMode ? 'border-[#0a0a0a]' : 'border-white'} shadow-md`}
+                                className={`h-10 w-10 rounded-full border-[3px] border-white dark:border-[#0a0a0a] shadow-md`}
                                 style={{ zIndex: 10 - idx, opacity: 1 - (idx * 0.12) }} 
                               />
                             ))}
@@ -589,7 +596,7 @@ export default function TopicLayout({
                         href={`https://github.com/yash-pluto/refme/edit/main/frontend/content/${topicKey}.mdx`} 
                         target="_blank" 
                         rel="noopener noreferrer" 
-                        className={`flex flex-1 sm:flex-none justify-center items-center gap-2 rounded-xl px-4 py-3 text-[13px] font-bold border transition-colors ${darkMode ? "border-[#333] hover:bg-white/5 text-zinc-300" : "border-[#E5E5E5] hover:bg-black/5 text-zinc-700"}`}
+                        className={`flex flex-1 sm:flex-none justify-center items-center gap-2 rounded-xl px-4 py-3 text-[13px] font-bold border transition-colors border-[#E5E5E5] hover:bg-black/5 text-zinc-700 dark:border-[#333] dark:hover:bg-white/5 dark:text-zinc-300`}
                       >
                         Edit Page
                       </a>
@@ -597,7 +604,7 @@ export default function TopicLayout({
                         href="https://github.com/yash-pluto/refme" 
                         target="_blank" 
                         rel="noopener noreferrer" 
-                        className={`flex flex-1 sm:flex-none justify-center items-center gap-2 rounded-xl px-5 py-3 text-[13px] font-bold transition-all active:scale-[0.98] ${darkMode ? "bg-white text-black hover:bg-zinc-200" : "bg-black text-white hover:bg-zinc-800"}`}
+                        className={`flex flex-1 sm:flex-none justify-center items-center gap-2 rounded-xl px-5 py-3 text-[13px] font-bold transition-all active:scale-[0.98] bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200`}
                       >
                         <FaGithub size={16} /> Contribute
                       </a>
@@ -641,13 +648,13 @@ export default function TopicLayout({
                   const isActiveGroup = activeOutlineId === group.id;
                   return (
                     <div key={group.id} className="mb-4">
-                      <a href={`#${group.id}`} onClick={(e) => { e.preventDefault(); scrollToSection(group.id); }} className={`block text-[13px] tracking-tight font-semibold leading-snug transition-colors mb-2 ${isActiveGroup ? (darkMode ? "text-[#C699FF] drop-shadow-[0_0_8px_rgba(198,153,255,0.4)]" : "text-[#6f45d6] drop-shadow-[0_0_8px_rgba(111,69,214,0.4)]") : `${themeClasses.muted} hover:text-current`}`}>
+                      <a href={`#${group.id}`} onClick={(e) => { e.preventDefault(); scrollToSection(group.id); }} className={`block text-[13px] tracking-tight font-semibold leading-snug transition-colors mb-2 ${isActiveGroup ? "text-[#6f45d6] drop-shadow-[0_0_8px_rgba(111,69,214,0.4)] dark:text-[#C699FF] dark:drop-shadow-[0_0_8px_rgba(198,153,255,0.4)]" : `${themeClasses.muted} hover:text-current`}`}>
                         {group.title}
                       </a>
                       {group.items.length > 0 && (
                         <div className={`border-l ml-[3px] pl-3 mt-1 space-y-2 ${themeClasses.border}`}>
                           {group.items.map((item) => (
-                            <a key={item.id} href={`#${item.id}`} onClick={(e) => { e.preventDefault(); scrollToSection(item.id); }} className={`block text-[12px] font-medium leading-snug transition-colors ${activeOutlineId === item.id ? (darkMode ? "text-[#C699FF] drop-shadow-[0_0_8px_rgba(198,153,255,0.4)]" : "text-[#6f45d6] drop-shadow-[0_0_8px_rgba(111,69,214,0.4)]") : `${themeClasses.muted} hover:text-current`}`}>
+                            <a key={item.id} href={`#${item.id}`} onClick={(e) => { e.preventDefault(); scrollToSection(item.id); }} className={`block text-[12px] font-medium leading-snug transition-colors ${activeOutlineId === item.id ? "text-[#6f45d6] drop-shadow-[0_0_8px_rgba(111,69,214,0.4)] dark:text-[#C699FF] dark:drop-shadow-[0_0_8px_rgba(198,153,255,0.4)]" : `${themeClasses.muted} hover:text-current`}`}>
                               {item.title}
                             </a>
                           ))}
@@ -667,7 +674,7 @@ export default function TopicLayout({
       <button
         ref={scrollTopBtnRef}
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        className={`fixed bottom-24 right-8 z-50 flex h-10 w-10 items-center justify-center rounded-full border shadow-lg transition-all duration-300 md:bottom-24 md:right-12 pointer-events-none translate-y-8 opacity-0 ${darkMode ? "bg-[#101010] border-[#333]" : "bg-white border-[#E5E5E5]"} ${themeClasses.hoverAccent}`}
+        className={`fixed bottom-24 right-8 z-50 flex h-10 w-10 items-center justify-center rounded-full border shadow-lg transition-all duration-300 md:bottom-24 md:right-12 pointer-events-none translate-y-8 opacity-0 bg-white border-[#E5E5E5] dark:bg-[#101010] dark:border-[#333] ${themeClasses.hoverAccent}`}
         aria-label="Scroll to top"
       >
         <ArrowUp size={18} />
