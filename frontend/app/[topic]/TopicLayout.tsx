@@ -79,6 +79,23 @@ export default function TopicLayout({
   const headingElementsRef = useRef<{ id: string; el: HTMLElement }[]>([]);
 
   useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setCmdOpen(false);
+        return;
+      }
+      const isModifier = event.metaKey || event.ctrlKey;
+      if (!isModifier || event.key.toLowerCase() !== "k") return;
+      
+      event.preventDefault();
+      setCmdOpen((open) => !open);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  useEffect(() => {
     document.body.style.overflow = isMobileMenuOpen || cmdOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
