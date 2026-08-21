@@ -1,6 +1,5 @@
-/* app/globals.css */
 @import "tailwindcss";
-
+@custom-variant dark (&:where(.dark, .dark *));
 @theme {
   --font-sans: "Segoe UI", Inter, "Helvetica Neue", Arial, sans-serif;
   --font-mono: "SFMono-Regular", "Consolas", "Liberation Mono", monospace;
@@ -10,7 +9,6 @@
   scroll-behavior: smooth;
 }
 
-/* 1. REMOVE BROWSER SCROLLBARS GLOBALLY */
 ::-webkit-scrollbar {
   display: none;
 }
@@ -19,12 +17,10 @@ html {
   scrollbar-width: none;
 }
 
-/* 2. OPTIMIZE CODE BLOCKS */
 pre code {
   white-space: pre-wrap !important;
   word-wrap: break-word !important;
   font-family: var(--font-jetbrains-mono) !important;
-  /* Force all code blocks to use JetBrains */
   font-size: 0.9em;
 }
 
@@ -51,8 +47,42 @@ article iframe {
   max-width: 100%;
 }
 
-/* 3. SUBTLE TEXT SELECTION COLOR */
 ::selection {
   background-color: #c599ff6f !important;
   color: wheat !important;
+}
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.skeleton-base {
+  background-color: #f1f5f9;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    transparent 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 1000px 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+:is(.dark) .skeleton-base,
+.dark .skeleton-base {
+  background-color: #1e293b;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 50%,
+    transparent 100%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-base {
+    animation: none !important;
+    background-image: none !important;
+  }
 }

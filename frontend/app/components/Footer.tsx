@@ -60,7 +60,7 @@ export default function Footer() {
 
         <div
           aria-hidden="true"
-          className="relative w-full overflow-hidden pointer-events-none select-none"
+          className="hidden md:block relative w-full overflow-hidden pointer-events-none select-none "
           style={{ height: "clamp(65px, 10vw, 150px)" }}
         >
          <div
@@ -102,7 +102,7 @@ export default function Footer() {
         <div className="relative flex flex-col sm:flex-row items-center justify-between gap-4 pt-5 border-t border-[#E5E5E5] dark:border-[#333] text-[13px] font-medium text-zinc-500 dark:text-zinc-400">
           
           <div 
-            className="absolute top-0 left-0 w-full h-[95px] -translate-y-full pointer-events-none z-10 bg-[linear-gradient(to_top,#fafafa_10%,rgba(250,250,250,0.85)_40%,transparent_100%)] dark:bg-[linear-gradient(to_top,#050505_10%,rgba(5,5,5,0.85)_40%,transparent_100%)]"
+            className="absolute top-0 left-0 w-full h-[95px] hidden md:block -translate-y-full pointer-events-none z-10 bg-[linear-gradient(to_top,#fafafa_10%,rgba(250,250,250,0.85)_40%,transparent_100%)] dark:bg-[linear-gradient(to_top,#050505_10%,rgba(5,5,5,0.85)_40%,transparent_100%)]"
           />
 
           <p className="relative z-20">© 2026 RefMe</p>
